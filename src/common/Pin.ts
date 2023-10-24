@@ -7,7 +7,7 @@ export enum PinState {
 }
 
 export class PinInfo {
-    public State: PinState = PinState.FLOATING;
+    public State: PinState = PinState.LOW;
     PinID: number = Date.now();
     ID: number;
     Name = "Pin";
@@ -17,10 +17,10 @@ export class PinInfo {
     ColourThemeName = "Red";
     PinType = 1;
     SubChipID = 0;
-    constructor(IsInput: boolean, Chip: ChipModel, PinID?: number) {
+    constructor(IsInput: boolean, Chip: ChipModel, PinID: number = -1) {
         this.IsInput = IsInput;
         this.Chip = Chip;
-        if (PinID) this.PinID = PinID;
+        if (PinID != -1) this.PinID = PinID;
         this.ID = this.PinID;
     }
 }

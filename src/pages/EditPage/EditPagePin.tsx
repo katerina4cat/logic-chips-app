@@ -3,14 +3,14 @@ import { PinInfo, PinState } from "../../common/Pin";
 
 interface ReqPin {
     Pin: PinInfo;
-    handleChangeInputPin: () => void;
+    handleChangeInputPin: React.MutableRefObject<() => void>;
 }
 
 const EditPagePin: React.FC<ReqPin> = (props) => {
     const [pinState, setpinState] = useState(PinState.LOW);
     useEffect(() => {
         props.Pin.State = pinState;
-        props.handleChangeInputPin();
+        props.handleChangeInputPin.current();
     }, [pinState]);
     return (
         <button
@@ -20,6 +20,8 @@ const EditPagePin: React.FC<ReqPin> = (props) => {
                 );
             }}
         >
+            {props.Pin.Name}
+            <br />
             {pinState}
         </button>
     );
