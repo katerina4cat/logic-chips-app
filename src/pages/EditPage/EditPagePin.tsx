@@ -1,23 +1,24 @@
 import { useEffect, useState } from "react";
-import { PinInfo, PinState } from "../../common/Pin";
+import { Pin } from "../../common/Pin";
 
 interface ReqPin {
-    Pin: PinInfo;
+    Pin: Pin;
     handleChangeInputPin: React.MutableRefObject<() => void>;
 }
 
 const EditPagePin: React.FC<ReqPin> = (props) => {
-    const [pinState, setpinState] = useState(PinState.LOW);
+    const [pinState, setpinState] = useState(0);
     useEffect(() => {
-        props.Pin.State = pinState;
         props.handleChangeInputPin.current();
     }, [pinState]);
     return (
         <button
             onClick={() => {
-                setpinState((prev) =>
-                    prev === PinState.LOW ? PinState.HIGH : PinState.LOW
-                );
+                setpinState((prev) => {
+                    const res = prev ? 0 : 1;
+                    props.Pin.State.value = res;
+                    return res;
+                });
             }}
         >
             {props.Pin.Name}

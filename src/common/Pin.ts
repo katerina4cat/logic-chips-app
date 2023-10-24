@@ -1,26 +1,38 @@
 import { ChipModel } from "./ChipModel";
 
-export enum PinState {
+export enum PinStates {
     "FLOATING" = -1,
     "LOW" = 0,
     "HIGH" = 1,
 }
+export class PinState {
+    public value: PinStates;
+    constructor(value: PinStates = PinStates.FLOATING) {
+        this.value = value;
+    }
+}
 
-export class PinInfo {
-    public State: PinState = PinState.LOW;
-    PinID: number = Date.now();
-    ID: number;
+export class Pin {
+    State: PinState = new PinState();
     Name = "Pin";
-    PositionY: number = 0;
+    ID: number;
     IsInput = false;
     Chip: ChipModel;
-    ColourThemeName = "Red";
-    PinType = 1;
     SubChipID = 0;
-    constructor(IsInput: boolean, Chip: ChipModel, PinID: number = -1) {
+    PositionY: number;
+    constructor(
+        IsInput: boolean,
+        Chip: ChipModel,
+        Name: string = "Pin",
+        ID: number = -1,
+        PositionY: number = 0,
+        pinStatus: PinStates = PinStates.FLOATING
+    ) {
         this.IsInput = IsInput;
+        this.Name = Name;
         this.Chip = Chip;
-        if (PinID != -1) this.PinID = PinID;
-        this.ID = this.PinID;
+        this.ID = ID === -1 ? Date.now() : ID;
+        this.PositionY = PositionY;
+        this.State.value = pinStatus;
     }
 }

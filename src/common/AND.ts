@@ -1,21 +1,23 @@
 import { ChipModel } from "./ChipModel";
-import { PinInfo } from "./Pin";
+import { Pin } from "./Pin";
 
 export class AND extends ChipModel {
     constructor(chipID: number) {
-        super({ Name: "AND", Colour: "#fcc", chipID: chipID });
+        super("AND", chipID, "#fcc");
         this.IsBasedChip = true;
         this.InputPins = [
-            new PinInfo(true, this, 0),
-            new PinInfo(true, this, 1),
+            new Pin(true, this, "A", 0, 0.25, 0),
+            new Pin(true, this, "B", 1, 0.75, 0),
         ];
-        this.InputPins[1].PositionY = 1;
-        this.OutputPins = [new PinInfo(false, this, 2)];
+        this.OutputPins = [new Pin(false, this, "Out", 2, 0.5)];
     }
-    override RecurseState() {
-        this.OutputPins[0].State =
-            this.InputPins[0].State && this.InputPins[1].State;
-        if (this.OutputPins[0].State === -1) this.OutputPins[0].State = 0;
+    override RefreshLogic() {
+        console.log(this.InputPins.map((e) => e.State.value));
+        this.OutputPins[0].State.value =
+            this.InputPins[0].State.value && this.InputPins[1].State.value;
+        if (this.OutputPins[0].State.value === -1)
+            this.OutputPins[0].State.value = 0;
+        this.RefreshedLogic = true;
         return true;
     }
 }

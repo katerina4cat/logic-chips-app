@@ -1,16 +1,24 @@
-import { PinInfo, PinState } from "./Pin";
+import { Pin, PinState } from "./Pin";
 
 export class Wire {
-    public State: PinState = PinState.FLOATING;
+    State: PinState;
     ID: number = Date.now();
-    WirePoints: Pos = [];
-    Source: PinInfo;
-    Target: PinInfo;
-    ColourThemeName: string = "Red";
-    constructor(Source: PinInfo, Target: PinInfo, WirePoints?: Pos) {
+    Source: Pin;
+    Target: Pin;
+    WirePoints: Pos[];
+    Color: string;
+    constructor(
+        Source: Pin,
+        Target: Pin,
+        WirePoints: Pos[] = [],
+        Color = "#fdd"
+    ) {
         this.Source = Source;
         this.Target = Target;
-        if (WirePoints) this.WirePoints = WirePoints;
+        this.State = Source.State;
+        this.Target.State = this.State;
+        this.WirePoints = WirePoints;
+        this.Color = Color;
     }
 }
 export type Pos = Array<{ X: number; Y: number }>;

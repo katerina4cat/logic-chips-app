@@ -1,15 +1,16 @@
 import { ChipModel } from "./ChipModel";
-import { PinInfo } from "./Pin";
+import { Pin } from "./Pin";
 
 export class NOT extends ChipModel {
     constructor(chipID: number) {
-        super({ Name: "NOT", Colour: "#ddd", chipID: chipID });
+        super("NOT", chipID, "#fff");
         this.IsBasedChip = true;
-        this.InputPins = [new PinInfo(true, this, 0)];
-        this.OutputPins = [new PinInfo(false, this, 1)];
+        this.InputPins = [new Pin(true, this, "In", 0, 0.5, 0)];
+        this.OutputPins = [new Pin(false, this, "Out", 1, 0.5, 0)];
     }
-    override RecurseState() {
-        this.OutputPins[0].State = this.InputPins[0].State ? 0 : 1;
+    override RefreshLogic() {
+        this.OutputPins[0].State.value = this.InputPins[0].State.value ? 0 : 1;
+        this.RefreshedLogic = true;
         return true;
     }
 }
