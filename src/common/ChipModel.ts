@@ -1,5 +1,5 @@
 import { CreateBaseChip, CustomChip } from "./CustomChip";
-import { PinInfo } from "./Pin";
+import { PinInfo, PinState } from "./Pin";
 import { Pos, Wire } from "./Wire";
 interface Saves {
     [key: string]: string;
@@ -343,68 +343,88 @@ export abstract class ChipModel implements ChipSaveStruct {
     Connections: Wire[];
     Points: Array<Pos> = [];
     Data: any;
+    InputCounts = 0;
 
     Colour: string = "#000";
     IsBasedChip: boolean = false;
     ID: number = Date.now();
 
-    public static FromJSON(chipName: string, chipID: number) {
+    public static FromJSON(chipName: string, chipID: number = 0) {
         if (!Object.keys(chips).includes(chipName)) {
             throw "Chip not found!";
         }
         const res = new CustomChip(
             JSON.parse(chips[chipName]) as ChipSaveStruct
         );
+        res.ID = chipID;
+        for (const pin of res.InputPins) pin.Chip = res;
+        for (const pin of res.OutputPins) pin.Chip = res;
+        // res.OutputPins.forEach((pin) => (pin.Chip = res));
         res.SubChipsObject = res.SubChips.map((chip) =>
             CreateBaseChip(chip.Name, chip.ID)
         );
-
-        res.setConnection();
+        res.Connections = res.Connections.sort((e) =>
+            e.Source.PinType == 1 ? 2 : e.Target.PinType == 2 ? 0 : 1
+        ).map((e) => {
+            e.Source.Chip = res.SubChipsObject.filter(
+                (chip) => chip.ID == e.Source.SubChipID
+            )[0];
+            e.Target.Chip = res.SubChipsObject.filter(
+                (chip) => chip.ID == e.Target.SubChipID
+            )[0];
+            return e;
+        });
         return res;
     }
 
-    public setConnection() {
-        console.log(this);
-        this.Connections = this.Connections.sort((e) =>
-            e.Source.PinType == 1 ? 2 : e.Target.PinType == 2 ? 0 : 1
-        ).map((e, i) => {
-            if (e.Source.PinType != 1)
-                e.Source.Chip = this.SubChipsObject.filter(
-                    (chip) => chip.ID == e.Source.SubChipID
-                )[0];
-            if (e.Target.PinType != 2)
-                e.Target.Chip = this.SubChipsObject.filter(
-                    (chip) => chip.ID == e.Target.SubChipID
-                )[0];
+    private setState(PinID: number, state: PinState) {
+        this.InputPins.forEach((pin) => {
+            if (pin.ID == PinID) pin.State = state;
+        });
 
+        this.OutputPins.forEach((pin) => {
+            if (pin.ID == PinID) pin.State = state;
+        });
+    }
+
+    public RecurseState() {
+        this.Connections.map((e) => {
+            // Чип соеденён с входом текущего чипа
+            if (e.Source.SubChipID == 0 && e.Target.SubChipID != 0) {
+                e.Target.Chip.InputPins[e.Target.PinID].State =
+                    this.InputPins.filter(
+                        (pin) => pin.ID == e.Source.PinID
+                    )[0].State;
+                e.Target.Chip.AddCount();
+            }
             // Чип соеденён с другим чипом
             if (e.Source.SubChipID != 0 && e.Target.SubChipID != 0) {
-                e.Target.Chip.InputPins[e.Target.PinID] =
+                e.Target.Chip.InputPins[e.Target.PinID].State =
                     e.Source.Chip.OutputPins[
                         e.Source.PinID - e.Source.Chip.InputPins.length
-                    ];
+                    ].State;
+                e.Target.Chip.AddCount();
             }
-
-            // Чип соеденён с входои текущего чипа
-            if (e.Source.SubChipID == 0 && e.Target.SubChipID != 0)
-                e.Target.Chip.InputPins[e.Target.PinID] = this.InputPins.filter(
-                    (pin) => pin.ID == e.Source.PinID
-                )[0];
-
             // Чип соедёнен с выходом текущего чипа
             if (e.Source.SubChipID != 0 && e.Target.SubChipID == 0) {
                 this.OutputPins = this.OutputPins.map((pin) => {
                     if (pin.ID == e.Target.PinID)
-                        pin =
+                        pin.State =
                             e.Source.Chip.OutputPins[
                                 e.Source.PinID - e.Source.Chip.InputPins.length
-                            ];
+                            ].State;
                     return pin;
                 });
             }
-
-            return e;
         });
+    }
+
+    AddCount() {
+        this.InputCounts++;
+        if (this.InputCounts >= this.InputPins.length) {
+            this.RecurseState();
+            this.InputCounts = 0;
+        }
     }
 
     constructor(props: {
@@ -425,8 +445,6 @@ export abstract class ChipModel implements ChipSaveStruct {
         this.SubChipsObject = [];
         this.ID = props.chipID || 0;
     }
-
-    SendInput(Connection: Wire) {}
 
     StartChipLogic() {}
 }

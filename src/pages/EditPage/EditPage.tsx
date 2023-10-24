@@ -1,34 +1,43 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import cl from "./EditPage.module.scss";
 import { CustomChip } from "../../common/CustomChip";
+import EditPagePin from "./EditPagePin";
+import { PinState } from "../../common/Pin";
 
-interface EditReq {
-    chipFile: string;
-}
+interface EditReq {}
 
-const EditPage: React.FC<EditReq> = (props) => {
-    const editChip = useRef(CustomChip.FromJSON("OR", 0));
-    const [fir, setfir] = useState(0);
-    const [sec, setsec] = useState(0);
-    editChip.current.InputPins[0].State = fir;
-    editChip.current.InputPins[1].State = sec;
-    editChip.current.setConnection();
-    editChip.current.StartChipLogic();
+const EditPage: React.FC<EditReq> = () => {
+    const editChip = useRef(CustomChip.FromJSON("NAND", 0));
+
+    const [OutputPins, setOutputPins] = useState<PinState[]>([]);
+
+    const handleChangeInputPin = () => {
+        editChip.current.RecurseState();
+        setOutputPins(editChip.current.OutputPins.map((pin) => pin.State));
+    };
+
+    console.log(editChip.current);
 
     return (
         <div className={cl.EditPage}>
-            <button onClick={() => setfir((prev) => (prev === 0 ? 1 : 0))}>
-                {fir}
-            </button>
-            <button onClick={() => setsec((prev) => (prev === 0 ? 1 : 0))}>
-                {sec}
-            </button>
+            {editChip.current.InputPins.map((pinInput) => {
+                return (
+                    <EditPagePin
+                        Pin={pinInput}
+                        handleChangeInputPin={handleChangeInputPin}
+                    />
+                );
+            })}
             <br />
             <br />
             <br />
             <br />
             <br />
-            <button>{editChip.current.OutputPins[0].State}</button>
+            <div>
+                {OutputPins.map((pin) => (
+                    <button>{pin}</button>
+                ))}
+            </div>
         </div>
     );
 };

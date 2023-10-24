@@ -17,9 +17,10 @@ export class PinInfo {
     ColourThemeName = "Red";
     PinType = 1;
     SubChipID = 0;
-    constructor(IsInput: boolean, Chip: ChipModel) {
+    constructor(IsInput: boolean, Chip: ChipModel, PinID?: number) {
         this.IsInput = IsInput;
         this.Chip = Chip;
+        if (PinID) this.PinID = PinID;
         this.ID = this.PinID;
     }
 }
