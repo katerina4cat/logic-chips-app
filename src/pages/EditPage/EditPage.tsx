@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import cl from "./EditPage.module.scss";
 import EditPagePin from "./EditPagePin";
 import { CreateChip } from "../../common/LoadSave";
@@ -6,7 +6,7 @@ import { CreateChip } from "../../common/LoadSave";
 interface EditReq {}
 
 const EditPage: React.FC<EditReq> = () => {
-    const editChip = useRef(CreateChip("NAND", 0));
+    const editChip = useRef(CreateChip("SR-LATCH", 0));
 
     const [OutputPins, setOutputPins] = useState<number[]>([]);
 
@@ -15,12 +15,7 @@ const EditPage: React.FC<EditReq> = () => {
         setOutputPins(
             editChip.current.OutputPins.map((pin) => pin.State.value)
         );
-        console.log(editChip.current);
     });
-
-    // useEffect(() => {
-    //     setInterval(handleChangeInputPin.current, 500);
-    // }, []);
 
     return (
         <div className={cl.EditPage}>

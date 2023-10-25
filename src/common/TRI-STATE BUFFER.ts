@@ -6,8 +6,8 @@ export class TRI_STATE_BUFFER extends ChipModel {
         super("TRI-STATE BUFFER", chipID, "#ddd");
         this.IsBasedChip = true;
         this.InputPins = [
-            new Pin(true, this, "Enabled", 0, 0.25, 0),
-            new Pin(true, this, "Data", 1, 0.75, 0),
+            new Pin(true, this, "Enabled", 0, 0.25),
+            new Pin(true, this, "Data", 1, 0.75),
         ];
         this.OutputPins = [new Pin(false, this, "Out", 2, 0.5)];
     }

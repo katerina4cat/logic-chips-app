@@ -57,14 +57,7 @@ export function InitilizeChipModel(
     // Инициализация пинов входов загружаемого чипа
     ChipInfo.InputPins.map((pinInfo) =>
         res.InputPins.push(
-            new Pin(
-                true,
-                res,
-                pinInfo.Name,
-                pinInfo.ID,
-                pinInfo.PositionY,
-                PinStates.LOW
-            )
+            new Pin(true, res, pinInfo.Name, pinInfo.ID, pinInfo.PositionY)
         )
     );
     // Инициализация пинов выходов загружаемого чипа
@@ -84,18 +77,18 @@ export function InitilizeChipModel(
             TargetPin: undefined,
         };
 
-        // Если провод выходит из пина текущего редактируемого чипа
+        // Если провод выходит из пина текущего чипа
         if (wireInfo.Source.SubChipID == 0)
             buff.SourcePin = res.InputPins.filter(
                 (pin) => pin.ID == wireInfo.Source.PinID
             )[0];
         // Если провод выходит из пина дочернего чипа
-        else
+        else {
             buff.SourcePin = res.SubChips.filter(
                 (chip) => chip.ID == wireInfo.Source.SubChipID
             )[0].OutputPins.filter((pin) => pin.ID == wireInfo.Source.PinID)[0];
-
-        // Если провод заходит в пин текущего редактируемого чипа
+        }
+        // Если провод заходит в пин текущего чипа
         if (wireInfo.Target.SubChipID == 0)
             buff.TargetPin = res.OutputPins.filter(
                 (pin) => pin.ID == wireInfo.Target.PinID
@@ -141,5 +134,10 @@ export function InitilizeChipModel(
         wire.Target.Chip == res ? 2 : wire.Source.Chip == res ? 0 : 1
     );
 
+    res.Connections.map((wire) => {
+        if (wire.Target.Chip.IsBasedChip) {
+            wire.Target.State.addListener(wire.Target.Chip);
+        }
+    });
     return res;
 }
