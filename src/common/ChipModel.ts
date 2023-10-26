@@ -62,7 +62,7 @@ export function InitilizeChipModel(
                 res,
                 pinInfo.Name,
                 pinInfo.ID,
-                -(pinInfo.PositionY - 50) / 200
+                -(pinInfo.PositionY - 4.75) / 9.5
             )
         )
     );
@@ -74,7 +74,7 @@ export function InitilizeChipModel(
                 res,
                 pinInfo.Name,
                 pinInfo.ID,
-                -(pinInfo.PositionY - 50) / 200
+                -(pinInfo.PositionY - 4.75) / 9.5
             )
         )
     );
@@ -85,8 +85,8 @@ export function InitilizeChipModel(
                 chipInfo.Name,
                 chipInfo.ID,
                 chipInfo.Points.map((pos) => ({
-                    X: (pos.X + 8) / 21,
-                    Y: -(pos.Y - 10) / 32.5,
+                    X: -(pos.X - 8.35) / 16.7,
+                    Y: -(pos.Y - 4.75) / 9.5,
                 }))
             )
         )

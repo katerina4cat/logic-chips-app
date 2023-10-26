@@ -27,5 +27,8 @@ export type Color = { color: string };
 export const Colors: { [key: string]: Color } = {
     floating: { color: "#000" },
     red: { color: "#e93145" },
-    green: { color: "green" },
+    green: { color: "#1fb03a" },
+    indigo: { color: "#8c49ff" },
+    blue: { color: "#147fff" },
+    yellow: { color: "#ff9b00" },
 };

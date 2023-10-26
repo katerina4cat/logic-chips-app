@@ -12,7 +12,6 @@ export class NOT extends ChipModel {
     }
     override RefreshLogic() {
         this.OutputPins[0].State.value = this.InputPins[0].State.value ? 0 : 1;
-        this.RefreshedLogic = true;
         return true;
     }
 }

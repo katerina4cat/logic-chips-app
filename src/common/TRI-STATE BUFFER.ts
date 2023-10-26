@@ -17,7 +17,6 @@ export class TRI_STATE_BUFFER extends ChipModel {
         this.OutputPins[0].State.value = this.InputPins[0].State.value
             ? this.InputPins[1].State.value
             : -1;
-        this.RefreshedLogic = true;
         return true;
     }
 }

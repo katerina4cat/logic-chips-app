@@ -8,12 +8,14 @@ import PinInteraction from "./PinInteraction";
 interface ReqPin {
     Pin: Pin;
     handleChangeInputPin: () => void;
+    setupsInput: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const EditPagePin: React.FC<ReqPin> = (props) => {
     const [pinState, setpinState] = useState(0);
+    props.Pin.State.value = pinState;
     useEffect(() => {
-        props.Pin.State.value = pinState;
+        props.setupsInput((prev) => prev + 1);
     }, []);
     useEffect(() => {
         props.handleChangeInputPin();
@@ -37,7 +39,6 @@ const EditPagePin: React.FC<ReqPin> = (props) => {
                     onClick={() => {
                         setpinState((prev) => {
                             const res = prev ? 0 : 1;
-                            props.Pin.State.value = res;
                             return res;
                         });
                     }}

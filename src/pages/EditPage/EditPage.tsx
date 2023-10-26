@@ -15,12 +15,13 @@ const EditPage: React.FC<EditReq> = () => {
     const [chipsSelected, setchipsSelected] = useState("3AND");
     const [editChip, setEditChip] = useState(CreateChip(chipsSelected, 0));
     const setModalEditState = useRef((e: boolean) => {});
-    console.log(editChip);
+    const [setupsInput, setSetupsInput] = useState(0);
+    const chipLoaded = setupsInput >= editChip.InputPins.length;
 
     const [OutputPins, setOutputPins] = useState<Pin[]>([]);
 
     const handleChangeInputPin = () => {
-        setOutputPins((prev) => [...editChip.OutputPins]);
+        setOutputPins([...editChip.OutputPins]);
         setEditChip((prev) => prev);
     };
 
@@ -48,7 +49,8 @@ const EditPage: React.FC<EditReq> = () => {
                                 onClick={() => {
                                     setchipsSelected(chipName);
                                     setEditChip(CreateChip(chipName, 0));
-                                    setOutputPins(editChip.OutputPins);
+                                    setOutputPins([]);
+                                    setSetupsInput(0);
                                     setModalEditState.current(false);
                                 }}
                             >
@@ -58,26 +60,30 @@ const EditPage: React.FC<EditReq> = () => {
                     </div>
                 </Modal>
                 <div className={cl.InputPins}>
-                    {editChip.InputPins.map((pinInput) => {
+                    {editChip.InputPins.map((pinInput, i) => {
                         return (
                             <EditPagePin
+                                key={editChip.Name + i}
                                 Pin={pinInput}
                                 handleChangeInputPin={handleChangeInputPin}
+                                setupsInput={setSetupsInput}
                             />
                         );
                     })}
                 </div>
                 <div className={cl.EditField}>
-                    {editChip.SubChips.map((chip) => (
-                        <Chip chip={chip} />
-                    ))}
+                    {chipLoaded
+                        ? editChip.SubChips.map((chip) => <Chip chip={chip} />)
+                        : undefined}
                 </div>
                 <div className={cl.OutputPins}>
-                    {OutputPins.map((pin) => (
-                        <div>
-                            <EditPageOutPin Pin={pin} />
-                        </div>
-                    ))}
+                    {chipLoaded
+                        ? OutputPins.map((pin) => (
+                              <div>
+                                  <EditPageOutPin Pin={pin} />
+                              </div>
+                          ))
+                        : undefined}
                 </div>
             </div>
         </HotKeys>

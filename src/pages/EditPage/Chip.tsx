@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ChipModel } from "../../common/ChipModel";
 import cl from "./Chip.module.scss";
 import Draggable from "react-draggable";
@@ -9,6 +9,7 @@ interface ChipReq {
 }
 
 const Chip: React.FC<ChipReq> = (props) => {
+    const first = useRef<HTMLDivElement | null>(null);
     return (
         <Draggable
             defaultPosition={{
@@ -21,6 +22,7 @@ const Chip: React.FC<ChipReq> = (props) => {
             }}
         >
             <div
+                ref={first}
                 className={cl.Chip}
                 style={{
                     backgroundColor: props.chip.Colour,
@@ -37,7 +39,12 @@ const Chip: React.FC<ChipReq> = (props) => {
                 {props.chip.Name.replace(/\s+/, "\n")}
                 <div
                     className={cl.PinList}
-                    style={{ transform: "translateX(60%)" }}
+                    style={{
+                        transform: "translateX(60%)",
+                        height: first.current?.offsetHeight
+                            ? first.current?.offsetHeight - 10
+                            : "auto",
+                    }}
                 >
                     {props.chip.OutputPins.map((pin) => (
                         <PinInteraction pin={pin} />

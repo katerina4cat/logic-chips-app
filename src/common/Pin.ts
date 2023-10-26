@@ -70,7 +70,7 @@ export class Pin {
     }
     getColorWithState() {
         return `color-mix(in srgb, ${this.Color.color} ${
-            this.State.value ? 100 : 25
+            this._State.value == 1 ? 100 : this._State.value == -1 ? 0 : 25
         }%, ${Colors.floating.color})`;
     }
 }
