@@ -1,5 +1,5 @@
 import { ChipModel } from "./ChipModel";
-import { Color, Colors } from "./Wire";
+import { Color, Colors, fixPosY } from "./Wire";
 
 export enum PinStates {
     "FLOATING" = -1,
@@ -7,7 +7,10 @@ export enum PinStates {
     "HIGH" = 1,
 }
 
+let stateIDS = 0;
+
 export class PinState {
+    private id = stateIDS;
     private _value: PinStates;
     private listeners: Array<ChipModel> = [];
     set value(value: PinStates) {
@@ -31,6 +34,7 @@ export class PinState {
         });
     }
     constructor(value: PinStates = PinStates.FLOATING) {
+        stateIDS++;
         this._value = value;
     }
 }
@@ -65,7 +69,7 @@ export class Pin {
         this.Name = Name;
         this.Chip = Chip;
         this.ID = ID === -1 ? Date.now() : ID;
-        this.PositionY = PositionY;
+        this.PositionY = fixPosY(PositionY);
         this._State.value = PinStates.FLOATING;
     }
     getColorWithState() {

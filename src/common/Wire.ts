@@ -15,14 +15,34 @@ export class Wire {
     ) {
         this.Color = Color;
         this.Source = Source;
-        this.Target = Target;
         this.State = Source.State;
+        if (Target.Chip.Name == "BUS") {
+            const newPin = new Pin(
+                true,
+                Target.Chip,
+                "",
+                Target.Chip.InputPins.length + 1
+            );
+            this.Target = newPin;
+            this.Target.Chip.InputPins.push(newPin);
+        } else this.Target = Target;
         this.Target.State = this.State;
         this.Target.Color = this.Color;
-        this.WirePoints = WirePoints;
+        this.WirePoints = WirePoints.map((WirePoint) => fixPos(WirePoint));
+    }
+    getColorWithState() {
+        return `color-mix(in srgb, ${this.Color.color} ${
+            this.State.value == 1 ? 100 : this.State.value == -1 ? 0 : 25
+        }%, ${Colors.floating.color})`;
     }
 }
 export type Pos = { X: number; Y: number };
+export const fixPosX = (X: number) => ((X + 8.35) / 16.7) * window.innerWidth;
+export const fixPosY = (Y: number) => ((Y - 4.6) / -9.2) * window.innerHeight;
+export const fixPos: (pos: Pos) => Pos = (pos) => ({
+    X: fixPosX(pos.X),
+    Y: fixPosY(pos.Y),
+});
 export type Color = { color: string };
 export const Colors: { [key: string]: Color } = {
     floating: { color: "#000" },

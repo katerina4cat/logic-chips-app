@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { ChipModel } from "../../common/ChipModel";
 import cl from "./Chip.module.scss";
 import Draggable from "react-draggable";
@@ -13,42 +13,44 @@ const Chip: React.FC<ChipReq> = (props) => {
     return (
         <Draggable
             defaultPosition={{
-                x: props.chip.Position[0].X * window.innerWidth,
-                y: props.chip.Position[0].Y * window.innerHeight,
+                x: props.chip.Position[0].X,
+                y: props.chip.Position[0].Y,
             }}
             onDrag={(e, data) => {
                 props.chip.Position[0].X = data.x;
                 props.chip.Position[0].Y = data.y;
             }}
         >
-            <div
-                ref={first}
-                className={cl.Chip}
-                style={{
-                    backgroundColor: props.chip.Colour,
-                }}
-            >
+            <div style={{ position: "absolute" }}>
                 <div
-                    className={cl.PinList}
-                    style={{ transform: "translateX(-60%)" }}
-                >
-                    {props.chip.InputPins.map((pin) => (
-                        <PinInteraction pin={pin} />
-                    ))}
-                </div>
-                {props.chip.Name.replace(/\s+/, "\n")}
-                <div
-                    className={cl.PinList}
+                    ref={first}
+                    className={cl.Chip}
                     style={{
-                        transform: "translateX(60%)",
-                        height: first.current?.offsetHeight
-                            ? first.current?.offsetHeight - 10
-                            : "auto",
+                        backgroundColor: props.chip.Colour,
                     }}
                 >
-                    {props.chip.OutputPins.map((pin) => (
-                        <PinInteraction pin={pin} />
-                    ))}
+                    <div
+                        className={cl.PinList}
+                        style={{ transform: "translateX(-60%)" }}
+                    >
+                        {props.chip.InputPins.map((pin) => (
+                            <PinInteraction pin={pin} />
+                        ))}
+                    </div>
+                    {props.chip.Name.replace(/\s+/, "\n")}
+                    <div
+                        className={cl.PinList}
+                        style={{
+                            transform: "translateX(60%)",
+                            height: first.current?.offsetHeight
+                                ? first.current?.offsetHeight - 10
+                                : "auto",
+                        }}
+                    >
+                        {props.chip.OutputPins.map((pin) => (
+                            <PinInteraction pin={pin} />
+                        ))}
+                    </div>
                 </div>
             </div>
         </Draggable>

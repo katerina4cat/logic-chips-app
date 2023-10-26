@@ -20,6 +20,7 @@ const PinInteraction: React.FC<PinReq> = (props) => {
                     props.pin.State.value == -1
                         ? Colors.floating.color
                         : props.pin.getColorWithState(),
+                border: "0.05em solid " + Colors.floating.color,
             }}
             onMouseDown={(e) => {
                 e.stopPropagation();

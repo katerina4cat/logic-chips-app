@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import cl from "./EditPage.module.scss";
 import EditPagePin from "./EditPagePin";
 import { CreateChip } from "../../common/LoadSave";
@@ -8,6 +8,8 @@ import Modal from "../Modal/Modal";
 import { HotKeys } from "react-hotkeys";
 import { Pin } from "../../common/Pin";
 import EditPageOutPin from "./EditPageOutPin";
+import { Bus, LineDrawer } from "./Bus";
+import { BUS } from "../../common/BUS";
 
 interface EditReq {}
 
@@ -26,10 +28,15 @@ const EditPage: React.FC<EditReq> = () => {
     };
 
     const keyMap = {
-        SelectChipToEdit: "ctrl+e",
+        SelectChipToEdit: "ctrl+x",
+        SelectChipToEdit2: "ctrl+X",
     };
     const handlers = {
         SelectChipToEdit: (keyboardEvent: any) => {
+            keyboardEvent.preventDefault();
+            setModalEditState.current(true);
+        },
+        SelectChipToEdit2: (keyboardEvent: any) => {
             keyboardEvent.preventDefault();
             setModalEditState.current(true);
         },
@@ -72,10 +79,20 @@ const EditPage: React.FC<EditReq> = () => {
                     })}
                 </div>
                 <div className={cl.EditField}>
+                    <LineDrawer
+                        wires={chipLoaded ? editChip.Connections : []}
+                        buses={
+                            chipLoaded
+                                ? editChip.SubChips.filter(
+                                      (chip) => chip.Name == BUS.name
+                                  )
+                                : []
+                        }
+                    />
                     {chipLoaded
                         ? editChip.SubChips.map((chip) =>
                               chip.Name == "BUS" ? (
-                                  <Chip chip={chip} />
+                                  <Bus chip={chip} />
                               ) : (
                                   <Chip chip={chip} />
                               )

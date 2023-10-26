@@ -13,31 +13,33 @@ const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
         <Draggable
             defaultPosition={{
                 x: 0,
-                y: props.Pin.PositionY * window.innerHeight,
+                y: props.Pin.PositionY,
             }}
             axis="y"
         >
-            <div className={cl.EditPagePin}>
-                <div className={cl.PinChange} />
-                <div
-                    className={cl.PinButtonChange}
-                    style={{
-                        border: "0.15em solid " + Colors.floating.color,
-                        backgroundColor: props.Pin.getColorWithState(),
-                    }}
-                />
-                <line
-                    style={{
-                        width: "1.4em",
-                        height: "12.5%",
-                        backgroundColor: Colors.floating.color,
-                    }}
-                />
-                <PinInteraction
-                    pin={props.Pin}
-                    NameLeft={true}
-                    style={{ transform: "translateX(75%)" }}
-                />
+            <div style={{ position: "absolute", right: 0 }}>
+                <div className={cl.EditPagePin}>
+                    <div className={cl.PinChange} />
+                    <div
+                        className={cl.PinButtonChange}
+                        style={{
+                            border: "0.15em solid " + Colors.floating.color,
+                            backgroundColor: props.Pin.getColorWithState(),
+                        }}
+                    />
+                    <line
+                        style={{
+                            width: "1.4em",
+                            height: "12.5%",
+                            backgroundColor: Colors.floating.color,
+                        }}
+                    />
+                    <PinInteraction
+                        pin={props.Pin}
+                        NameLeft={true}
+                        style={{ transform: "translateX(75%)" }}
+                    />
+                </div>
             </div>
         </Draggable>
     );

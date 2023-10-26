@@ -1,5 +1,5 @@
 import { Pin } from "./Pin";
-import { Colors, Pos, Wire } from "./Wire";
+import { Colors, Pos, Wire, fixPos } from "./Wire";
 import { ChipSaveStruct, CreateChip } from "./LoadSave";
 
 export class ChipModel {
@@ -31,7 +31,7 @@ export class ChipModel {
         this.Connections = Connections;
         this.SubChips = SubChips;
         this.ID = ID;
-        this.Position = Position;
+        this.Position = Position.map((pos) => fixPos(pos));
     }
 
     RefreshedLogic = false;
@@ -57,38 +57,19 @@ export function InitilizeChipModel(
     // Инициализация пинов входов загружаемого чипа
     ChipInfo.InputPins.map((pinInfo) =>
         res.InputPins.push(
-            new Pin(
-                true,
-                res,
-                pinInfo.Name,
-                pinInfo.ID,
-                -(pinInfo.PositionY - 4.75) / 9.5
-            )
+            new Pin(true, res, pinInfo.Name, pinInfo.ID, pinInfo.PositionY)
         )
     );
     // Инициализация пинов выходов загружаемого чипа
     ChipInfo.OutputPins.map((pinInfo) =>
         res.OutputPins.push(
-            new Pin(
-                false,
-                res,
-                pinInfo.Name,
-                pinInfo.ID,
-                -(pinInfo.PositionY - 4.75) / 9.5
-            )
+            new Pin(false, res, pinInfo.Name, pinInfo.ID, pinInfo.PositionY)
         )
     );
     // Инициализация дочерних чипов загружаемого чипа
     ChipInfo.SubChips.map((chipInfo) =>
         res.SubChips.push(
-            CreateChip(
-                chipInfo.Name,
-                chipInfo.ID,
-                chipInfo.Points.map((pos) => ({
-                    X: -(pos.X - 8.35) / 16.7,
-                    Y: -(pos.Y - 4.75) / 9.5,
-                }))
-            )
+            CreateChip(chipInfo.Name, chipInfo.ID, chipInfo.Points)
         )
     );
     // Инициализация связи всех пинов загружаемого чипа
