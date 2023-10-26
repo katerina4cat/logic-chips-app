@@ -4,19 +4,22 @@ import { AND } from "./AND";
 import { NOT } from "./NOT";
 import { TRI_STATE_BUFFER } from "./TRI-STATE BUFFER";
 import { ChipModel, InitilizeChipModel } from "./ChipModel";
+import { BUS } from "./BUS";
 
 export function CreateChip(
     chipName: string,
     chipID: number,
-    Points?: Array<Pos>
+    Points: Array<Pos> = []
 ): ChipModel {
     switch (chipName) {
         case AND.name:
-            return new AND(chipID);
+            return new AND(chipID, Points);
+        case BUS.name:
+            return new BUS(chipID, Points);
         case NOT.name:
-            return new NOT(chipID);
+            return new NOT(chipID, Points);
         case "TRI-STATE BUFFER":
-            return new TRI_STATE_BUFFER(chipID);
+            return new TRI_STATE_BUFFER(chipID, Points);
         default:
             return InitilizeChipModel(LoadChipInfo(chipName), chipID, Points);
     }
@@ -51,5 +54,5 @@ export interface ChipSaveStruct {
 }
 
 export function LoadChipInfo(ChipName: string) {
-    return JSON.parse(chips[ChipName]) as ChipSaveStruct;
+    return chips[ChipName] as ChipSaveStruct;
 }

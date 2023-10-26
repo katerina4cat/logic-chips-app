@@ -6,19 +6,26 @@ export class Wire {
     Source: Pin;
     Target: Pin;
     WirePoints: Pos[];
-    Color: string;
+    Color: Color;
     constructor(
         Source: Pin,
         Target: Pin,
         WirePoints: Pos[] = [],
-        Color = "#fdd"
+        Color: Color = Colors.red
     ) {
+        this.Color = Color;
         this.Source = Source;
         this.Target = Target;
         this.State = Source.State;
         this.Target.State = this.State;
+        this.Target.Color = this.Color;
         this.WirePoints = WirePoints;
-        this.Color = Color;
     }
 }
-export type Pos = Array<{ X: number; Y: number }>;
+export type Pos = { X: number; Y: number };
+export type Color = { color: string };
+export const Colors: { [key: string]: Color } = {
+    floating: { color: "#000" },
+    red: { color: "#e93145" },
+    green: { color: "green" },
+};

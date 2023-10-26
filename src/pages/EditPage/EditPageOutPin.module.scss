@@ -1,0 +1,22 @@
+.EditPagePin {
+    width: max-content;
+    height: 5vh;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    position: absolute;
+    right: 0;
+    .PinChange {
+        width: 0.7em;
+        height: 100%;
+        background-color: rgba($color: #fff, $alpha: 0.25);
+        cursor: n-resize;
+        margin-left: 0.25em;
+    }
+    .PinButtonChange {
+        cursor: pointer;
+        height: 3.75vh;
+        aspect-ratio: 1;
+        border-radius: 50%;
+    }
+}

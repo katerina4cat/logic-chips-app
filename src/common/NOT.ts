@@ -1,12 +1,14 @@
 import { ChipModel } from "./ChipModel";
 import { Pin } from "./Pin";
+import { Pos } from "./Wire";
 
 export class NOT extends ChipModel {
-    constructor(chipID: number) {
-        super("NOT", chipID, "#fff");
+    constructor(chipID: number, Position: Array<Pos> = []) {
+        super("NOT", chipID, "#8c1f1a");
         this.IsBasedChip = true;
         this.InputPins = [new Pin(true, this, "In", 0, 0.5)];
         this.OutputPins = [new Pin(false, this, "Out", 1, 0.5)];
+        this.Position = Position;
     }
     override RefreshLogic() {
         this.OutputPins[0].State.value = this.InputPins[0].State.value ? 0 : 1;

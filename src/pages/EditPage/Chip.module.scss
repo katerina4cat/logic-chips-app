@@ -1,0 +1,24 @@
+.Chip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    max-width: 25vw;
+    min-width: 5vw;
+    min-height: 4vh;
+    width: min-content;
+
+    text-align: center;
+
+    color: black;
+    font-weight: bold;
+    font-size: 1.25em;
+    cursor: "move";
+    border: 2.5px solid rgba($color: #000000, $alpha: 0.4);
+    .PinList {
+        min-height: 4vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+}

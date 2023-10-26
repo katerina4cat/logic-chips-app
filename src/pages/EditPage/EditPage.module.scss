@@ -1,2 +1,40 @@
 .EditPage {
+    width: 100%;
+    height: 400svh;
+    display: flex;
+    overflow-y: hidden;
+    .InputPins {
+        padding-left: 0.5em;
+    }
+    .OutputPins {
+        padding-right: 0.5em;
+    }
+    .InputPins,
+    .OutputPins {
+        background-color: rgba($color: #fff, $alpha: 0.15);
+        z-index: 10;
+        width: 2.25em;
+        height: 100%;
+    }
+    .EditField {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+    .OpenEditChipList {
+        border-radius: 6px;
+        overflow-y: auto;
+        padding: 1.5vh;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        .ListObjects {
+            display: flex;
+            flex-direction: column;
+            width: max-content;
+            .Button {
+                margin: 0.25vh;
+            }
+        }
+    }
 }

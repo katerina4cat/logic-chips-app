@@ -1,4 +1,5 @@
 import { ChipModel } from "./ChipModel";
+import { Color, Colors } from "./Wire";
 
 export enum PinStates {
     "FLOATING" = -1,
@@ -52,6 +53,7 @@ export class Pin {
     Chip: ChipModel;
     SubChipID = 0;
     PositionY: number;
+    Color: Color = Colors.red;
     constructor(
         IsInput: boolean,
         Chip: ChipModel,
@@ -65,5 +67,10 @@ export class Pin {
         this.ID = ID === -1 ? Date.now() : ID;
         this.PositionY = PositionY;
         this._State.value = PinStates.FLOATING;
+    }
+    getColorWithState() {
+        return `color-mix(in srgb, ${this.Color.color} ${
+            this.State.value ? 100 : 25
+        }%, ${Colors.floating.color})`;
     }
 }

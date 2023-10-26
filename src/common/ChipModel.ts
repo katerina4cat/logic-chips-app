@@ -1,5 +1,5 @@
-import { Pin, PinStates } from "./Pin";
-import { Pos, Wire } from "./Wire";
+import { Pin } from "./Pin";
+import { Colors, Pos, Wire } from "./Wire";
 import { ChipSaveStruct, CreateChip } from "./LoadSave";
 
 export class ChipModel {
@@ -57,18 +57,39 @@ export function InitilizeChipModel(
     // Инициализация пинов входов загружаемого чипа
     ChipInfo.InputPins.map((pinInfo) =>
         res.InputPins.push(
-            new Pin(true, res, pinInfo.Name, pinInfo.ID, pinInfo.PositionY)
+            new Pin(
+                true,
+                res,
+                pinInfo.Name,
+                pinInfo.ID,
+                -(pinInfo.PositionY - 50) / 200
+            )
         )
     );
     // Инициализация пинов выходов загружаемого чипа
     ChipInfo.OutputPins.map((pinInfo) =>
         res.OutputPins.push(
-            new Pin(false, res, pinInfo.Name, pinInfo.ID, pinInfo.PositionY)
+            new Pin(
+                false,
+                res,
+                pinInfo.Name,
+                pinInfo.ID,
+                -(pinInfo.PositionY - 50) / 200
+            )
         )
     );
     // Инициализация дочерних чипов загружаемого чипа
     ChipInfo.SubChips.map((chipInfo) =>
-        res.SubChips.push(CreateChip(chipInfo.Name, chipInfo.ID))
+        res.SubChips.push(
+            CreateChip(
+                chipInfo.Name,
+                chipInfo.ID,
+                chipInfo.Points.map((pos) => ({
+                    X: (pos.X + 8) / 21,
+                    Y: -(pos.Y - 10) / 32.5,
+                }))
+            )
+        )
     );
     // Инициализация связи всех пинов загружаемого чипа
     ChipInfo.Connections.map((wireInfo) => {
@@ -122,7 +143,7 @@ export function InitilizeChipModel(
                 buff.SourcePin,
                 buff.TargetPin,
                 wireInfo.WirePoints,
-                wireInfo.ColourThemeName
+                Colors[wireInfo.ColourThemeName.toLocaleLowerCase()]
             )
         );
     });

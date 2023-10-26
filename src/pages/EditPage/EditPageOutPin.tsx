@@ -1,23 +1,14 @@
-import { useEffect, useState } from "react";
 import { Pin } from "../../common/Pin";
-import cl from "./EditPagePin.module.scss";
+import cl from "./EditPageOutPin.module.scss";
 import Draggable from "react-draggable";
 import { Colors } from "../../common/Wire";
 import PinInteraction from "./PinInteraction";
 
-interface ReqPin {
+interface ReqOutPin {
     Pin: Pin;
-    handleChangeInputPin: () => void;
 }
 
-const EditPagePin: React.FC<ReqPin> = (props) => {
-    const [pinState, setpinState] = useState(0);
-    useEffect(() => {
-        props.Pin.State.value = pinState;
-    }, []);
-    useEffect(() => {
-        props.handleChangeInputPin();
-    }, [pinState]);
+const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
     return (
         <Draggable
             defaultPosition={{
@@ -34,13 +25,6 @@ const EditPagePin: React.FC<ReqPin> = (props) => {
                         border: "0.15em solid " + Colors.floating.color,
                         backgroundColor: props.Pin.getColorWithState(),
                     }}
-                    onClick={() => {
-                        setpinState((prev) => {
-                            const res = prev ? 0 : 1;
-                            props.Pin.State.value = res;
-                            return res;
-                        });
-                    }}
                 />
                 <line
                     style={{
@@ -51,12 +35,12 @@ const EditPagePin: React.FC<ReqPin> = (props) => {
                 />
                 <PinInteraction
                     pin={props.Pin}
-                    NameLeft={false}
-                    style={{ transform: "translateX(-75%)" }}
+                    NameLeft={true}
+                    style={{ transform: "translateX(75%)" }}
                 />
             </div>
         </Draggable>
     );
 };
 
-export default EditPagePin;
+export default EditPageOutPin;
