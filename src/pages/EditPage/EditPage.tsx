@@ -73,7 +73,13 @@ const EditPage: React.FC<EditReq> = () => {
                 </div>
                 <div className={cl.EditField}>
                     {chipLoaded
-                        ? editChip.SubChips.map((chip) => <Chip chip={chip} />)
+                        ? editChip.SubChips.map((chip) =>
+                              chip.Name == "BUS" ? (
+                                  <Chip chip={chip} />
+                              ) : (
+                                  <Chip chip={chip} />
+                              )
+                          )
                         : undefined}
                 </div>
                 <div className={cl.OutputPins}>
