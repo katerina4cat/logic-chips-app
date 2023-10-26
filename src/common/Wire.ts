@@ -37,8 +37,10 @@ export class Wire {
     }
 }
 export type Pos = { X: number; Y: number };
-export const fixPosX = (X: number) => ((X + 8.35) / 16.7) * window.innerWidth;
-export const fixPosY = (Y: number) => ((Y - 4.6) / -9.2) * window.innerHeight;
+export const fixPosX = (X: number) =>
+    ((X + 8.349655) / 16.69931) * window.innerWidth;
+export const fixPosY = (Y: number) =>
+    ((Y - 4.611875) / -9.22375) * window.innerHeight;
 export const fixPos: (pos: Pos) => Pos = (pos) => ({
     X: fixPosX(pos.X),
     Y: fixPosY(pos.Y),
