@@ -14,11 +14,15 @@ export class AND extends ChipModel {
         this.Position = Position;
     }
     override RefreshLogic() {
-        this.OutputPins[0].State.value =
-            this.InputPins[0].State.value && this.InputPins[1].State.value;
-        if (this.OutputPins[0].State.value === -1)
-            this.OutputPins[0].State.value = 0;
-        this.RefreshedLogic = true;
+        this.OutputPins[0].State.forEach((states) => {
+            const value =
+                this.InputPins[0].getPinStatus() &&
+                this.InputPins[1].getPinStatus();
+            if (this.OutputPins[0].getPinStatus() === -1) states.value = 0;
+            else if (this.OutputPins[0].getPinStatus() === -2)
+                states.value = -2;
+            else states.value = value;
+        });
         return true;
     }
 }

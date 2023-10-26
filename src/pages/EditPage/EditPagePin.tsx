@@ -13,7 +13,7 @@ interface ReqPin {
 
 const EditPagePin: React.FC<ReqPin> = (props) => {
     const [pinState, setpinState] = useState(0);
-    props.Pin.State.value = pinState;
+    props.Pin.State.forEach((states) => (states.value = pinState));
     useEffect(() => {
         props.setupsInput((prev) => prev + 1);
     }, []);

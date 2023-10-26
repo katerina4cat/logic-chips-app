@@ -12,11 +12,12 @@ import EditPageOutPin from "./EditPageOutPin";
 interface EditReq {}
 
 const EditPage: React.FC<EditReq> = () => {
-    const [chipsSelected, setchipsSelected] = useState("3AND");
+    const [chipsSelected, setchipsSelected] = useState("NOR");
     const [editChip, setEditChip] = useState(CreateChip(chipsSelected, 0));
     const setModalEditState = useRef((e: boolean) => {});
     const [setupsInput, setSetupsInput] = useState(0);
     const chipLoaded = setupsInput >= editChip.InputPins.length;
+    console.log(editChip);
 
     const [OutputPins, setOutputPins] = useState<Pin[]>([]);
 

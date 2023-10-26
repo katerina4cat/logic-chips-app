@@ -11,7 +11,11 @@ export class NOT extends ChipModel {
         this.Position = Position;
     }
     override RefreshLogic() {
-        this.OutputPins[0].State.value = this.InputPins[0].State.value ? 0 : 1;
+        this.OutputPins[0].State.forEach((states) => {
+            const value = this.InputPins[0].getPinStatus() ? 0 : 1;
+            if (this.InputPins[0].getPinStatus() == -2) states.value = -2;
+            else states.value = value;
+        });
         return true;
     }
 }

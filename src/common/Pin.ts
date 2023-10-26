@@ -2,12 +2,16 @@ import { ChipModel } from "./ChipModel";
 import { Color, Colors } from "./Wire";
 
 export enum PinStates {
+    "ERORR" = -2,
     "FLOATING" = -1,
     "LOW" = 0,
     "HIGH" = 1,
 }
 
+let StateIDS = 0;
+
 export class PinState {
+    private id = StateIDS;
     private _value: PinStates;
     private listeners: Array<ChipModel> = [];
     set value(value: PinStates) {
@@ -25,26 +29,26 @@ export class PinState {
     merge(pinState: PinState) {
         pinState.listeners.forEach((listener) => {
             this.addListener(listener);
-            listener.InputPins.filter(
-                (pin) => pin.State === pinState
-            )[0].setState(this);
         });
     }
     constructor(value: PinStates = PinStates.FLOATING) {
+        StateIDS++;
         this._value = value;
     }
 }
 
 export class Pin {
-    private _State: PinState = new PinState();
-    get State(): PinState {
+    private _State: PinState[] = [new PinState()];
+    get State(): PinState[] {
         return this._State;
     }
-    set State(value: PinState) {
-        value.merge(this.State);
-        this._State = value;
+    set State(value: PinState[]) {
+        value.forEach((pinState) => {
+            this._State.forEach((thisPinState) => pinState.merge(thisPinState));
+            this._State.push(pinState);
+        });
     }
-    setState(value: PinState) {
+    setState(value: PinState[]) {
         this._State = value;
     }
     Name = "Pin";
@@ -66,11 +70,31 @@ export class Pin {
         this.Chip = Chip;
         this.ID = ID === -1 ? Date.now() : ID;
         this.PositionY = PositionY;
-        this._State.value = PinStates.FLOATING;
+        this._State[0].value = PinStates.FLOATING;
+    }
+    getPinStatus() {
+        const EnabledStates = this._State.filter(
+            (state) =>
+                state.value == PinStates.LOW || state.value == PinStates.HIGH
+        );
+        return EnabledStates.length > 2
+            ? PinStates.ERORR
+            : EnabledStates.length == 0
+            ? PinStates.FLOATING
+            : EnabledStates[0].value;
     }
     getColorWithState() {
-        return `color-mix(in srgb, ${this.Color.color} ${
-            this._State.value == 1 ? 100 : this._State.value == -1 ? 0 : 25
+        const stateToDisplay = this.IsInput
+            ? this.getPinStatus()
+            : this.getPinStatus();
+        return `color-mix(in srgb, ${
+            stateToDisplay == PinStates.ERORR ? Colors.error : this.Color.color
+        } ${
+            stateToDisplay == -2 || stateToDisplay == 1
+                ? 100
+                : stateToDisplay == -1
+                ? 0
+                : 25
         }%, ${Colors.floating.color})`;
     }
 }

@@ -9,6 +9,7 @@ interface ReqOutPin {
 }
 
 const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
+    console.log(props.Pin.getColorWithState());
     return (
         <Draggable
             defaultPosition={{

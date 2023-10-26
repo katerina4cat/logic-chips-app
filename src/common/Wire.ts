@@ -1,7 +1,7 @@
 import { Pin, PinState } from "./Pin";
 
 export class Wire {
-    State: PinState;
+    State: PinState[];
     ID: number = Date.now();
     Source: Pin;
     Target: Pin;
@@ -31,4 +31,5 @@ export const Colors: { [key: string]: Color } = {
     indigo: { color: "#8c49ff" },
     blue: { color: "#147fff" },
     yellow: { color: "#ff9b00" },
+    error: { color: "#fff" },
 };

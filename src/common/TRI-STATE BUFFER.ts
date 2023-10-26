@@ -14,9 +14,11 @@ export class TRI_STATE_BUFFER extends ChipModel {
         this.Position = Position;
     }
     override RefreshLogic() {
-        this.OutputPins[0].State.value = this.InputPins[0].State.value
-            ? this.InputPins[1].State.value
-            : -1;
+        this.OutputPins[0].State.forEach((states) => {
+            states.value = this.InputPins[0].getPinStatus()
+                ? this.InputPins[1].getPinStatus()
+                : -1;
+        });
         return true;
     }
 }

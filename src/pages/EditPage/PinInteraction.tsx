@@ -17,8 +17,10 @@ const PinInteraction: React.FC<PinReq> = (props) => {
                 position: "relative",
                 aspectRatio: 1,
                 backgroundColor:
-                    props.pin.State.value == -1
+                    props.pin.getPinStatus() == -1
                         ? Colors.floating.color
+                        : props.pin.getPinStatus() == -2
+                        ? Colors.error.color
                         : props.pin.getColorWithState(),
             }}
             onMouseDown={(e) => {
