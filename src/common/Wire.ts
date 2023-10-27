@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Pin, PinState } from "./Pin";
 
 export class Wire {
@@ -10,7 +11,7 @@ export class Wire {
     constructor(
         Source: Pin,
         Target: Pin,
-        WirePoints: Pos[] = [],
+        WirePoints: Position[] = [],
         Color: Color = Colors.red
     ) {
         this.Color = Color;
@@ -28,7 +29,9 @@ export class Wire {
         } else this.Target = Target;
         this.Target.State = this.State;
         this.Target.Color = this.Color;
-        this.WirePoints = WirePoints.map((WirePoint) => fixPos(WirePoint));
+        this.WirePoints = WirePoints.slice(1, WirePoints.length - 1).map(
+            (WirePoint) => new Pos(fixPos(WirePoint))
+        );
     }
     getColorWithState() {
         return `color-mix(in srgb, ${this.Color.color} ${
@@ -36,12 +39,18 @@ export class Wire {
         }%, ${Colors.floating.color})`;
     }
 }
-export type Pos = { X: number; Y: number };
+export type Position = { X: number; Y: number };
+export class Pos {
+    pos: [Position, React.Dispatch<React.SetStateAction<Position>>];
+    constructor(position: Position) {
+        this.pos = useState<Position>(position);
+    }
+}
 export const fixPosX = (X: number) =>
     ((X + 8.349655) / 16.69931) * window.innerWidth;
 export const fixPosY = (Y: number) =>
     ((Y - 4.611875) / -9.22375) * window.innerHeight;
-export const fixPos: (pos: Pos) => Pos = (pos) => ({
+export const fixPos: (pos: Position) => Position = (pos) => ({
     X: fixPosX(pos.X),
     Y: fixPosY(pos.Y),
 });

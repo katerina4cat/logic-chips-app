@@ -1,4 +1,4 @@
-import { Pos } from "./Wire";
+import { Pos, Position } from "./Wire";
 import { chips } from "./chips";
 import { AND } from "./AND";
 import { NOT } from "./NOT";
@@ -9,7 +9,7 @@ import { BUS } from "./BUS";
 export function CreateChip(
     chipName: string,
     chipID: number,
-    Points: Array<Pos> = []
+    Points: Array<Position> = []
 ): ChipModel {
     switch (chipName) {
         case AND.name:
@@ -34,13 +34,13 @@ interface PinInfo {
 interface ChipInfo {
     Name: string;
     ID: number;
-    Points: Array<Pos>;
+    Points: Array<Position>;
 }
 
 interface WireInfo {
     Source: { SubChipID: number; PinID: number };
     Target: { SubChipID: number; PinID: number };
-    WirePoints: Array<Pos>;
+    WirePoints: Array<Position>;
     ColourThemeName: string;
 }
 

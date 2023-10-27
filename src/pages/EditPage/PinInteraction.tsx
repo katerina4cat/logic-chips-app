@@ -1,6 +1,8 @@
+import { useEffect, useRef } from "react";
 import { Pin } from "../../common/Pin";
 import { Colors } from "../../common/Wire";
 import cl from "./PinInteraction.module.scss";
+import { ArcherElement } from "react-archer";
 
 interface PinReq extends React.HTMLAttributes<HTMLDivElement> {
     pin: Pin;
@@ -8,9 +10,19 @@ interface PinReq extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const PinInteraction: React.FC<PinReq> = (props) => {
+    const pinref = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const rect = pinref.current?.getBoundingClientRect();
+        if (!rect || !props.pin.Chip.Position[0]) return;
+        props.pin.deltaChip = {
+            X: rect.x - props.pin.Chip.Position[0].pos[0].X,
+            Y: rect.y - props.pin.Chip.Position[0].pos[0].Y,
+        };
+    }, []);
     return (
         <div
             {...props}
+            ref={pinref}
             className={cl.PinInteraction}
             style={{
                 ...props.style,

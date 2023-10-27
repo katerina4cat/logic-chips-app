@@ -1,9 +1,9 @@
 import { ChipModel } from "./ChipModel";
 import { Pin, PinStates } from "./Pin";
-import { Pos } from "./Wire";
+import { Pos, Position } from "./Wire";
 
 export class BUS extends ChipModel {
-    constructor(chipID: number, Position: Array<Pos> = []) {
+    constructor(chipID: number, Position: Array<Position> = []) {
         super(
             "BUS",
             chipID,
@@ -22,7 +22,6 @@ export class BUS extends ChipModel {
         const states = this.InputPins.filter(
             (pin) => pin.State.value != PinStates.FLOATING
         );
-        console.log(states);
         this.OutputPins[0].State.value =
             states.length == 1 ? states[0].State.value : PinStates.FLOATING;
     }

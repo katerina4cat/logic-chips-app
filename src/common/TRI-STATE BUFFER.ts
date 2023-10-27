@@ -1,9 +1,9 @@
 import { ChipModel } from "./ChipModel";
 import { Pin } from "./Pin";
-import { Pos } from "./Wire";
+import { Pos, Position } from "./Wire";
 
 export class TRI_STATE_BUFFER extends ChipModel {
-    constructor(chipID: number, Position: Array<Pos> = []) {
+    constructor(chipID: number, Position: Array<Position> = []) {
         super(
             "TRI-STATE BUFFER",
             chipID,

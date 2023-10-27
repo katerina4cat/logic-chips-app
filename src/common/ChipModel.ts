@@ -1,5 +1,5 @@
 import { Pin } from "./Pin";
-import { Colors, Pos, Wire, fixPos } from "./Wire";
+import { Colors, Pos, Position, Wire, fixPos } from "./Wire";
 import { ChipSaveStruct, CreateChip } from "./LoadSave";
 
 export class ChipModel {
@@ -22,7 +22,7 @@ export class ChipModel {
         OutputPins: Array<Pin> = [],
         SubChips: Array<ChipModel> = [],
         Connections: Array<Wire> = [],
-        Position: Array<Pos> = []
+        Position: Array<Position> = []
     ) {
         this.Name = Name;
         this.Colour = Colour;
@@ -31,7 +31,7 @@ export class ChipModel {
         this.Connections = Connections;
         this.SubChips = SubChips;
         this.ID = ID;
-        this.Position = Position.map((pos) => fixPos(pos));
+        this.Position = Position.map((pos) => new Pos(fixPos(pos)));
     }
 
     RefreshedLogic = false;
@@ -42,7 +42,7 @@ export class ChipModel {
 export function InitilizeChipModel(
     ChipInfo: ChipSaveStruct,
     chipID: number = 0,
-    Points?: Array<Pos>
+    Points?: Array<Position>
 ) {
     const res = new ChipModel(
         ChipInfo.Name,

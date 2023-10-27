@@ -10,6 +10,7 @@ import { Pin } from "../../common/Pin";
 import EditPageOutPin from "./EditPageOutPin";
 import { Bus, LineDrawer } from "./Bus";
 import { BUS } from "../../common/BUS";
+import { ArcherContainer } from "react-archer";
 
 interface EditReq {}
 
@@ -24,7 +25,6 @@ const EditPage: React.FC<EditReq> = () => {
 
     const handleChangeInputPin = () => {
         setOutputPins([...editChip.OutputPins]);
-        setEditChip((prev) => prev);
     };
 
     const keyMap = {
@@ -80,7 +80,6 @@ const EditPage: React.FC<EditReq> = () => {
                 </div>
                 <div className={cl.EditField}>
                     <LineDrawer
-                        wires={chipLoaded ? editChip.Connections : []}
                         buses={
                             chipLoaded
                                 ? editChip.SubChips.filter(
@@ -88,6 +87,7 @@ const EditPage: React.FC<EditReq> = () => {
                                   )
                                 : []
                         }
+                        wires={chipLoaded ? editChip.Connections : []}
                     />
                     {chipLoaded
                         ? editChip.SubChips.map((chip) =>

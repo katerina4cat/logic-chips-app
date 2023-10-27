@@ -13,12 +13,12 @@ const Chip: React.FC<ChipReq> = (props) => {
     return (
         <Draggable
             defaultPosition={{
-                x: props.chip.Position[0].X,
-                y: props.chip.Position[0].Y,
+                x: props.chip.Position[0].pos[0].X,
+                y: props.chip.Position[0].pos[0].Y,
             }}
             onDrag={(e, data) => {
-                props.chip.Position[0].X = data.x;
-                props.chip.Position[0].Y = data.y;
+                props.chip.Position[0].pos[1]({ X: data.x, Y: data.y });
+                console.log();
             }}
         >
             <div style={{ position: "absolute" }}>
