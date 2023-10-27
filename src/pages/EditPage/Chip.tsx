@@ -6,6 +6,7 @@ import PinInteraction from "./PinInteraction";
 
 interface ChipReq {
     chip: ChipModel;
+    updateWires: () => void;
 }
 
 const Chip: React.FC<ChipReq> = (props) => {
@@ -19,6 +20,11 @@ const Chip: React.FC<ChipReq> = (props) => {
             onDrag={(e, data) => {
                 props.chip.Position[0].X = data.x;
                 props.chip.Position[0].Y = data.y;
+                props.chip.InputPins.forEach((pin) =>
+                    pin.Wires.map((wire) => {
+                        wire.WireGraphicObject;
+                    })
+                );
             }}
         >
             <div style={{ position: "absolute" }}>

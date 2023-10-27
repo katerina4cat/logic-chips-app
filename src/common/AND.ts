@@ -16,10 +16,10 @@ export class AND extends ChipModel {
         );
         this.IsBasedChip = true;
         this.InputPins = [
-            new Pin(true, this, "A", 0, 0.25),
-            new Pin(true, this, "B", 1, 0.75),
+            new Pin(true, this, "A", 0, { X: 0, Y: 0.25 }),
+            new Pin(true, this, "B", 1, { X: 0, Y: 0.75 }),
         ];
-        this.OutputPins = [new Pin(false, this, "Out", 2, 0.5)];
+        this.OutputPins = [new Pin(false, this, "Out", 2, { X: 0, Y: 0.5 })];
     }
     override RefreshLogic() {
         this.OutputPins[0].State.value =

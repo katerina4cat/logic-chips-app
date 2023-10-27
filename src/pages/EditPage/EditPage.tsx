@@ -94,7 +94,12 @@ const EditPage: React.FC<EditReq> = () => {
                               chip.Name == "BUS" ? (
                                   <Bus chip={chip} />
                               ) : (
-                                  <Chip chip={chip} />
+                                  <Chip
+                                      chip={chip}
+                                      updateWires={() => {
+                                          setEditChip(editChip);
+                                      }}
+                                  />
                               )
                           )
                         : undefined}

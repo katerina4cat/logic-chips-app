@@ -1,12 +1,14 @@
 import { Pin, PinState } from "./Pin";
 
 export class Wire {
+    WireGraphicObject: SVGPathElement = new SVGPathElement();
     State: PinState;
     ID: number = Date.now();
     Source: Pin;
     Target: Pin;
     WirePoints: Pos[];
     Color: Color;
+    WirePontsString: string;
     constructor(
         Source: Pin,
         Target: Pin,
@@ -29,6 +31,9 @@ export class Wire {
         this.Target.State = this.State;
         this.Target.Color = this.Color;
         this.WirePoints = WirePoints.map((WirePoint) => fixPos(WirePoint));
+        this.WirePontsString = this.WirePoints.join(" L");
+        this.Source.Wires.push(this);
+        this.Target.Wires.push(this);
     }
     getColorWithState() {
         return `color-mix(in srgb, ${this.Color.color} ${
