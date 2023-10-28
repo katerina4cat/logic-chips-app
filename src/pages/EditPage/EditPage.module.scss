@@ -3,17 +3,11 @@
     height: 400svh;
     display: flex;
     overflow-y: hidden;
-    .InputPins {
-        padding-left: 0.5em;
-    }
-    .OutputPins {
-        padding-right: 0.5em;
-    }
     .InputPins,
     .OutputPins {
         background-color: rgba($color: #fff, $alpha: 0.15);
         z-index: 10;
-        width: 2.25em;
+        width: 45px;
         height: 100%;
     }
     .EditField {

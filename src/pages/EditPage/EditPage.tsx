@@ -8,13 +8,13 @@ import Modal from "../Modal/Modal";
 import { HotKeys } from "react-hotkeys";
 import { Pin } from "../../common/Pin";
 import EditPageOutPin from "./EditPageOutPin";
-import { Bus, LineDrawer } from "./Bus";
+import { Bus, BusDrawer, LineDrawer } from "./Bus";
 import { BUS } from "../../common/BUS";
 
 interface EditReq {}
 
 const EditPage: React.FC<EditReq> = () => {
-    const [chipsSelected, setchipsSelected] = useState("3AND");
+    const [chipsSelected, setchipsSelected] = useState("1bit-REGISTER");
     const [editChip, setEditChip] = useState(CreateChip(chipsSelected, 0));
     const setModalEditState = useRef((e: boolean) => {});
     const [setupsInput, setSetupsInput] = useState(0);
@@ -66,6 +66,7 @@ const EditPage: React.FC<EditReq> = () => {
                         ))}
                     </div>
                 </Modal>
+                <LineDrawer wires={chipLoaded ? editChip.Connections : []} />
                 <div className={cl.InputPins}>
                     {editChip.InputPins.map((pinInput, i) => {
                         return (
@@ -79,8 +80,7 @@ const EditPage: React.FC<EditReq> = () => {
                     })}
                 </div>
                 <div className={cl.EditField}>
-                    <LineDrawer
-                        wires={chipLoaded ? editChip.Connections : []}
+                    <BusDrawer
                         buses={
                             chipLoaded
                                 ? editChip.SubChips.filter(

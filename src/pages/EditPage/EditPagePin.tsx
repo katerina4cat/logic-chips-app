@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pin } from "../../common/Pin";
 import cl from "./EditPagePin.module.scss";
 import Draggable from "react-draggable";
@@ -20,11 +20,22 @@ const EditPagePin: React.FC<ReqPin> = (props) => {
     useEffect(() => {
         props.handleChangeInputPin();
     }, [pinState]);
+    const DragListeners = useRef<{ [key: number]: () => void }>({});
+    useEffect(() => {
+        Object.values(DragListeners.current).forEach((listener) => listener());
+        console.log("UpdateInputsWires!");
+    }, [props.Pin]);
     return (
         <Draggable
             defaultPosition={{
                 x: 0,
-                y: props.Pin.PositionY,
+                y: props.Pin.Position.Y,
+            }}
+            onDrag={(e, data) => {
+                props.Pin.Position.Y = data.y;
+                Object.values(DragListeners.current).forEach((listener) =>
+                    listener()
+                );
             }}
             axis="y"
         >
@@ -55,6 +66,7 @@ const EditPagePin: React.FC<ReqPin> = (props) => {
                         pin={props.Pin}
                         NameLeft={false}
                         style={{ transform: "translateX(-75%)" }}
+                        DragListeners={DragListeners}
                     />
                 </div>
             </div>

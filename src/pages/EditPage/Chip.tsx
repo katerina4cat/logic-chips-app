@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { ChipModel } from "../../common/ChipModel";
 import cl from "./Chip.module.scss";
 import Draggable from "react-draggable";
 import PinInteraction from "./PinInteraction";
+import { chips } from "../../common/chips";
 
 interface ChipReq {
     chip: ChipModel;
@@ -11,6 +12,11 @@ interface ChipReq {
 
 const Chip: React.FC<ChipReq> = (props) => {
     const first = useRef<HTMLDivElement | null>(null);
+    const DragListeners = useRef<{ [key: number]: () => void }>({});
+    useEffect(() => {
+        Object.values(DragListeners.current).forEach((listener) => listener());
+        console.log("UpdateChipsWires!");
+    }, [props.chip]);
     return (
         <Draggable
             defaultPosition={{
@@ -20,10 +26,8 @@ const Chip: React.FC<ChipReq> = (props) => {
             onDrag={(e, data) => {
                 props.chip.Position[0].X = data.x;
                 props.chip.Position[0].Y = data.y;
-                props.chip.InputPins.forEach((pin) =>
-                    pin.Wires.map((wire) => {
-                        wire.WireGraphicObject;
-                    })
+                Object.values(DragListeners.current).forEach((listener) =>
+                    listener()
                 );
             }}
         >
@@ -40,7 +44,10 @@ const Chip: React.FC<ChipReq> = (props) => {
                         style={{ transform: "translateX(-60%)" }}
                     >
                         {props.chip.InputPins.map((pin) => (
-                            <PinInteraction pin={pin} />
+                            <PinInteraction
+                                pin={pin}
+                                DragListeners={DragListeners}
+                            />
                         ))}
                     </div>
                     {props.chip.Name.replace(/\s+/, "\n")}
@@ -54,7 +61,10 @@ const Chip: React.FC<ChipReq> = (props) => {
                         }}
                     >
                         {props.chip.OutputPins.map((pin) => (
-                            <PinInteraction pin={pin} />
+                            <PinInteraction
+                                pin={pin}
+                                DragListeners={DragListeners}
+                            />
                         ))}
                     </div>
                 </div>

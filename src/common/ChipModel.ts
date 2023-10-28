@@ -57,19 +57,33 @@ export function InitilizeChipModel(
     // Инициализация пинов входов загружаемого чипа
     ChipInfo.InputPins.map((pinInfo) =>
         res.InputPins.push(
-            new Pin(true, res, pinInfo.Name, pinInfo.ID, {
-                X: 0,
-                Y: pinInfo.PositionY,
-            })
+            new Pin(
+                true,
+                res,
+                pinInfo.Name,
+                pinInfo.ID,
+                {
+                    X: 0,
+                    Y: pinInfo.PositionY,
+                },
+                { X: 40, Y: 0 }
+            )
         )
     );
     // Инициализация пинов выходов загружаемого чипа
     ChipInfo.OutputPins.map((pinInfo) =>
         res.OutputPins.push(
-            new Pin(false, res, pinInfo.Name, pinInfo.ID, {
-                X: 0,
-                Y: pinInfo.PositionY,
-            })
+            new Pin(
+                false,
+                res,
+                pinInfo.Name,
+                pinInfo.ID,
+                {
+                    X: window.innerWidth,
+                    Y: pinInfo.PositionY,
+                },
+                { X: -40, Y: 0 }
+            )
         )
     );
     // Инициализация дочерних чипов загружаемого чипа

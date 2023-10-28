@@ -3,17 +3,29 @@ import cl from "./EditPageOutPin.module.scss";
 import Draggable from "react-draggable";
 import { Colors } from "../../common/Wire";
 import PinInteraction from "./PinInteraction";
+import { useEffect, useRef } from "react";
 
 interface ReqOutPin {
     Pin: Pin;
 }
 
 const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
+    const DragListeners = useRef<{ [key: number]: () => void }>({});
+    useEffect(() => {
+        Object.values(DragListeners.current).forEach((listener) => listener());
+        console.log("UpdateInputsWires!");
+    }, [props.Pin]);
     return (
         <Draggable
             defaultPosition={{
                 x: 0,
-                y: props.Pin.PositionY,
+                y: props.Pin.Position.Y,
+            }}
+            onDrag={(e, data) => {
+                props.Pin.Position.Y = data.y;
+                Object.values(DragListeners.current).forEach((listener) =>
+                    listener()
+                );
             }}
             axis="y"
         >
@@ -38,6 +50,7 @@ const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
                         pin={props.Pin}
                         NameLeft={true}
                         style={{ transform: "translateX(75%)" }}
+                        DragListeners={DragListeners}
                     />
                 </div>
             </div>

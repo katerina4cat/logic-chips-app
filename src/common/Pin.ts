@@ -54,19 +54,22 @@ export class Pin {
     Chip: ChipModel;
     SubChipID = 0;
     Position: Pos;
+    deltaChip: Pos = { X: 0, Y: 0 };
     Color: Color = Colors.red;
     constructor(
         IsInput: boolean,
         Chip: ChipModel,
         Name: string = "Pin",
         ID: number = -1,
-        Position: Pos = { X: 0, Y: 0 }
+        Position: Pos = { X: 0, Y: 0 },
+        deltaChip?: Pos
     ) {
         this.IsInput = IsInput;
         this.Name = Name;
         this.Chip = Chip;
         this.ID = ID === -1 ? Date.now() : ID;
-        this.Position = fixPos(Position);
+        this.Position = { X: Position.X, Y: fixPosY(Position.Y) };
+        if (deltaChip) this.deltaChip = deltaChip;
         this._State.value = PinStates.FLOATING;
     }
     getColorWithState() {

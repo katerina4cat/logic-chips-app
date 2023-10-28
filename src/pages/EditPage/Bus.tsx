@@ -2,18 +2,18 @@ import React, { RefObject, useRef } from "react";
 import cl from "./Bus.module.scss";
 import { ChipModel } from "../../common/ChipModel";
 import { Colors, Pos, Wire } from "../../common/Wire";
-import PinInteraction from "./PinInteraction";
-import { Pin } from "../../common/Pin";
 import { BUS } from "../../common/BUS";
 
 interface ChipReq {
     chip: ChipModel;
 }
-interface LineReq {
+interface LineDrawReq {
     wires: Wire[];
-    buses: BUS[];
 }
 
+interface BusDrawReq {
+    buses: BUS[];
+}
 export const Bus: React.FC<ChipReq> = (props) => {
     return (
         <>
@@ -39,13 +39,13 @@ export const Bus: React.FC<ChipReq> = (props) => {
     );
 };
 
-export const LineDrawer: React.FC<LineReq> = (props) => {
+export const BusDrawer: React.FC<BusDrawReq> = (props) => {
     return (
         <svg
             style={{
                 position: "absolute",
                 width: "100%",
-                height: "100%",
+                height: "inherit",
                 left: 0,
                 top: 0,
             }}
@@ -60,16 +60,32 @@ export const LineDrawer: React.FC<LineReq> = (props) => {
                     strokeWidth="6px"
                 />
             ))}
-            {props.wires.map((wire) => (
-                <path
-                    d={`M${wire.WirePoints.map(
-                        (pos) => `${pos.X} ${pos.Y}`
-                    ).join(" L")}`}
-                    fill="none"
-                    stroke={wire.getColorWithState()}
-                    strokeWidth="6px"
-                />
-            ))}
+        </svg>
+    );
+};
+
+export const LineDrawer: React.FC<LineDrawReq> = (props) => {
+    return (
+        <svg
+            style={{
+                position: "absolute",
+                width: "100%",
+                height: "inherit",
+                left: 0,
+                top: 0,
+            }}
+        >
+            {props.wires.map((wire) => {
+                wire.WireGraphObject = useRef(null);
+                return (
+                    <path
+                        ref={wire.WireGraphObject}
+                        strokeWidth={6}
+                        stroke={wire.getColorWithState()}
+                        fill="none"
+                    />
+                );
+            })}
         </svg>
     );
 };
