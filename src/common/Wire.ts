@@ -44,26 +44,40 @@ export class Wire {
         ).join(" L");
      */
 
-    generateStringPoints() {
-        let commands = [];
+    private radiusWire = 20;
 
+    generateStringPoints() {
         if (this.WirePoints.length < 2) {
             return "";
         }
-        commands.push(`M ${this.WirePoints[0].X} ${this.WirePoints[0].Y}`);
 
-        for (let i = 1; i < this.WirePoints.length; i++) {
-            const prevPoint = this.WirePoints[i - 1];
+        let path = `M${this.WirePoints[0].X},${this.WirePoints[0].Y}`;
+
+        for (let i = 1; i < this.WirePoints.length - 1; i++) {
+            const previousPoint = this.WirePoints[i - 1];
             const currentPoint = this.WirePoints[i];
+            const nextPoint = this.WirePoints[i + 1];
 
-            const radius = -10;
-            const arcFlag = 0;
+            const lcpx = currentPoint.X - previousPoint.X;
+            const lcpy = currentPoint.Y - previousPoint.Y;
+            const dCoefcp =
+                this.radiusWire / Math.sqrt(lcpx * lcpx + lcpy * lcpy);
+            const qx = currentPoint.X - lcpx * dCoefcp;
+            const qy = currentPoint.Y - lcpy * dCoefcp;
 
-            commands.push(
-                `A ${radius} ${radius} 0 0 1 ${currentPoint.X} ${currentPoint.Y}`
-            );
+            const lpnx = nextPoint.X - currentPoint.X;
+            const lpny = nextPoint.Y - currentPoint.Y;
+            const dCoefpn =
+                this.radiusWire / Math.sqrt(lpnx * lpnx + lpny * lpny);
+            const ex = currentPoint.X + lpnx * dCoefpn;
+            const ey = currentPoint.Y + lpny * dCoefpn;
+            path += ` L${qx},${qy}Q${currentPoint.X},${currentPoint.Y},${ex},${ey}`;
         }
-        return commands.join(" ");
+        path += `L${this.WirePoints[this.WirePoints.length - 1].X},${
+            this.WirePoints[this.WirePoints.length - 1].Y
+        }`;
+
+        return path;
     }
 
     getColorWithState() {

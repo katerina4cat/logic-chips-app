@@ -80,9 +80,9 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
                 return (
                     <path
                         ref={wire.WireGraphObject}
-                        strokeWidth={6}
                         stroke={wire.getColorWithState()}
                         fill="none"
+                        className={cl.WirePath}
                     />
                 );
             })}

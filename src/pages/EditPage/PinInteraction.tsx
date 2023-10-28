@@ -16,8 +16,8 @@ const PinInteraction: React.FC<PinReq> = (props) => {
             props.DragListeners.current[props.pin.ID] = () => {
                 if (ref.current) {
                     const rect = ref.current.getBoundingClientRect();
-                    props.pin.Position.X = rect.x + rect.width / 2;
-                    props.pin.Position.Y = rect.y + rect.height / 2;
+                    props.pin.Position.X = rect.left + rect.width / 2;
+                    props.pin.Position.Y = rect.top + rect.height / 2;
                     props.pin.Wires.map((wire) => {
                         wire.WireGraphObject?.current?.setAttribute(
                             "d",
@@ -34,8 +34,6 @@ const PinInteraction: React.FC<PinReq> = (props) => {
             className={cl.PinInteraction}
             style={{
                 ...props.style,
-                position: "relative",
-                aspectRatio: 1,
                 backgroundColor:
                     props.pin.State.value == -1
                         ? Colors.floating.color
@@ -56,10 +54,8 @@ const PinInteraction: React.FC<PinReq> = (props) => {
             }}
         >
             <div
+                className={cl.PinTitle}
                 style={{
-                    position: "absolute",
-                    top: "-50%",
-                    fontSize: "1.75vh",
                     right: (
                         props.NameLeft !== undefined
                             ? props.NameLeft

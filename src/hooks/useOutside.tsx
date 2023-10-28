@@ -15,6 +15,7 @@ function useOutside(
     };
     useEffect(() => {
         document.addEventListener("click", handleClick, true);
+        document.addEventListener("contextmenu", handleClick, true);
         return () => document.removeEventListener("click", handleClick, true);
     });
     return [ref, IsShow, setIsShow];

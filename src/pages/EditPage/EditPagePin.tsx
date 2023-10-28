@@ -4,6 +4,7 @@ import cl from "./EditPagePin.module.scss";
 import Draggable from "react-draggable";
 import { Colors } from "../../common/Wire";
 import PinInteraction from "./PinInteraction";
+import useOutside from "../../hooks/useOutside";
 
 interface ReqPin {
     Pin: Pin;
@@ -39,7 +40,7 @@ const EditPagePin: React.FC<ReqPin> = (props) => {
             }}
             axis="y"
         >
-            <div style={{ position: "absolute" }}>
+            <div className={cl.CurrChipPin}>
                 <div className={cl.EditPagePin}>
                     <div className={cl.PinChange} />
                     <div
@@ -65,7 +66,10 @@ const EditPagePin: React.FC<ReqPin> = (props) => {
                     <PinInteraction
                         pin={props.Pin}
                         NameLeft={false}
-                        style={{ transform: "translateX(-75%)" }}
+                        style={{
+                            transform: "translateX(-75%)",
+                            fontSize: "1.2em",
+                        }}
                         DragListeners={DragListeners}
                     />
                 </div>

@@ -66,7 +66,6 @@ const EditPage: React.FC<EditReq> = () => {
                         ))}
                     </div>
                 </Modal>
-                <LineDrawer wires={chipLoaded ? editChip.Connections : []} />
                 <div className={cl.InputPins}>
                     {editChip.InputPins.map((pinInput, i) => {
                         return (
@@ -88,6 +87,9 @@ const EditPage: React.FC<EditReq> = () => {
                                   )
                                 : []
                         }
+                    />
+                    <LineDrawer
+                        wires={chipLoaded ? editChip.Connections : []}
                     />
                     {chipLoaded
                         ? editChip.SubChips.map((chip) =>

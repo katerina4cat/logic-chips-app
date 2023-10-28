@@ -41,7 +41,9 @@ const Chip: React.FC<ChipReq> = (props) => {
                 >
                     <div
                         className={cl.PinList}
-                        style={{ transform: "translateX(-60%)" }}
+                        style={{
+                            transform: "translateX(-60%)",
+                        }}
                     >
                         {props.chip.InputPins.map((pin) => (
                             <PinInteraction
@@ -50,14 +52,11 @@ const Chip: React.FC<ChipReq> = (props) => {
                             />
                         ))}
                     </div>
-                    {props.chip.Name.replace(/\s+/, "\n")}
+                    {props.chip.Name}
                     <div
                         className={cl.PinList}
                         style={{
                             transform: "translateX(60%)",
-                            height: first.current?.offsetHeight
-                                ? first.current?.offsetHeight - 10
-                                : "auto",
                         }}
                     >
                         {props.chip.OutputPins.map((pin) => (

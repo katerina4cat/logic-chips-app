@@ -49,7 +49,10 @@ const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
                     <PinInteraction
                         pin={props.Pin}
                         NameLeft={true}
-                        style={{ transform: "translateX(75%)" }}
+                        style={{
+                            transform: "translateX(75%)",
+                            fontSize: "1.2em",
+                        }}
                         DragListeners={DragListeners}
                     />
                 </div>
