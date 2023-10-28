@@ -4,10 +4,10 @@
     align-items: center;
     position: absolute;
 
-    max-width: 25vw;
+    max-width: 10vw;
     min-width: 5vw;
     min-height: 4vh;
-    width: min-content;
+    width: max-content;
 
     text-align: center;
 
@@ -19,9 +19,10 @@
 
     transform: translate(-50%, -50%);
     .PinList {
-        min-height: 4vh;
+        align-self: stretch;
+        min-height: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: space-evenly;
+        justify-content: space-around;
     }
 }

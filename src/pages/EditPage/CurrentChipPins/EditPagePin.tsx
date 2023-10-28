@@ -1,15 +1,26 @@
-import { Pin } from "../../common/Pin";
-import cl from "./EditPageOutPin.module.scss";
+import { useEffect, useRef, useState } from "react";
+import { Pin } from "../../../common/Pin";
+import cl from "./EditPagePin.module.scss";
 import Draggable from "react-draggable";
-import { Colors } from "../../common/Wire";
-import PinInteraction from "./PinInteraction";
-import { useEffect, useRef } from "react";
+import { Colors } from "../../../common/Wire";
+import PinInteraction from "../PinInteraction";
 
-interface ReqOutPin {
+interface ReqPin {
     Pin: Pin;
+    handleChangeInputPin: () => void;
+    setupsInput: React.Dispatch<React.SetStateAction<number>>;
+    VisiblePinTitles?: boolean;
 }
 
-const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
+const EditPagePin: React.FC<ReqPin> = (props) => {
+    const [pinState, setpinState] = useState(0);
+    props.Pin.State.value = pinState;
+    useEffect(() => {
+        props.setupsInput((prev) => prev + 1);
+    }, []);
+    useEffect(() => {
+        props.handleChangeInputPin();
+    }, [pinState]);
     const DragListeners = useRef<{ [key: number]: () => void }>({});
     useEffect(() => {
         Object.values(DragListeners.current).forEach((listener) => listener());
@@ -29,7 +40,7 @@ const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
             }}
             axis="y"
         >
-            <div style={{ position: "absolute", right: 0 }}>
+            <div className={cl.CurrChipPin}>
                 <div className={cl.EditPagePin}>
                     <div className={cl.PinChange} />
                     <div
@@ -37,6 +48,12 @@ const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
                         style={{
                             border: "0.15em solid " + Colors.floating.color,
                             backgroundColor: props.Pin.getColorWithState(),
+                        }}
+                        onClick={() => {
+                            setpinState((prev) => {
+                                const res = prev ? 0 : 1;
+                                return res;
+                            });
                         }}
                     />
                     <line
@@ -48,12 +65,13 @@ const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
                     />
                     <PinInteraction
                         pin={props.Pin}
-                        NameLeft={true}
+                        NameLeft={false}
                         style={{
-                            transform: "translateX(75%)",
+                            transform: "translateX(-75%)",
                             fontSize: "1.2em",
                         }}
                         DragListeners={DragListeners}
+                        VisiblePinTitles={props.VisiblePinTitles}
                     />
                 </div>
             </div>
@@ -61,4 +79,4 @@ const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
     );
 };
 
-export default EditPageOutPin;
+export default EditPagePin;

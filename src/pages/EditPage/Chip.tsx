@@ -3,11 +3,11 @@ import { ChipModel } from "../../common/ChipModel";
 import cl from "./Chip.module.scss";
 import Draggable from "react-draggable";
 import PinInteraction from "./PinInteraction";
-import { chips } from "../../common/chips";
 
 interface ChipReq {
     chip: ChipModel;
     updateWires: () => void;
+    VisiblePinTitles: boolean;
 }
 
 const Chip: React.FC<ChipReq> = (props) => {
@@ -49,6 +49,7 @@ const Chip: React.FC<ChipReq> = (props) => {
                             <PinInteraction
                                 pin={pin}
                                 DragListeners={DragListeners}
+                                VisiblePinTitles={props.VisiblePinTitles}
                             />
                         ))}
                     </div>
@@ -63,6 +64,7 @@ const Chip: React.FC<ChipReq> = (props) => {
                             <PinInteraction
                                 pin={pin}
                                 DragListeners={DragListeners}
+                                VisiblePinTitles={props.VisiblePinTitles}
                             />
                         ))}
                     </div>

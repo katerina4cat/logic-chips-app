@@ -1,15 +1,16 @@
 import React, { useState, useRef } from "react";
 import cl from "./EditPage.module.scss";
-import EditPagePin from "./EditPagePin";
+import EditPagePin from "./CurrentChipPins/EditPagePin";
 import { CreateChip } from "../../common/LoadSave";
 import { chips } from "../../common/chips";
 import Chip from "./Chip";
 import Modal from "../Modal/Modal";
 import { HotKeys } from "react-hotkeys";
 import { Pin } from "../../common/Pin";
-import EditPageOutPin from "./EditPageOutPin";
+import EditPageOutPin from "./CurrentChipPins/EditPageOutPin";
 import { Bus, BusDrawer, LineDrawer } from "./Bus";
 import { BUS } from "../../common/BUS";
+import { ChipModel } from "../../common/ChipModel";
 
 interface EditReq {}
 
@@ -18,6 +19,8 @@ const EditPage: React.FC<EditReq> = () => {
     const [editChip, setEditChip] = useState(CreateChip(chipsSelected, 0));
     const setModalEditState = useRef((e: boolean) => {});
     const [setupsInput, setSetupsInput] = useState(0);
+    const [VisiblePinTitles, setVisiblePinTitles] = useState(true);
+    const [VisibleAllPinTitles, setVisibleAllPinTitles] = useState(true);
     const chipLoaded = setupsInput >= editChip.InputPins.length;
 
     const [OutputPins, setOutputPins] = useState<Pin[]>([]);
@@ -28,23 +31,31 @@ const EditPage: React.FC<EditReq> = () => {
     };
 
     const keyMap = {
-        SelectChipToEdit: "ctrl+x",
-        SelectChipToEdit2: "ctrl+X",
+        SelectChipToEdit: ["ctrl+x", "ctrl+X", "ctrl+ч", "ctrl+Ч"],
+        ChangePinTitles: "tab",
+        ChangeAllPinTitles: ["q", "Q", "й", "Й"],
     };
     const handlers = {
         SelectChipToEdit: (keyboardEvent: any) => {
             keyboardEvent.preventDefault();
             setModalEditState.current(true);
         },
-        SelectChipToEdit2: (keyboardEvent: any) => {
+        ChangePinTitles: (keyboardEvent: any) => {
             keyboardEvent.preventDefault();
-            setModalEditState.current(true);
+            setVisiblePinTitles((prev) => !prev);
+        },
+        ChangeAllPinTitles: (keyboardEvent: any) => {
+            keyboardEvent.preventDefault();
+            setVisibleAllPinTitles((prev) => {
+                setVisiblePinTitles(!prev);
+                return !prev;
+            });
         },
     };
 
     return (
         <HotKeys keyMap={keyMap} handlers={handlers}>
-            <div className={cl.EditPage} style={{}}>
+            <div className={cl.EditPage}>
                 <Modal
                     setOpenedRef={setModalEditState}
                     className={cl.OpenEditChipList}
@@ -53,7 +64,9 @@ const EditPage: React.FC<EditReq> = () => {
                         {Object.keys(chips).map((chipName) => (
                             <button
                                 className={cl.Button}
+                                disabled={chipName == chipsSelected}
                                 onClick={() => {
+                                    window.scrollTo(0, 0);
                                     setchipsSelected(chipName);
                                     setEditChip(CreateChip(chipName, 0));
                                     setOutputPins([]);
@@ -74,6 +87,7 @@ const EditPage: React.FC<EditReq> = () => {
                                 Pin={pinInput}
                                 handleChangeInputPin={handleChangeInputPin}
                                 setupsInput={setSetupsInput}
+                                VisiblePinTitles={VisibleAllPinTitles}
                             />
                         );
                     })}
@@ -101,6 +115,7 @@ const EditPage: React.FC<EditReq> = () => {
                                       updateWires={() => {
                                           setEditChip(editChip);
                                       }}
+                                      VisiblePinTitles={VisiblePinTitles}
                                   />
                               )
                           )
@@ -110,7 +125,10 @@ const EditPage: React.FC<EditReq> = () => {
                     {chipLoaded
                         ? OutputPins.map((pin) => (
                               <div>
-                                  <EditPageOutPin Pin={pin} />
+                                  <EditPageOutPin
+                                      Pin={pin}
+                                      VisiblePinTitles={VisibleAllPinTitles}
+                                  />
                               </div>
                           ))
                         : undefined}

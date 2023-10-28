@@ -60,17 +60,29 @@ export class Wire {
 
             const lcpx = currentPoint.X - previousPoint.X;
             const lcpy = currentPoint.Y - previousPoint.Y;
-            const dCoefcp =
+            let dCoefcp =
                 this.radiusWire / Math.sqrt(lcpx * lcpx + lcpy * lcpy);
-            const qx = currentPoint.X - lcpx * dCoefcp;
-            const qy = currentPoint.Y - lcpy * dCoefcp;
+            let qx, qy;
+            if (dCoefcp >= 0.5) {
+                qx = currentPoint.X - lcpx / 2;
+                qy = currentPoint.Y - lcpy / 2;
+            } else {
+                qx = currentPoint.X - lcpx * dCoefcp;
+                qy = currentPoint.Y - lcpy * dCoefcp;
+            }
 
             const lpnx = nextPoint.X - currentPoint.X;
             const lpny = nextPoint.Y - currentPoint.Y;
             const dCoefpn =
                 this.radiusWire / Math.sqrt(lpnx * lpnx + lpny * lpny);
-            const ex = currentPoint.X + lpnx * dCoefpn;
-            const ey = currentPoint.Y + lpny * dCoefpn;
+            let ex, ey;
+            if (dCoefpn >= 0.5) {
+                ex = currentPoint.X + lpnx / 2;
+                ey = currentPoint.Y + lpny / 2;
+            } else {
+                ex = currentPoint.X + lpnx * dCoefpn;
+                ey = currentPoint.Y + lpny * dCoefpn;
+            }
             path += ` L${qx},${qy}Q${currentPoint.X},${currentPoint.Y},${ex},${ey}`;
         }
         path += `L${this.WirePoints[this.WirePoints.length - 1].X},${

@@ -2,11 +2,13 @@ import { RefObject, useEffect, useRef } from "react";
 import { Pin } from "../../common/Pin";
 import { Colors } from "../../common/Wire";
 import cl from "./PinInteraction.module.scss";
+import Input from "./Input";
 
 interface PinReq extends React.HTMLAttributes<HTMLDivElement> {
     pin: Pin;
     NameLeft?: boolean;
     DragListeners: RefObject<{ [key: number]: () => void }>;
+    VisiblePinTitles?: boolean;
 }
 
 const PinInteraction: React.FC<PinReq> = (props) => {
@@ -53,27 +55,36 @@ const PinInteraction: React.FC<PinReq> = (props) => {
                 e.stopPropagation();
             }}
         >
-            <div
-                className={cl.PinTitle}
-                style={{
-                    right: (
-                        props.NameLeft !== undefined
-                            ? props.NameLeft
-                            : props.pin.IsInput
-                    )
-                        ? "150%"
-                        : "",
-                    left: (
-                        props.NameLeft !== undefined
-                            ? props.NameLeft
-                            : props.pin.IsInput
-                    )
-                        ? ""
-                        : "150%",
-                }}
-            >
-                {props.pin.Name}
-            </div>
+            {props.VisiblePinTitles === undefined || props.VisiblePinTitles ? (
+                <div
+                    style={{
+                        position: "absolute",
+                        right: (
+                            props.NameLeft !== undefined
+                                ? props.NameLeft
+                                : props.pin.IsInput
+                        )
+                            ? "150%"
+                            : "",
+                        left: (
+                            props.NameLeft !== undefined
+                                ? props.NameLeft
+                                : props.pin.IsInput
+                        )
+                            ? ""
+                            : "150%",
+                    }}
+                >
+                    {props.pin.Chip.ID != 0 ? (
+                        <div className={cl.PinTitle}>{props.pin.Name}</div>
+                    ) : (
+                        <Input
+                            pin={props.pin}
+                            className={cl.PinWithChangeTitle}
+                        />
+                    )}
+                </div>
+            ) : undefined}
         </div>
     );
 };

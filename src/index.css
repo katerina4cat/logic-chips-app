@@ -19,9 +19,12 @@ html,
 body,
 #root {
     margin: 0;
-    height: 100dvh;
     width: 100%;
     user-select: none;
+    overflow-x: hidden;
+    *:focus {
+        outline: none;
+    }
 }
 
 @media (prefers-color-scheme: light) {
