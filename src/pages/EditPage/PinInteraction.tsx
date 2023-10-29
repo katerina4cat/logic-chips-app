@@ -4,6 +4,7 @@ import { Colors } from "../../common/Wire";
 import cl from "./PinInteraction.module.scss";
 import Input from "./Input";
 import useOutside from "../../hooks/useOutside";
+import { debug } from "../../App";
 
 interface PinReq extends React.HTMLAttributes<HTMLDivElement> {
     pin: Pin;
@@ -47,10 +48,22 @@ const PinInteraction: React.FC<PinReq> = (props) => {
             }}
             onMouseDown={(e) => {
                 e.stopPropagation();
+                if (debug)
+                    if (e.button == 1) {
+                        alert(
+                            props.pin.State.listeners
+                                .map(
+                                    (listener) =>
+                                        `${listener.Name} - ${listener.OutputPins[0].State.value}`
+                                )
+                                .join("\n")
+                        );
+                    }
             }}
             onContextMenu={(e) => {
                 setvisible(true);
                 e.preventDefault();
+                e.stopPropagation();
             }}
         >
             <div
@@ -119,7 +132,9 @@ const PinInteraction: React.FC<PinReq> = (props) => {
                 }}
             >
                 {props.pin.Chip.ID != 0 ? (
-                    <div className={cl.PinTitle}>{props.pin.Name}</div>
+                    <div className={cl.PinTitle}>
+                        {debug ? `${props.pin.State.value}` : props.pin.Name}
+                    </div>
                 ) : (
                     <Input pin={props.pin} className={cl.PinWithChangeTitle} />
                 )}

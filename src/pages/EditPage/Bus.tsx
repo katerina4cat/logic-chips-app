@@ -1,9 +1,10 @@
-import React, { RefObject, useRef } from "react";
+import React, { useRef } from "react";
 import cl from "./Bus.module.scss";
 import { ChipModel } from "../../common/ChipModel";
-import { Colors, Pos, Wire } from "../../common/Wire";
+import { Colors, Wire } from "../../common/Wire";
 import { BUS } from "../../common/BUS";
 import { PinState } from "../../common/Pin";
+import { debug } from "../../App";
 
 interface ChipReq {
     chip: ChipModel;
@@ -80,25 +81,53 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
             {props.wires.map((wire) => {
                 if (!wire.WireGraphObject) wire.WireGraphObject = useRef(null);
                 return (
-                    <path
-                        ref={wire.WireGraphObject}
-                        stroke={wire.getColorWithState()}
-                        fill="none"
-                        className={cl.WirePath}
-                        d={wire.generateStringPoints()}
-                        tabIndex={0}
-                        onMouseEnter={(e) => e.currentTarget.focus()}
-                        onMouseLeave={(e) => e.currentTarget.blur()}
-                        onKeyDown={(e) => {
-                            if (e.code == "Backspace") {
-                                console.log(wire.Target.Chip.Name);
-                                wire.Target.State = new PinState(-1);
-                                const index = props.wires.indexOf(wire);
-                                if (index != -1) props.wires.splice(index, 1);
-                                if (props.updateAll) props.updateAll();
-                            }
-                        }}
-                    />
+                    <g>
+                        <path
+                            ref={wire.WireGraphObject}
+                            id={wire.ID.toString()}
+                            stroke={wire.getColorWithState()}
+                            fill="none"
+                            className={cl.WirePath}
+                            d={wire.generateStringPoints()}
+                            tabIndex={0}
+                            onMouseEnter={(e) => e.currentTarget.focus()}
+                            onMouseLeave={(e) => e.currentTarget.blur()}
+                            onKeyDown={(e) => {
+                                if (e.code == "Backspace") {
+                                    wire.Source.State.removeListeners(
+                                        wire.Target.State
+                                    );
+                                    wire.Target.State = new PinState();
+                                    // wire.Target.Chip.ReLink(wire.Target);
+                                    //wire.Target.Wires.
+                                    const indexWires =
+                                        props.wires.indexOf(wire);
+                                    if (indexWires != -1)
+                                        props.wires.splice(indexWires, 1);
+                                    const indexChipWires =
+                                        wire.Source.Wires.indexOf(wire);
+                                    if (indexChipWires != -1)
+                                        wire.Source.Wires.splice(
+                                            indexChipWires,
+                                            1
+                                        );
+                                    if (props.updateAll) props.updateAll();
+                                }
+                            }}
+                        />
+                        {debug ? (
+                            <text>
+                                <textPath
+                                    href={"#" + wire.ID}
+                                    startOffset="50%"
+                                    text-anchor="middle"
+                                    fontSize={"2em"}
+                                >
+                                    wire - {wire.ID}
+                                </textPath>
+                            </text>
+                        ) : undefined}
+                    </g>
                 );
             })}
         </svg>

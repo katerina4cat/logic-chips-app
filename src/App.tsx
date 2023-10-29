@@ -1,10 +1,12 @@
-import EditPage from "./pages/EditPage/EditPage";
+import EditPageCurrent from "./pages/EditPage/EditPageCurrent";
+
+export const debug = true;
 
 function App() {
     return (
         //onContextMenu={(e) => e.preventDefault()}
         <div>
-            <EditPage />
+            <EditPageCurrent />
         </div>
     );
 }

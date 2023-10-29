@@ -2,10 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { ChipModel } from "../../common/ChipModel";
 import cl from "./Chip.module.scss";
 import PinInteraction from "./PinInteraction";
+import Modal from "../Modal/Modal";
+import EditChip from "./EditChip";
+import { CreateChip } from "../../common/LoadSave";
+import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 interface ChipReq {
     chip: ChipModel;
-    updateWires: () => void;
     VisiblePinTitles: boolean;
     EditPage: React.RefObject<HTMLDivElement>;
     updateAll?: () => void;
@@ -19,9 +23,16 @@ const Chip: React.FC<ChipReq> = (props) => {
     }, [props.chip]);
 
     const first = useRef<HTMLDivElement | null>(null);
-    const handleMouseDown = () => {
-        props.EditPage.current?.addEventListener("mousemove", handleMouseMove);
-        props.EditPage.current?.addEventListener("mouseup", handleMouseUp);
+    const handleMouseDown = (
+        e: React.MouseEvent<HTMLDivElement, MouseEvent>
+    ) => {
+        if (e.button == 0) {
+            props.EditPage.current?.addEventListener(
+                "mousemove",
+                handleMouseMove
+            );
+            props.EditPage.current?.addEventListener("mouseup", handleMouseUp);
+        }
     };
 
     const handleMouseMove = (e: any) => {
@@ -55,6 +66,23 @@ const Chip: React.FC<ChipReq> = (props) => {
                 position: "absolute",
             }}
             onMouseDown={handleMouseDown}
+            onContextMenu={(e) => {
+                const buff = CreateChip(props.chip.Name, props.chip.ID);
+                buff.InputPins.forEach((piInpnDispl, i) => {
+                    piInpnDispl.setState(props.chip.InputPins[i].State);
+                });
+                e.preventDefault();
+                createRoot(document.getElementById("rend")!).render(
+                    <Modal Showed={true} style={{ width: "90%" }}>
+                        <EditChip
+                            chipModel={buff}
+                            VisiblePinTitles
+                            VisibleAllPinTitles
+                            other
+                        />
+                    </Modal>
+                );
+            }}
         >
             <div
                 className={cl.PinList}

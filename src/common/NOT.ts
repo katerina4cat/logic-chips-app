@@ -18,6 +18,10 @@ export class NOT extends ChipModel {
         this.InputPins = [new Pin(true, this, "In", 0, { X: 0, Y: 0.5 })];
         this.OutputPins = [new Pin(false, this, "Out", 1, { X: 0, Y: 0.5 })];
     }
+    override ReLink(InputPin: Pin) {
+        this.RefreshLogic();
+        return true;
+    }
     override RefreshLogic() {
         this.OutputPins[0].State.value = this.InputPins[0].State.value ? 0 : 1;
         return true;

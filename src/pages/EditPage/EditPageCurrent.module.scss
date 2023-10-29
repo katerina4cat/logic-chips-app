@@ -1,0 +1,16 @@
+.OpenEditChipList {
+    border-radius: 6px;
+    overflow-y: auto;
+    padding: 1.5vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    .ListObjects {
+        display: flex;
+        flex-direction: column;
+        width: max-content;
+        .Button {
+            margin: 0.25vh;
+        }
+    }
+}

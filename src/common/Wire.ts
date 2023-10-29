@@ -4,7 +4,7 @@ import { Pin, PinState } from "./Pin";
 export class Wire {
     WireGraphObject?: React.RefObject<SVGPathElement>;
     State: PinState;
-    ID: number = Date.now();
+    ID: number;
     Source: Pin;
     Target: Pin;
     WirePoints: Pos[];
@@ -13,8 +13,10 @@ export class Wire {
         Source: Pin,
         Target: Pin,
         WirePoints: Pos[] = [],
-        Color: Color = Colors.red
+        Color: Color = Colors.red,
+        ID: number = Date.now()
     ) {
+        this.ID = ID;
         this.Color = Color;
         this.Source = Source;
         this.State = Source.State;
