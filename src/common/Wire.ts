@@ -31,8 +31,9 @@ export class Wire {
         this.Target.State = this.State;
         this.Target.Color = this.Color;
         this.WirePoints = WirePoints.map((WirePoint) => fixPos(WirePoint));
-        this.WirePoints[0] = this.Source.Position;
-        this.WirePoints[this.WirePoints.length - 1] = this.Target.Position;
+        if (Source.Chip.Name != "BUS") this.WirePoints[0] = Source.Position;
+        if (Target.Chip.Name != "BUS")
+            this.WirePoints[this.WirePoints.length - 1] = Target.Position;
         this.Source.Wires.push(this);
         this.Target.Wires.push(this);
     }
@@ -47,6 +48,7 @@ export class Wire {
     private radiusWire = 20;
 
     generateStringPoints() {
+        if (this.Target.Chip.Name == "BUS") console.log(this.WirePoints.length);
         if (this.WirePoints.length < 2) {
             return "";
         }
@@ -88,7 +90,6 @@ export class Wire {
         path += `L${this.WirePoints[this.WirePoints.length - 1].X},${
             this.WirePoints[this.WirePoints.length - 1].Y
         }`;
-
         return path;
     }
 
@@ -107,12 +108,12 @@ export const fixPos: (pos: Pos) => Pos = (pos) => ({
     X: fixPosX(pos.X),
     Y: fixPosY(pos.Y),
 });
-export type Color = { color: string };
+export type Color = { color: string; title: string };
 export const Colors: { [key: string]: Color } = {
-    floating: { color: "#000" },
-    red: { color: "#e93145" },
-    green: { color: "#1fb03a" },
-    indigo: { color: "#8c49ff" },
-    blue: { color: "#147fff" },
-    yellow: { color: "#ff9b00" },
+    floating: { color: "#000", title: "" },
+    red: { color: "#e93145", title: "Красный" },
+    green: { color: "#1fb03a", title: "Зелёный" },
+    indigo: { color: "#8c49ff", title: "Индиго" },
+    blue: { color: "#147fff", title: "Синий" },
+    yellow: { color: "#ff9b00", title: "Жёлтый" },
 };

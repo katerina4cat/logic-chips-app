@@ -1,76 +1,93 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChipModel } from "../../common/ChipModel";
 import cl from "./Chip.module.scss";
-import Draggable from "react-draggable";
 import PinInteraction from "./PinInteraction";
 
 interface ChipReq {
     chip: ChipModel;
     updateWires: () => void;
     VisiblePinTitles: boolean;
+    EditPage: React.RefObject<HTMLDivElement>;
+    updateAll?: () => void;
 }
 
 const Chip: React.FC<ChipReq> = (props) => {
-    const first = useRef<HTMLDivElement | null>(null);
     const DragListeners = useRef<{ [key: number]: () => void }>({});
     useEffect(() => {
         Object.values(DragListeners.current).forEach((listener) => listener());
         console.log("UpdateChipsWires!");
     }, [props.chip]);
+
+    const first = useRef<HTMLDivElement | null>(null);
+    const handleMouseDown = () => {
+        props.EditPage.current?.addEventListener("mousemove", handleMouseMove);
+        props.EditPage.current?.addEventListener("mouseup", handleMouseUp);
+    };
+
+    const handleMouseMove = (e: any) => {
+        if (first.current) {
+            props.chip.Position[0].X = e.pageX - 45;
+            props.chip.Position[0].Y = e.pageY;
+            first.current.style.left = props.chip.Position[0].X + "px";
+            first.current.style.top = props.chip.Position[0].Y + "px";
+            Object.values(DragListeners.current).forEach((listener) =>
+                listener()
+            );
+        }
+    };
+
+    const handleMouseUp = () => {
+        props.EditPage.current?.removeEventListener(
+            "mousemove",
+            handleMouseMove
+        );
+        props.EditPage.current?.removeEventListener("mouseup", handleMouseUp);
+    };
+
     return (
-        <Draggable
-            defaultPosition={{
-                x: props.chip.Position[0].X,
-                y: props.chip.Position[0].Y,
+        <div
+            ref={first}
+            className={cl.Chip}
+            style={{
+                left: props.chip.Position[0].X,
+                top: props.chip.Position[0].Y,
+                backgroundColor: props.chip.Colour,
+                position: "absolute",
             }}
-            onDrag={(e, data) => {
-                props.chip.Position[0].X = data.x;
-                props.chip.Position[0].Y = data.y;
-                Object.values(DragListeners.current).forEach((listener) =>
-                    listener()
-                );
-            }}
+            onMouseDown={handleMouseDown}
         >
-            <div style={{ position: "absolute" }}>
-                <div
-                    ref={first}
-                    className={cl.Chip}
-                    style={{
-                        backgroundColor: props.chip.Colour,
-                    }}
-                >
-                    <div
-                        className={cl.PinList}
-                        style={{
-                            transform: "translateX(-60%)",
-                        }}
-                    >
-                        {props.chip.InputPins.map((pin) => (
-                            <PinInteraction
-                                pin={pin}
-                                DragListeners={DragListeners}
-                                VisiblePinTitles={props.VisiblePinTitles}
-                            />
-                        ))}
-                    </div>
-                    {props.chip.Name}
-                    <div
-                        className={cl.PinList}
-                        style={{
-                            transform: "translateX(60%)",
-                        }}
-                    >
-                        {props.chip.OutputPins.map((pin) => (
-                            <PinInteraction
-                                pin={pin}
-                                DragListeners={DragListeners}
-                                VisiblePinTitles={props.VisiblePinTitles}
-                            />
-                        ))}
-                    </div>
-                </div>
+            <div
+                className={cl.PinList}
+                style={{
+                    transform: "translateX(-60%)",
+                }}
+            >
+                {props.chip.InputPins.map((pin) => (
+                    <PinInteraction
+                        pin={pin}
+                        DragListeners={DragListeners}
+                        VisiblePinTitles={props.VisiblePinTitles}
+                        updateAll={props.updateAll}
+                    />
+                ))}
             </div>
-        </Draggable>
+            {props.chip.Name}
+            <div
+                className={cl.PinList}
+                style={{
+                    transform: "translateX(60%)",
+                }}
+            >
+                {props.chip.OutputPins.map((pin) => (
+                    <PinInteraction
+                        pin={pin}
+                        DragListeners={DragListeners}
+                        VisiblePinTitles={props.VisiblePinTitles}
+                        updateAll={props.updateAll}
+                    />
+                ))}
+            </div>
+        </div>
     );
 };
 

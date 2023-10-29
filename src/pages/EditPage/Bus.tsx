@@ -3,12 +3,14 @@ import cl from "./Bus.module.scss";
 import { ChipModel } from "../../common/ChipModel";
 import { Colors, Pos, Wire } from "../../common/Wire";
 import { BUS } from "../../common/BUS";
+import { PinState } from "../../common/Pin";
 
 interface ChipReq {
     chip: ChipModel;
 }
 interface LineDrawReq {
     wires: Wire[];
+    updateAll?: () => void;
 }
 
 interface BusDrawReq {
@@ -45,7 +47,7 @@ export const BusDrawer: React.FC<BusDrawReq> = (props) => {
             style={{
                 position: "absolute",
                 width: "100%",
-                height: "inherit",
+                height: "100%",
                 left: 0,
                 top: 0,
             }}
@@ -70,19 +72,32 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
             style={{
                 position: "absolute",
                 width: "100%",
-                height: "inherit",
+                height: "100%",
                 left: 0,
                 top: 0,
             }}
         >
             {props.wires.map((wire) => {
-                wire.WireGraphObject = useRef(null);
+                if (!wire.WireGraphObject) wire.WireGraphObject = useRef(null);
                 return (
                     <path
                         ref={wire.WireGraphObject}
                         stroke={wire.getColorWithState()}
                         fill="none"
                         className={cl.WirePath}
+                        d={wire.generateStringPoints()}
+                        tabIndex={0}
+                        onMouseEnter={(e) => e.currentTarget.focus()}
+                        onMouseLeave={(e) => e.currentTarget.blur()}
+                        onKeyDown={(e) => {
+                            if (e.code == "Backspace") {
+                                console.log(wire.Target.Chip.Name);
+                                wire.Target.State = new PinState(-1);
+                                const index = props.wires.indexOf(wire);
+                                if (index != -1) props.wires.splice(index, 1);
+                                if (props.updateAll) props.updateAll();
+                            }
+                        }}
                     />
                 );
             })}

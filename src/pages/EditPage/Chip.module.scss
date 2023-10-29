@@ -4,7 +4,8 @@
     align-items: center;
     position: absolute;
 
-    max-width: 10vw;
+    max-width: 25vw;
+    word-break: break-all;
     min-width: 5vw;
     min-height: 4vh;
     width: max-content;
@@ -19,6 +20,7 @@
 
     transform: translate(-50%, -50%);
     .PinList {
+        word-break: normal;
         align-self: stretch;
         min-height: 100%;
         display: flex;

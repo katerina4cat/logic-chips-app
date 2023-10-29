@@ -22,7 +22,6 @@ export class BUS extends ChipModel {
         const states = this.InputPins.filter(
             (pin) => pin.State.value != PinStates.FLOATING
         );
-        console.log(states);
         this.OutputPins[0].State.value =
             states.length == 1 ? states[0].State.value : PinStates.FLOATING;
     }

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import cl from "./EditPage.module.scss";
 import EditPagePin from "./CurrentChipPins/EditPagePin";
 import { CreateChip } from "../../common/LoadSave";
@@ -10,7 +10,6 @@ import { Pin } from "../../common/Pin";
 import EditPageOutPin from "./CurrentChipPins/EditPageOutPin";
 import { Bus, BusDrawer, LineDrawer } from "./Bus";
 import { BUS } from "../../common/BUS";
-import { ChipModel } from "../../common/ChipModel";
 
 interface EditReq {}
 
@@ -25,9 +24,8 @@ const EditPage: React.FC<EditReq> = () => {
 
     const [OutputPins, setOutputPins] = useState<Pin[]>([]);
 
-    const handleChangeInputPin = () => {
+    const updateAll = () => {
         setOutputPins([...editChip.OutputPins]);
-        setEditChip((prev) => prev);
     };
 
     const keyMap = {
@@ -53,9 +51,11 @@ const EditPage: React.FC<EditReq> = () => {
         },
     };
 
+    const editPageRef = useRef<HTMLDivElement>(null);
+
     return (
         <HotKeys keyMap={keyMap} handlers={handlers}>
-            <div className={cl.EditPage}>
+            <div className={cl.EditPage} ref={editPageRef}>
                 <Modal
                     setOpenedRef={setModalEditState}
                     className={cl.OpenEditChipList}
@@ -66,7 +66,7 @@ const EditPage: React.FC<EditReq> = () => {
                                 className={cl.Button}
                                 disabled={chipName == chipsSelected}
                                 onClick={() => {
-                                    window.scrollTo(0, 0);
+                                    editPageRef.current?.scrollTo(0, 0);
                                     setchipsSelected(chipName);
                                     setEditChip(CreateChip(chipName, 0));
                                     setOutputPins([]);
@@ -85,14 +85,15 @@ const EditPage: React.FC<EditReq> = () => {
                             <EditPagePin
                                 key={editChip.Name + i}
                                 Pin={pinInput}
-                                handleChangeInputPin={handleChangeInputPin}
+                                handleChangeInputPin={updateAll}
                                 setupsInput={setSetupsInput}
                                 VisiblePinTitles={VisibleAllPinTitles}
+                                updateAll={updateAll}
                             />
                         );
                     })}
                 </div>
-                <div className={cl.EditField}>
+                <div className={cl.EditField} id="test">
                     <BusDrawer
                         buses={
                             chipLoaded
@@ -104,6 +105,7 @@ const EditPage: React.FC<EditReq> = () => {
                     />
                     <LineDrawer
                         wires={chipLoaded ? editChip.Connections : []}
+                        updateAll={updateAll}
                     />
                     {chipLoaded
                         ? editChip.SubChips.map((chip) =>
@@ -111,11 +113,13 @@ const EditPage: React.FC<EditReq> = () => {
                                   <Bus chip={chip} />
                               ) : (
                                   <Chip
+                                      EditPage={editPageRef}
                                       chip={chip}
                                       updateWires={() => {
                                           setEditChip(editChip);
                                       }}
                                       VisiblePinTitles={VisiblePinTitles}
+                                      updateAll={updateAll}
                                   />
                               )
                           )
@@ -128,6 +132,7 @@ const EditPage: React.FC<EditReq> = () => {
                                   <EditPageOutPin
                                       Pin={pin}
                                       VisiblePinTitles={VisibleAllPinTitles}
+                                      updateAll={updateAll}
                                   />
                               </div>
                           ))
