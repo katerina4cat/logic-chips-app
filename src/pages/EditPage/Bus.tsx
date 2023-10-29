@@ -91,16 +91,18 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
                         onMouseLeave={(e) => e.currentTarget.blur()}
                         onKeyDown={(e) => {
                             if (e.code == "Backspace") {
+                                wire.Target.State = new PinState(-1);
                                 wire.Source.State.removeListeners(
                                     wire.Target.State
                                 );
-                                wire.Target.State = new PinState(-1);
+
                                 wire.Target.ReLinkPins();
+                                wire.Target.State.refreshListeners();
+
                                 let index = props.wires.indexOf(wire);
-
                                 if (index != -1) props.wires.splice(index, 1);
-                                index = wire.Target.Wires.indexOf(wire);
 
+                                index = wire.Target.Wires.indexOf(wire);
                                 if (index != -1)
                                     wire.Target.Wires.splice(index, 1);
 

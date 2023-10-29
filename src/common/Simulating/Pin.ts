@@ -15,11 +15,17 @@ export class PinState {
     set value(value: PinStates) {
         const changed = this._value != value;
         this._value = value;
-        if (changed)
-            this.listeners.forEach((listener) => listener.RefreshLogic());
+        if (changed) this.refreshListeners();
     }
     get value() {
         return this._value;
+    }
+
+    /**
+     * Заставляет всех слушателей просчитать свою логику
+     */
+    refreshListeners() {
+        this.listeners.forEach((listener) => listener.RefreshLogic());
     }
 
     /**
