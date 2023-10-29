@@ -1,5 +1,7 @@
 import EditPage from "./pages/EditPage/EditPage";
 
+export const debug = true;
+
 function App() {
     return (
         //onContextMenu={(e) => e.preventDefault()}

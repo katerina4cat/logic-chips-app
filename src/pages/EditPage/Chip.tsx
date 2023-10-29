@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChipModel } from "../../common/ChipModel";
+import { ChipModel } from "../../common/Simulating/ChipModel";
 import cl from "./Chip.module.scss";
 import PinInteraction from "./PinInteraction";
 
@@ -19,9 +19,14 @@ const Chip: React.FC<ChipReq> = (props) => {
     }, [props.chip]);
 
     const first = useRef<HTMLDivElement | null>(null);
-    const handleMouseDown = () => {
-        props.EditPage.current?.addEventListener("mousemove", handleMouseMove);
-        props.EditPage.current?.addEventListener("mouseup", handleMouseUp);
+    const handleMouseDown = (e: any) => {
+        if (e.button == 0) {
+            props.EditPage.current?.addEventListener(
+                "mousemove",
+                handleMouseMove
+            );
+            props.EditPage.current?.addEventListener("mouseup", handleMouseUp);
+        }
     };
 
     const handleMouseMove = (e: any) => {
@@ -55,6 +60,11 @@ const Chip: React.FC<ChipReq> = (props) => {
                 position: "absolute",
             }}
             onMouseDown={handleMouseDown}
+            onContextMenu={(e) => {
+                console.log(props.chip);
+                e.stopPropagation();
+                e.preventDefault();
+            }}
         >
             <div
                 className={cl.PinList}

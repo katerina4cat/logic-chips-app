@@ -1,15 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import cl from "./EditPage.module.scss";
 import EditPagePin from "./CurrentChipPins/EditPagePin";
-import { CreateChip } from "../../common/LoadSave";
-import { chips } from "../../common/chips";
+import { CreateChip } from "../../common/LoadSave/LoadSave";
+import { chips } from "../../common/LoadSave/chips";
 import Chip from "./Chip";
 import Modal from "../Modal/Modal";
 import { HotKeys } from "react-hotkeys";
-import { Pin } from "../../common/Pin";
+import { Pin } from "../../common/Simulating/Pin";
 import EditPageOutPin from "./CurrentChipPins/EditPageOutPin";
 import { Bus, BusDrawer, LineDrawer } from "./Bus";
-import { BUS } from "../../common/BUS";
+import { BUS } from "../../common/Simulating/BUS";
 
 interface EditReq {}
 

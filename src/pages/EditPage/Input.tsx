@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pin } from "../../common/Pin";
+import { Pin } from "../../common/Simulating/Pin";
 
 interface PinReq extends React.HTMLAttributes<HTMLInputElement> {
     pin: Pin;

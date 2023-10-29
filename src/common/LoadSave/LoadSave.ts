@@ -1,10 +1,11 @@
-import { Pos } from "./Wire";
+import { Pos } from "../Simulating/Wire";
 import { chips } from "./chips";
-import { AND } from "./AND";
-import { NOT } from "./NOT";
-import { TRI_STATE_BUFFER } from "./TRI-STATE BUFFER";
-import { ChipModel, InitilizeChipModel } from "./ChipModel";
-import { BUS } from "./BUS";
+import { AND } from "../Simulating/AND";
+import { NOT } from "../Simulating/NOT";
+import { TRI_STATE_BUFFER } from "../Simulating/TRI-STATE BUFFER";
+import { ChipModel } from "../Simulating/ChipModel";
+import { BUS } from "../Simulating/BUS";
+import { InitilizeChipModel } from "./InitializeComponent";
 
 export function CreateChip(
     chipName: string,

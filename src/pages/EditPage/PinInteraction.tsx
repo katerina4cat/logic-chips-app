@@ -1,9 +1,10 @@
 import { RefObject, useEffect, useRef } from "react";
-import { Pin } from "../../common/Pin";
-import { Colors } from "../../common/Wire";
+import { Pin } from "../../common/Simulating/Pin";
+import { Colors } from "../../common/Simulating/Wire";
 import cl from "./PinInteraction.module.scss";
 import Input from "./Input";
 import useOutside from "../../hooks/useOutside";
+import { debug } from "../../App";
 
 interface PinReq extends React.HTMLAttributes<HTMLDivElement> {
     pin: Pin;
@@ -47,10 +48,16 @@ const PinInteraction: React.FC<PinReq> = (props) => {
             }}
             onMouseDown={(e) => {
                 e.stopPropagation();
+                if (debug)
+                    if (e.button == 1) {
+                        props.pin.State.drawListeners();
+                        e.preventDefault();
+                    }
             }}
             onContextMenu={(e) => {
                 setvisible(true);
                 e.preventDefault();
+                e.stopPropagation();
             }}
         >
             <div
@@ -119,7 +126,9 @@ const PinInteraction: React.FC<PinReq> = (props) => {
                 }}
             >
                 {props.pin.Chip.ID != 0 ? (
-                    <div className={cl.PinTitle}>{props.pin.Name}</div>
+                    <div className={cl.PinTitle}>
+                        {debug ? `${props.pin.State.value}` : props.pin.Name}
+                    </div>
                 ) : (
                     <Input pin={props.pin} className={cl.PinWithChangeTitle} />
                 )}

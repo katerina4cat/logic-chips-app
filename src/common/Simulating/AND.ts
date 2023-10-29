@@ -24,7 +24,12 @@ export class AND extends ChipModel {
     override RefreshLogic() {
         this.OutputPins[0].State.value =
             this.InputPins[0].State.value && this.InputPins[1].State.value;
-        if (this.OutputPins[0].State.value === -1)
+
+        if (
+            this.OutputPins[0].State.value === -1 ||
+            this.InputPins[0].State.value == -1 ||
+            this.InputPins[1].State.value == -1
+        )
             this.OutputPins[0].State.value = 0;
         this.RefreshedLogic = true;
         return true;

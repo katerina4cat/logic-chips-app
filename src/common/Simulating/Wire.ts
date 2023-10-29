@@ -1,10 +1,11 @@
 import React from "react";
 import { Pin, PinState } from "./Pin";
 
+let wireID = 0;
 export class Wire {
     WireGraphObject?: React.RefObject<SVGPathElement>;
     State: PinState;
-    ID: number = Date.now();
+    ID: number;
     Source: Pin;
     Target: Pin;
     WirePoints: Pos[];
@@ -15,27 +16,35 @@ export class Wire {
         WirePoints: Pos[] = [],
         Color: Color = Colors.red
     ) {
-        this.Color = Color;
         this.Source = Source;
         this.State = Source.State;
+
+        // Если назначение провода это шина, то создаётся новый пин и добавляется в входные пины шины
         if (Target.Chip.Name == "BUS") {
-            const newPin = new Pin(
-                true,
-                Target.Chip,
-                "",
-                Target.Chip.InputPins.length + 1
-            );
+            const newPin = new Pin(true, Target.Chip, "");
             this.Target = newPin;
             this.Target.Chip.InputPins.push(newPin);
         } else this.Target = Target;
-        this.Target.State = this.State;
-        this.Target.Color = this.Color;
+
+        // Целевому пину устанавливается значения исходящего, после происходит перепривязка всех отходящих от него значений
+        // Возможно опасное место
+        this.Target.State = this.Source.State;
+        this.Target.ReLinkPins();
+        // Возможно опасное место
+
         this.WirePoints = WirePoints.map((WirePoint) => fixPos(WirePoint));
+        //Если чип не шина, то привязывается позиция пина
         if (Source.Chip.Name != "BUS") this.WirePoints[0] = Source.Position;
         if (Target.Chip.Name != "BUS")
             this.WirePoints[this.WirePoints.length - 1] = Target.Position;
         this.Source.Wires.push(this);
         this.Target.Wires.push(this);
+
+        this.ID = wireID;
+        wireID++;
+        this.Color = Color;
+        this.Target.Color = this.Color;
+        this.Source.Color = this.Color;
     }
 
     /**

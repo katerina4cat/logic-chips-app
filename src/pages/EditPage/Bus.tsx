@@ -1,9 +1,9 @@
 import React, { RefObject, useRef } from "react";
 import cl from "./Bus.module.scss";
-import { ChipModel } from "../../common/ChipModel";
-import { Colors, Pos, Wire } from "../../common/Wire";
-import { BUS } from "../../common/BUS";
-import { PinState } from "../../common/Pin";
+import { ChipModel } from "../../common/Simulating/ChipModel";
+import { Colors, Pos, Wire } from "../../common/Simulating/Wire";
+import { BUS } from "../../common/Simulating/BUS";
+import { Pin, PinState } from "../../common/Simulating/Pin";
 
 interface ChipReq {
     chip: ChipModel;
@@ -91,10 +91,23 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
                         onMouseLeave={(e) => e.currentTarget.blur()}
                         onKeyDown={(e) => {
                             if (e.code == "Backspace") {
-                                console.log(wire.Target.Chip.Name);
+                                wire.Source.State.removeListeners(
+                                    wire.Target.State
+                                );
                                 wire.Target.State = new PinState(-1);
-                                const index = props.wires.indexOf(wire);
+                                wire.Target.ReLinkPins();
+                                let index = props.wires.indexOf(wire);
+
                                 if (index != -1) props.wires.splice(index, 1);
+                                index = wire.Target.Wires.indexOf(wire);
+
+                                if (index != -1)
+                                    wire.Target.Wires.splice(index, 1);
+
+                                index = wire.Source.Wires.indexOf(wire);
+                                if (index != -1)
+                                    wire.Source.Wires.splice(index, 1);
+
                                 if (props.updateAll) props.updateAll();
                             }
                         }}

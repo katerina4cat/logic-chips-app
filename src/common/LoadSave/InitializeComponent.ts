@@ -1,43 +1,7 @@
-import { Pin } from "./Pin";
-import { Colors, Pos, Wire, fixPos } from "./Wire";
+import { ChipModel } from "../Simulating/ChipModel";
+import { Pin } from "../Simulating/Pin";
+import { Pos, Wire, Colors } from "../Simulating/Wire";
 import { ChipSaveStruct, CreateChip } from "./LoadSave";
-
-export class ChipModel {
-    Name: string;
-    Colour: string;
-    ID: number;
-    InputPins: Pin[];
-    OutputPins: Pin[];
-    SubChips: ChipModel[];
-    Connections: Wire[];
-    Position: Pos[] = [];
-
-    IsBasedChip: boolean = false;
-
-    constructor(
-        Name: string,
-        ID: number = 0,
-        Colour: string = "#000",
-        InputPins: Array<Pin> = [],
-        OutputPins: Array<Pin> = [],
-        SubChips: Array<ChipModel> = [],
-        Connections: Array<Wire> = [],
-        Position: Array<Pos> = []
-    ) {
-        this.Name = Name;
-        this.Colour = Colour;
-        this.InputPins = InputPins;
-        this.OutputPins = OutputPins;
-        this.Connections = Connections;
-        this.SubChips = SubChips;
-        this.ID = ID;
-        this.Position = Position.map((pos) => fixPos(pos));
-    }
-
-    RefreshedLogic = false;
-
-    RefreshLogic() {}
-}
 
 export function InitilizeChipModel(
     ChipInfo: ChipSaveStruct,
@@ -57,33 +21,19 @@ export function InitilizeChipModel(
     // Инициализация пинов входов загружаемого чипа
     ChipInfo.InputPins.map((pinInfo) =>
         res.InputPins.push(
-            new Pin(
-                true,
-                res,
-                pinInfo.Name,
-                pinInfo.ID,
-                {
-                    X: 0,
-                    Y: pinInfo.PositionY,
-                },
-                { X: 40, Y: 0 }
-            )
+            new Pin(true, res, pinInfo.Name, pinInfo.ID, {
+                X: 0,
+                Y: pinInfo.PositionY,
+            })
         )
     );
     // Инициализация пинов выходов загружаемого чипа
     ChipInfo.OutputPins.map((pinInfo) =>
         res.OutputPins.push(
-            new Pin(
-                false,
-                res,
-                pinInfo.Name,
-                pinInfo.ID,
-                {
-                    X: window.innerWidth,
-                    Y: pinInfo.PositionY,
-                },
-                { X: -40, Y: 0 }
-            )
+            new Pin(false, res, pinInfo.Name, pinInfo.ID, {
+                X: 0,
+                Y: pinInfo.PositionY,
+            })
         )
     );
     // Инициализация дочерних чипов загружаемого чипа

@@ -22,9 +22,10 @@ export class TRI_STATE_BUFFER extends ChipModel {
         this.OutputPins = [new Pin(false, this, "Out", 2, { X: 0, Y: 0.5 })];
     }
     override RefreshLogic() {
-        this.OutputPins[0].State.value = this.InputPins[0].State.value
-            ? this.InputPins[1].State.value
-            : -1;
+        this.OutputPins[0].State.value =
+            this.InputPins[0].State.value == 1
+                ? this.InputPins[1].State.value
+                : -1;
         return true;
     }
 }
