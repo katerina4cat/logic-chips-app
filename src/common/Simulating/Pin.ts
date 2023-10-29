@@ -44,6 +44,13 @@ export class PinState {
             (chip) => !state.listeners.includes(chip)
         );
     }
+    /**
+     * Удаляет из текущего состояния слушателя
+     * @param state
+     */
+    removeListener(listener: ChipModel) {
+        this.listeners = this.listeners.filter((chip) => listener != chip);
+    }
 
     /**
      ** this<=**pinState**
@@ -91,12 +98,20 @@ export class Pin {
         this._State = value;
     }
 
-    ReLinkPins() {
+    /**
+     * Перепривязывает все пины у текущего.
+     */
+    ReLinkPins(prevPin?: Pin) {
         this.Wires.forEach((wire) => {
             if (wire.Source == this) {
                 wire.State = this.State;
                 wire.Target.setState(this.State);
-                if (!wire.Target.Chip.IsBasedChip) wire.Target.ReLinkPins();
+                if (wire.Target.Chip.IsBasedChip) {
+                    if (prevPin) {
+                        prevPin?.State.removeListener(wire.Target.Chip);
+                        this.State.addListener(wire.Target.Chip);
+                    }
+                } else wire.Target.ReLinkPins(prevPin);
             }
         });
     }

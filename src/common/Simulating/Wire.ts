@@ -57,7 +57,6 @@ export class Wire {
     private radiusWire = 20;
 
     generateStringPoints() {
-        if (this.Target.Chip.Name == "BUS") console.log(this.WirePoints.length);
         if (this.WirePoints.length < 2) {
             return "";
         }

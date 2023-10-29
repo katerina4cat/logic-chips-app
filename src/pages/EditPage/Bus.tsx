@@ -79,6 +79,26 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
         >
             {props.wires.map((wire) => {
                 if (!wire.WireGraphObject) wire.WireGraphObject = useRef(null);
+                const handleKeyDownEventHover = (e: any) => {
+                    if (e.code == "Backspace") {
+                        wire.Target.setState(new PinState(-1));
+
+                        wire.Target.ReLinkPins(wire.Source);
+                        wire.Source.State.refreshListeners();
+                        wire.Target.State.refreshListeners();
+
+                        let index = props.wires.indexOf(wire);
+                        if (index != -1) props.wires.splice(index, 1);
+
+                        index = wire.Target.Wires.indexOf(wire);
+                        if (index != -1) wire.Target.Wires.splice(index, 1);
+
+                        index = wire.Source.Wires.indexOf(wire);
+                        if (index != -1) wire.Source.Wires.splice(index, 1);
+
+                        if (props.updateAll) props.updateAll();
+                    }
+                };
                 return (
                     <path
                         ref={wire.WireGraphObject}
@@ -87,32 +107,18 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
                         className={cl.WirePath}
                         d={wire.generateStringPoints()}
                         tabIndex={0}
-                        onMouseEnter={(e) => e.currentTarget.focus()}
-                        onMouseLeave={(e) => e.currentTarget.blur()}
-                        onKeyDown={(e) => {
-                            if (e.code == "Backspace") {
-                                wire.Target.State = new PinState(-1);
-                                wire.Source.State.removeListeners(
-                                    wire.Target.State
-                                );
-
-                                wire.Target.ReLinkPins();
-                                wire.Target.State.refreshListeners();
-
-                                let index = props.wires.indexOf(wire);
-                                if (index != -1) props.wires.splice(index, 1);
-
-                                index = wire.Target.Wires.indexOf(wire);
-                                if (index != -1)
-                                    wire.Target.Wires.splice(index, 1);
-
-                                index = wire.Source.Wires.indexOf(wire);
-                                if (index != -1)
-                                    wire.Source.Wires.splice(index, 1);
-
-                                if (props.updateAll) props.updateAll();
-                            }
-                        }}
+                        onMouseEnter={() =>
+                            window.addEventListener(
+                                "keydown",
+                                handleKeyDownEventHover
+                            )
+                        }
+                        onMouseLeave={() =>
+                            window.removeEventListener(
+                                "keydown",
+                                handleKeyDownEventHover
+                            )
+                        }
                     />
                 );
             })}
