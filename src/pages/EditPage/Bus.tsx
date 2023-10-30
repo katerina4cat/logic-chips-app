@@ -11,7 +11,7 @@ interface ChipReq {
 }
 interface LineDrawReq {
     wires: Wire[];
-    updateAll?: () => void;
+    updateAll: () => void;
 }
 
 interface BusDrawReq {
@@ -86,13 +86,11 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
                             "keydown",
                             handleKeyDownEventHover
                         );
-                        DeleteWire(props.wires, wire);
-
-                        if (props.updateAll) props.updateAll();
+                        DeleteWire(props.wires, wire, props.updateAll);
                     }
                 };
                 return (
-                    <g>
+                    <g key={wire.ID}>
                         <path
                             ref={wire.WireGraphObject}
                             stroke={wire.getColorWithState()}

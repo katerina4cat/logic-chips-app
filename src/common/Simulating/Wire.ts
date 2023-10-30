@@ -137,8 +137,11 @@ export const Colors: { [key: string]: Color } = {
     yellow: { color: "#ff9b00", title: "Жёлтый" },
 };
 
-export const DeleteWire = (AllWires: Wire[], wire: Wire) => {
-    console.log(wire.ID);
+export const DeleteWire = (
+    AllWires: Wire[],
+    wire: Wire,
+    updateAll?: () => void
+) => {
     wire.DeleteLink();
     let index = AllWires.indexOf(wire);
     if (index != -1) AllWires.splice(index, 1);
@@ -148,4 +151,6 @@ export const DeleteWire = (AllWires: Wire[], wire: Wire) => {
 
     index = wire.Source.Wires.indexOf(wire);
     if (index != -1) wire.Source.Wires.splice(index, 1);
+
+    if (updateAll) updateAll();
 };

@@ -49,7 +49,7 @@ const PinInteraction: React.FC<PinReq> = (props) => {
             onMouseDown={(e) => {
                 e.stopPropagation();
                 if (debug)
-                    if (e.button == 1) {
+                    if (e.button == 2) {
                         props.pin.State.drawListeners();
                         e.preventDefault();
                     }

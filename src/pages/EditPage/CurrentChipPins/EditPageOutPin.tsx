@@ -40,6 +40,7 @@ const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
 
     return (
         <div
+            key={props.Pin.ID}
             className={cl.CurrChipPin}
             ref={first}
             style={{ top: props.Pin.Position.Y }}

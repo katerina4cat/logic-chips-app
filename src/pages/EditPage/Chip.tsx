@@ -9,7 +9,7 @@ interface ChipReq {
     chip: ChipModel;
     VisiblePinTitles: boolean;
     MainChip: ChipModel;
-    updateAll?: () => void;
+    updateAll: () => void;
 }
 
 const Chip: React.FC<ChipReq> = (props) => {
@@ -47,28 +47,31 @@ const Chip: React.FC<ChipReq> = (props) => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if (e.code == "Backspace") {
             window.removeEventListener("keydown", handleKeyDown);
+
             props.chip.OutputPins.forEach((pin) =>
-                pin.Wires.forEach((pinWire) => {
-                    if (pinWire.Source.Chip == props.chip) {
-                        DeleteWire(props.MainChip.Connections, pinWire);
-                    }
+                pin.Wires.filter(
+                    (pinWire) => pinWire.Source.ID == pin.ID
+                ).forEach((pinWire) => {
+                    DeleteWire(props.MainChip.Connections, pinWire);
                 })
             );
             props.chip.InputPins.forEach((pin) =>
-                pin.Wires.forEach((pinWire) => {
-                    if (pinWire.Target.Chip == props.chip) {
-                        DeleteWire(props.MainChip.Connections, pinWire);
-                    }
+                pin.Wires.filter(
+                    (pinWire) => pinWire.Target.ID == pin.ID
+                ).forEach((pinWire) => {
+                    DeleteWire(props.MainChip.Connections, pinWire);
                 })
             );
-            const chipIndex = props.MainChip.SubChips.indexOf(props.chip);
-            if (chipIndex != -1) props.MainChip.SubChips.splice(chipIndex, 1);
+            props.MainChip.SubChips = props.MainChip.SubChips.filter(
+                (chip) => chip != props.chip
+            );
             if (props.updateAll) props.updateAll();
         }
     };
 
     return (
         <div
+            key={props.chip.ID}
             ref={first}
             className={cl.Chip}
             style={{
@@ -99,6 +102,7 @@ const Chip: React.FC<ChipReq> = (props) => {
             >
                 {props.chip.InputPins.map((pin) => (
                     <PinInteraction
+                        key={pin.ID}
                         pin={pin}
                         DragListeners={DragListeners}
                         VisiblePinTitles={props.VisiblePinTitles}
@@ -115,6 +119,7 @@ const Chip: React.FC<ChipReq> = (props) => {
             >
                 {props.chip.OutputPins.map((pin) => (
                     <PinInteraction
+                        key={pin.ID}
                         pin={pin}
                         DragListeners={DragListeners}
                         VisiblePinTitles={props.VisiblePinTitles}
