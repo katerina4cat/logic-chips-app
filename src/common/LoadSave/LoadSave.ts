@@ -57,3 +57,11 @@ export interface ChipSaveStruct {
 export function LoadChipInfo(ChipName: string) {
     return chips[ChipName] as ChipSaveStruct;
 }
+export function ChipHasInChip(ChipName: string, SubChipName: string) {
+    if (chips[SubChipName]?.SubChips)
+        for (const subChip of chips[SubChipName]?.SubChips) {
+            if (subChip.Name == ChipName) return true;
+            if (ChipHasInChip(ChipName, subChip.Name)) return true;
+        }
+    return false;
+}

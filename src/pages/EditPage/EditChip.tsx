@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import cl from "./EditChip.module.scss";
 import EditPagePin from "./CurrentChipPins/EditPagePin";
-import { CreateChip } from "../../common/LoadSave/LoadSave";
+import { ChipHasInChip, CreateChip } from "../../common/LoadSave/LoadSave";
 import { chips } from "../../common/LoadSave/chips";
 import Chip from "./Chip";
 import Modal from "../Modal/Modal";
@@ -10,6 +10,7 @@ import { Pin } from "../../common/Simulating/Pin";
 import EditPageOutPin from "./CurrentChipPins/EditPageOutPin";
 import { Bus, BusDrawer, LineDrawer } from "./Bus";
 import { BUS } from "../../common/Simulating/BUS";
+import { ChipModel } from "../../common/Simulating/ChipModel";
 
 interface EditReq {
     VisiblePinTitles?: boolean;
@@ -17,9 +18,12 @@ interface EditReq {
 }
 
 const EditChip: React.FC<EditReq> = (props) => {
-    const [chipsSelected, setchipsSelected] = useState("1bit-REGISTER");
-    const [editChip, setEditChip] = useState(CreateChip(chipsSelected, 0));
+    const [chipSelected, setchipSelected] = useState("1bit-REGISTER");
+    const [addSelected, setAddSelected] = useState("");
+    const [editChip, setEditChip] = useState(CreateChip(chipSelected, 0));
+    const [AddingChips, setAddingChips] = useState<ChipModel[]>([]);
     const setModalEditState = useRef((e: boolean) => {});
+    const setModalAddState = useRef((e: boolean) => {});
     const [setupsInput, setSetupsInput] = useState(0);
     const [VisiblePinTitles, setVisiblePinTitles] = useState<boolean>(
         props.VisiblePinTitles != undefined ? props.VisiblePinTitles : true
@@ -53,6 +57,7 @@ const EditChip: React.FC<EditReq> = (props) => {
 
     const keyMap = {
         SelectChipToEdit: ["ctrl+x", "ctrl+X", "ctrl+ч", "ctrl+Ч"],
+        SelectChipToAdd: ["ctrl+a", "ctrl+A", "ctrl+ф", "ctrl+Ф"],
         ChangePinTitles: "tab",
         ChangeAllPinTitles: ["q", "Q", "й", "Й"],
     };
@@ -60,6 +65,10 @@ const EditChip: React.FC<EditReq> = (props) => {
         SelectChipToEdit: (keyboardEvent: any) => {
             keyboardEvent.preventDefault();
             setModalEditState.current(true);
+        },
+        SelectChipToAdd: (keyboardEvent: any) => {
+            keyboardEvent.preventDefault();
+            setModalAddState.current(true);
         },
         ChangePinTitles: (keyboardEvent: any) => {
             keyboardEvent.preventDefault();
@@ -75,6 +84,7 @@ const EditChip: React.FC<EditReq> = (props) => {
     };
 
     const editPageRef = useRef<HTMLDivElement>(null);
+    const addSelectedConflict = ChipHasInChip(chipSelected, addSelected);
 
     return (
         <HotKeys keyMap={keyMap} handlers={handlers}>
@@ -83,14 +93,15 @@ const EditChip: React.FC<EditReq> = (props) => {
                     setOpenedRef={setModalEditState}
                     className={cl.OpenEditChipList}
                 >
+                    <h2>Открыть чип в редакторе</h2>
                     <div className={cl.ListObjects}>
                         {Object.keys(chips).map((chipName) => (
                             <button
                                 className={cl.Button}
-                                disabled={chipName == chipsSelected}
+                                disabled={chipName == chipSelected}
                                 onClick={() => {
                                     editPageRef.current?.scrollTo(0, 0);
-                                    setchipsSelected(chipName);
+                                    setchipSelected(chipName);
                                     setEditChip(CreateChip(chipName, 0));
                                     setOutputPins([]);
                                     setSetupsInput(0);
@@ -100,6 +111,58 @@ const EditChip: React.FC<EditReq> = (props) => {
                                 {chipName}
                             </button>
                         ))}
+                    </div>
+                </Modal>
+                <Modal
+                    setOpenedRef={setModalAddState}
+                    className={cl.OpenAddChipList}
+                >
+                    <h2>Добавить чип</h2>
+                    <div className={cl.ListObjects}>
+                        {Object.keys(chips).map((chipName) => (
+                            <button
+                                className={cl.Button}
+                                style={{
+                                    border:
+                                        chipName == addSelected
+                                            ? "2px solid lime"
+                                            : "none",
+                                }}
+                                onClick={() => {
+                                    setAddSelected(chipName);
+                                }}
+                            >
+                                {chipName}
+                            </button>
+                        ))}
+                    </div>
+                    <div className={cl.AddChipActions}>
+                        <button
+                            className={cl.Button}
+                            disabled={
+                                addSelected == "" ||
+                                addSelected == chipSelected ||
+                                addSelectedConflict
+                            }
+                            onClick={() => {}}
+                        >
+                            Добавить
+                        </button>
+                        <button
+                            className={cl.Button}
+                            disabled={addSelected == ""}
+                            onClick={() => {}}
+                        >
+                            Закрепить
+                        </button>
+
+                        <button
+                            className={cl.Button}
+                            disabled={addSelected == ""}
+                            onClick={() => {}}
+                        >
+                            Удалить
+                        </button>
                     </div>
                 </Modal>
                 <div className={cl.InputPins}>
