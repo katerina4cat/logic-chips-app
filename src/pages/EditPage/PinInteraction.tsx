@@ -126,9 +126,7 @@ const PinInteraction: React.FC<PinReq> = (props) => {
                 }}
             >
                 {props.pin.Chip.ID != 0 ? (
-                    <div className={cl.PinTitle}>
-                        {debug ? `${props.pin.State.value}` : props.pin.Name}
-                    </div>
+                    <div className={cl.PinTitle}>{props.pin.Name}</div>
                 ) : (
                     <Input pin={props.pin} className={cl.PinWithChangeTitle} />
                 )}

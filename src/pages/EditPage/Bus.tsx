@@ -1,9 +1,10 @@
 import React, { RefObject, useRef } from "react";
 import cl from "./Bus.module.scss";
 import { ChipModel } from "../../common/Simulating/ChipModel";
-import { Colors, Pos, Wire } from "../../common/Simulating/Wire";
+import { Colors, DeleteWire, Pos, Wire } from "../../common/Simulating/Wire";
 import { BUS } from "../../common/Simulating/BUS";
 import { Pin, PinState } from "../../common/Simulating/Pin";
+import { debug } from "../../App";
 
 interface ChipReq {
     chip: ChipModel;
@@ -81,45 +82,50 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
                 if (!wire.WireGraphObject) wire.WireGraphObject = useRef(null);
                 const handleKeyDownEventHover = (e: any) => {
                     if (e.code == "Backspace") {
-                        wire.Target.setState(new PinState(-1));
-
-                        wire.Target.ReLinkPins(wire.Source);
-                        wire.Source.State.refreshListeners();
-                        wire.Target.State.refreshListeners();
-
-                        let index = props.wires.indexOf(wire);
-                        if (index != -1) props.wires.splice(index, 1);
-
-                        index = wire.Target.Wires.indexOf(wire);
-                        if (index != -1) wire.Target.Wires.splice(index, 1);
-
-                        index = wire.Source.Wires.indexOf(wire);
-                        if (index != -1) wire.Source.Wires.splice(index, 1);
+                        window.removeEventListener(
+                            "keydown",
+                            handleKeyDownEventHover
+                        );
+                        DeleteWire(props.wires, wire);
 
                         if (props.updateAll) props.updateAll();
                     }
                 };
                 return (
-                    <path
-                        ref={wire.WireGraphObject}
-                        stroke={wire.getColorWithState()}
-                        fill="none"
-                        className={cl.WirePath}
-                        d={wire.generateStringPoints()}
-                        tabIndex={0}
-                        onMouseEnter={() =>
-                            window.addEventListener(
-                                "keydown",
-                                handleKeyDownEventHover
-                            )
-                        }
-                        onMouseLeave={() =>
-                            window.removeEventListener(
-                                "keydown",
-                                handleKeyDownEventHover
-                            )
-                        }
-                    />
+                    <g>
+                        <path
+                            ref={wire.WireGraphObject}
+                            stroke={wire.getColorWithState()}
+                            fill="none"
+                            className={cl.WirePath}
+                            id={wire.ID.toString()}
+                            d={wire.generateStringPoints()}
+                            tabIndex={0}
+                            onMouseEnter={() =>
+                                window.addEventListener(
+                                    "keydown",
+                                    handleKeyDownEventHover
+                                )
+                            }
+                            onMouseLeave={() =>
+                                window.removeEventListener(
+                                    "keydown",
+                                    handleKeyDownEventHover
+                                )
+                            }
+                        />
+                        {debug ? (
+                            <text>
+                                <textPath
+                                    href={`#${wire.ID}`}
+                                    startOffset={"50%"}
+                                    fill="white"
+                                >
+                                    {wire.ID}
+                                </textPath>
+                            </text>
+                        ) : undefined}
+                    </g>
                 );
             })}
         </svg>

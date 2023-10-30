@@ -48,6 +48,17 @@ export class Wire {
     }
 
     /**
+     * Удаляет связь между элементами
+     */
+    DeleteLink() {
+        this.Target.setState(new PinState(-1));
+
+        this.Target.ReLinkPins(this.Source);
+        this.Source.State.refreshListeners();
+        this.Target.State.refreshListeners();
+    }
+
+    /**
      *  Версия с обычными углами
         this.WirePontsString = this.WirePoints.map(
             (wire) => `${wire.X} ${wire.Y}`
@@ -124,4 +135,17 @@ export const Colors: { [key: string]: Color } = {
     indigo: { color: "#8c49ff", title: "Индиго" },
     blue: { color: "#147fff", title: "Синий" },
     yellow: { color: "#ff9b00", title: "Жёлтый" },
+};
+
+export const DeleteWire = (AllWires: Wire[], wire: Wire) => {
+    console.log(wire.ID);
+    wire.DeleteLink();
+    let index = AllWires.indexOf(wire);
+    if (index != -1) AllWires.splice(index, 1);
+
+    index = wire.Target.Wires.indexOf(wire);
+    if (index != -1) wire.Target.Wires.splice(index, 1);
+
+    index = wire.Source.Wires.indexOf(wire);
+    if (index != -1) wire.Source.Wires.splice(index, 1);
 };

@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { ChipModel } from "../../common/Simulating/ChipModel";
 import cl from "./Chip.module.scss";
 import PinInteraction from "./PinInteraction";
+import { debug } from "../../App";
+import { DeleteWire } from "../../common/Simulating/Wire";
 
 interface ChipReq {
     chip: ChipModel;
-    updateWires: () => void;
     VisiblePinTitles: boolean;
-    EditPage: React.RefObject<HTMLDivElement>;
+    MainChip: ChipModel;
     updateAll?: () => void;
 }
 
@@ -21,11 +22,8 @@ const Chip: React.FC<ChipReq> = (props) => {
     const first = useRef<HTMLDivElement | null>(null);
     const handleMouseDown = (e: any) => {
         if (e.button == 0) {
-            props.EditPage.current?.addEventListener(
-                "mousemove",
-                handleMouseMove
-            );
-            props.EditPage.current?.addEventListener("mouseup", handleMouseUp);
+            window.addEventListener("mousemove", handleMouseMove);
+            window.addEventListener("mouseup", handleMouseUp);
         }
     };
 
@@ -42,11 +40,31 @@ const Chip: React.FC<ChipReq> = (props) => {
     };
 
     const handleMouseUp = () => {
-        props.EditPage.current?.removeEventListener(
-            "mousemove",
-            handleMouseMove
-        );
-        props.EditPage.current?.removeEventListener("mouseup", handleMouseUp);
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.code == "Backspace") {
+            window.removeEventListener("keydown", handleKeyDown);
+            props.chip.OutputPins.forEach((pin) =>
+                pin.Wires.forEach((pinWire) => {
+                    if (pinWire.Source.Chip == props.chip) {
+                        DeleteWire(props.MainChip.Connections, pinWire);
+                    }
+                })
+            );
+            props.chip.InputPins.forEach((pin) =>
+                pin.Wires.forEach((pinWire) => {
+                    if (pinWire.Target.Chip == props.chip) {
+                        DeleteWire(props.MainChip.Connections, pinWire);
+                    }
+                })
+            );
+            const chipIndex = props.MainChip.SubChips.indexOf(props.chip);
+            if (chipIndex != -1) props.MainChip.SubChips.splice(chipIndex, 1);
+            if (props.updateAll) props.updateAll();
+        }
     };
 
     return (
@@ -61,10 +79,17 @@ const Chip: React.FC<ChipReq> = (props) => {
             }}
             onMouseDown={handleMouseDown}
             onContextMenu={(e) => {
-                console.log(props.chip);
+                if (debug) console.log(props.chip);
+                alert("Заглушка при пкм по чипу");
                 e.stopPropagation();
                 e.preventDefault();
             }}
+            onMouseEnter={() =>
+                window.addEventListener("keydown", handleKeyDown)
+            }
+            onMouseLeave={() =>
+                window.removeEventListener("keydown", handleKeyDown)
+            }
         >
             <div
                 className={cl.PinList}

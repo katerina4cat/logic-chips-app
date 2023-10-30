@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import cl from "./EditPage.module.scss";
+import cl from "./EditChip.module.scss";
 import EditPagePin from "./CurrentChipPins/EditPagePin";
 import { CreateChip } from "../../common/LoadSave/LoadSave";
 import { chips } from "../../common/LoadSave/chips";
@@ -11,15 +11,38 @@ import EditPageOutPin from "./CurrentChipPins/EditPageOutPin";
 import { Bus, BusDrawer, LineDrawer } from "./Bus";
 import { BUS } from "../../common/Simulating/BUS";
 
-interface EditReq {}
+interface EditReq {
+    VisiblePinTitles?: boolean;
+    VisibleAllPinTitles?: boolean;
+}
 
-const EditPage: React.FC<EditReq> = () => {
+const EditChip: React.FC<EditReq> = (props) => {
     const [chipsSelected, setchipsSelected] = useState("1bit-REGISTER");
     const [editChip, setEditChip] = useState(CreateChip(chipsSelected, 0));
     const setModalEditState = useRef((e: boolean) => {});
     const [setupsInput, setSetupsInput] = useState(0);
-    const [VisiblePinTitles, setVisiblePinTitles] = useState(true);
-    const [VisibleAllPinTitles, setVisibleAllPinTitles] = useState(true);
+    const [VisiblePinTitles, setVisiblePinTitles] = useState<boolean>(
+        props.VisiblePinTitles != undefined ? props.VisiblePinTitles : true
+    );
+    const [VisibleAllPinTitles, setVisibleAllPinTitles] = useState<boolean>(
+        props.VisibleAllPinTitles != undefined
+            ? props.VisibleAllPinTitles
+            : true
+    );
+
+    useEffect(() => {
+        window.localStorage.setItem(
+            "VisiblePinTitles",
+            VisiblePinTitles.toString()
+        );
+    }, [VisiblePinTitles]);
+    useEffect(() => {
+        window.localStorage.setItem(
+            "VisibleAllPinTitles",
+            VisibleAllPinTitles.toString()
+        );
+    }, [VisibleAllPinTitles]);
+
     const chipLoaded = setupsInput >= editChip.InputPins.length;
 
     const [OutputPins, setOutputPins] = useState<Pin[]>([]);
@@ -113,11 +136,8 @@ const EditPage: React.FC<EditReq> = () => {
                                   <Bus chip={chip} />
                               ) : (
                                   <Chip
-                                      EditPage={editPageRef}
                                       chip={chip}
-                                      updateWires={() => {
-                                          setEditChip(editChip);
-                                      }}
+                                      MainChip={editChip}
                                       VisiblePinTitles={VisiblePinTitles}
                                       updateAll={updateAll}
                                   />
@@ -143,4 +163,4 @@ const EditPage: React.FC<EditReq> = () => {
     );
 };
 
-export default EditPage;
+export default EditChip;
