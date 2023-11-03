@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Pin } from "../../../common/Simulating/Pin";
 import cl from "./EditPagePin.module.scss";
-import { Colors } from "../../../common/Simulating/Wire";
+import { Colors, Wire, WireIncomplete } from "../../../common/Simulating/Wire";
 import PinInteraction from "../PinInteraction";
 
 interface ReqPin {
@@ -9,7 +9,9 @@ interface ReqPin {
     handleChangeInputPin: () => void;
     setupsInput: React.Dispatch<React.SetStateAction<number>>;
     VisiblePinTitles?: boolean;
+    newWire: { current: WireIncomplete };
     updateAll?: () => void;
+    Wires: Wire[];
 }
 
 const EditPagePin: React.FC<ReqPin> = (props) => {
@@ -87,6 +89,8 @@ const EditPagePin: React.FC<ReqPin> = (props) => {
                     DragListeners={DragListeners}
                     VisiblePinTitles={props.VisiblePinTitles}
                     updateAll={props.updateAll}
+                    newWire={props.newWire}
+                    Wires={props.Wires}
                 />
             </div>
         </div>

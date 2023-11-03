@@ -1,22 +1,108 @@
-import { RefObject, useEffect, useRef } from "react";
+import { RefObject, useCallback, useEffect, useRef } from "react";
 import { Pin } from "../../common/Simulating/Pin";
-import { Colors } from "../../common/Simulating/Wire";
+import { Colors, Wire, WireIncomplete } from "../../common/Simulating/Wire";
 import cl from "./PinInteraction.module.scss";
 import Input from "./Input";
 import useOutside from "../../hooks/useOutside";
 import { debug } from "../../App";
+import { sideWidth } from "./EditChip";
 
 interface PinReq extends React.HTMLAttributes<HTMLDivElement> {
     pin: Pin;
     NameLeft?: boolean;
     DragListeners: RefObject<{ [key: number]: () => void }>;
     VisiblePinTitles?: boolean;
+    newWire: { current: WireIncomplete };
+    Wires: Wire[];
     updateAll?: () => void;
 }
 
 const PinInteraction: React.FC<PinReq> = (props) => {
     const ref = useRef<HTMLDivElement>(null);
+    const handleStartWire = useCallback((e: any) => {
+        const handleMove = (e: MouseEvent) => {
+            props.newWire.current.LastPos = {
+                X: e.pageX - sideWidth,
+                Y: e.pageY,
+            };
+        };
+        const handleClick = (e: MouseEvent) => {
+            props.newWire.current.WirePoints = [
+                ...props.newWire.current.WirePoints,
+                {
+                    X: e.pageX - sideWidth,
+                    Y: e.pageY,
+                },
+            ];
+
+            if (props.updateAll) props.updateAll();
+        };
+        const handleKeydown = (e: globalThis.KeyboardEvent) => {
+            if (e.key == "Escape") {
+                window.removeEventListener("keydown", handleKeydown);
+                window.removeEventListener("click", handleClick);
+                window.removeEventListener("mousemove", handleMove);
+                props.newWire.current.WireGraphObject.current?.setAttribute(
+                    "d",
+                    ""
+                );
+                props.newWire.current.Source = undefined;
+            }
+        };
+        if (props.newWire.current.Source != undefined) {
+            let pinFrom: Pin | undefined = undefined;
+            let pinTarget: Pin | undefined = undefined;
+
+            const settible = (pinInCurrentEdit: boolean, pin: Pin) => {
+                if (pinInCurrentEdit)
+                    if (pin.IsInput) {
+                        pinFrom = pin;
+                    } else {
+                        pinTarget = pin;
+                    }
+                else if (pin.IsInput) {
+                    pinTarget = pin;
+                } else {
+                    pinFrom = pin;
+                }
+            };
+
+            const newWirePinEditable =
+                props.newWire.current.Source.Chip.ID == 0;
+            const currPinEditable = props.pin.Chip.ID == 0;
+            settible(newWirePinEditable, props.newWire.current.Source);
+            settible(currPinEditable, props.pin);
+
+            if (pinFrom != undefined && pinTarget != undefined) {
+                const newWire = new Wire(
+                    pinFrom,
+                    pinTarget,
+                    props.newWire.current.WirePoints,
+                    undefined,
+                    false
+                );
+                props.Wires.push(newWire);
+                props.newWire.current.Source.Wires.push(newWire);
+                props.pin.Wires.push(newWire);
+            }
+
+            window.removeEventListener("keydown", handleKeydown);
+            window.removeEventListener("click", handleClick);
+            window.removeEventListener("mousemove", handleMove);
+            props.newWire.current.WireGraphObject.current?.setAttribute(
+                "d",
+                ""
+            );
+            props.newWire.current.Source = undefined;
+        } else {
+            props.newWire.current.Source = props.pin;
+            window.addEventListener("keydown", handleKeydown);
+            window.addEventListener("click", handleClick);
+            window.addEventListener("mousemove", handleMove);
+        }
+    }, []);
     const [refColor, visible, setvisible] = useOutside(false);
+
     useEffect(() => {
         if (props.DragListeners.current)
             props.DragListeners.current[props.pin.ID] = () => {
@@ -33,6 +119,7 @@ const PinInteraction: React.FC<PinReq> = (props) => {
                 }
             };
     }, []);
+
     return (
         <div
             {...props}
@@ -46,6 +133,7 @@ const PinInteraction: React.FC<PinReq> = (props) => {
                         : props.pin.getColorWithState(),
                 border: "0.05em solid " + Colors.floating.color,
             }}
+            onClick={handleStartWire}
             onMouseDown={(e) => {
                 e.stopPropagation();
                 if (debug)

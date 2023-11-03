@@ -11,17 +11,22 @@ import EditPageOutPin from "./CurrentChipPins/EditPageOutPin";
 import { Bus, BusDrawer, LineDrawer } from "./Bus";
 import { BUS } from "../../common/Simulating/BUS";
 import { ChipModel } from "../../common/Simulating/ChipModel";
+import { WireIncomplete } from "../../common/Simulating/Wire";
 
 interface EditReq {
     VisiblePinTitles?: boolean;
     VisibleAllPinTitles?: boolean;
 }
 
+export const sideWidth = 45;
+
 const EditChip: React.FC<EditReq> = (props) => {
     const [chipSelected, setchipSelected] = useState("1bit-REGISTER");
     const [addSelected, setAddSelected] = useState("");
     const [editChip, setEditChip] = useState(CreateChip(chipSelected, 0));
     const [AddingChips, setAddingChips] = useState<ChipModel[]>([]);
+    const newWire = useRef(new WireIncomplete(undefined));
+
     const setModalEditState = useRef((e: boolean) => {});
     const setModalAddState = useRef((e: boolean) => {});
     const [setupsInput, setSetupsInput] = useState(0);
@@ -175,6 +180,8 @@ const EditChip: React.FC<EditReq> = (props) => {
                                 setupsInput={setSetupsInput}
                                 VisiblePinTitles={VisibleAllPinTitles}
                                 updateAll={updateAll}
+                                newWire={newWire}
+                                Wires={editChip.Connections}
                             />
                         );
                     })}
@@ -192,6 +199,7 @@ const EditChip: React.FC<EditReq> = (props) => {
                     <LineDrawer
                         wires={chipLoaded ? editChip.Connections : []}
                         updateAll={updateAll}
+                        draggingWire={newWire}
                     />
                     {chipLoaded
                         ? editChip.SubChips.map((chip) =>
@@ -203,6 +211,8 @@ const EditChip: React.FC<EditReq> = (props) => {
                                       MainChip={editChip}
                                       VisiblePinTitles={VisiblePinTitles}
                                       updateAll={updateAll}
+                                      newWire={newWire}
+                                      Wires={editChip.Connections}
                                   />
                               )
                           )
@@ -216,6 +226,8 @@ const EditChip: React.FC<EditReq> = (props) => {
                                       Pin={pin}
                                       VisiblePinTitles={VisibleAllPinTitles}
                                       updateAll={updateAll}
+                                      newWire={newWire}
+                                      Wires={editChip.Connections}
                                   />
                               </div>
                           ))

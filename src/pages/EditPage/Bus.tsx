@@ -1,9 +1,13 @@
-import React, { RefObject, useRef } from "react";
+import React, { useRef } from "react";
 import cl from "./Bus.module.scss";
 import { ChipModel } from "../../common/Simulating/ChipModel";
-import { Colors, DeleteWire, Pos, Wire } from "../../common/Simulating/Wire";
+import {
+    Colors,
+    DeleteWire,
+    Wire,
+    WireIncomplete,
+} from "../../common/Simulating/Wire";
 import { BUS } from "../../common/Simulating/BUS";
-import { Pin, PinState } from "../../common/Simulating/Pin";
 import { debug } from "../../App";
 
 interface ChipReq {
@@ -11,6 +15,7 @@ interface ChipReq {
 }
 interface LineDrawReq {
     wires: Wire[];
+    draggingWire: { current: WireIncomplete };
     updateAll: () => void;
 }
 
@@ -77,6 +82,7 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
                 left: 0,
                 top: 0,
             }}
+            id="WireSvg"
         >
             {props.wires.map((wire) => {
                 if (!wire.WireGraphObject) wire.WireGraphObject = useRef(null);
@@ -126,6 +132,12 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
                     </g>
                 );
             })}
+            <path
+                ref={props.draggingWire.current.WireGraphObject}
+                stroke={props.draggingWire.current.getColorWithState()}
+                strokeWidth="6px"
+                fill="none"
+            />
         </svg>
     );
 };

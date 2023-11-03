@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Pin, PinState } from "./Pin";
 
 let wireID = 0;
@@ -14,7 +14,8 @@ export class Wire {
         Source: Pin,
         Target: Pin,
         WirePoints: Pos[] = [],
-        Color: Color = Colors.red
+        Color: Color = Colors.red,
+        fixing = true
     ) {
         this.Source = Source;
         this.State = Source.State;
@@ -31,8 +32,9 @@ export class Wire {
         this.Target.State = this.Source.State;
         this.Target.ReLinkPins();
         // Возможно опасное место
-
-        this.WirePoints = WirePoints.map((WirePoint) => fixPos(WirePoint));
+        if (fixing)
+            this.WirePoints = WirePoints.map((WirePoint) => fixPos(WirePoint));
+        else this.WirePoints = WirePoints;
         //Если чип не шина, то привязывается позиция пина
         if (Source.Chip.Name != "BUS") this.WirePoints[0] = Source.Position;
         if (Target.Chip.Name != "BUS")
@@ -116,6 +118,94 @@ export class Wire {
         return `color-mix(in srgb, ${this.Color.color} ${
             this.State.value == 1 ? 100 : this.State.value == -1 ? 0 : 25
         }%, ${Colors.floating.color})`;
+    }
+}
+
+export class WireIncomplete {
+    radiusWire = 20;
+    private _Source: Pin | undefined;
+    WirePoints: Pos[] = [];
+    WireGraphObject = useRef<SVGPathElement>(null);
+    public set LastPos(value: Pos) {
+        this.WirePoints[this.WirePoints.length - 1] = value;
+        this.WireGraphObject?.current?.setAttribute(
+            "d",
+            this.generateStringPoints()
+        );
+    }
+    public set Source(value: Pin | undefined) {
+        this._Source = value;
+        if (value) {
+            this.Color = value.Color;
+            this.WirePoints = [value.Position, value.Position];
+        } else {
+            this.Color = undefined;
+            this.WirePoints = [];
+        }
+    }
+    public get Source() {
+        return this._Source;
+    }
+    Target?: Pin;
+    Color?: Color;
+    constructor(Source: Pin | undefined) {
+        this._Source = Source;
+    }
+    generateStringPoints() {
+        if (this.WirePoints.length < 2) {
+            return "";
+        }
+
+        let path = `M${this.WirePoints[0].X},${this.WirePoints[0].Y}`;
+
+        for (let i = 1; i < this.WirePoints.length - 1; i++) {
+            const previousPoint = this.WirePoints[i - 1];
+            const currentPoint = this.WirePoints[i];
+            const nextPoint = this.WirePoints[i + 1];
+
+            const lcpx = currentPoint.X - previousPoint.X;
+            const lcpy = currentPoint.Y - previousPoint.Y;
+            let dCoefcp =
+                this.radiusWire / Math.sqrt(lcpx * lcpx + lcpy * lcpy);
+            let qx, qy;
+            if (dCoefcp >= 0.5) {
+                qx = currentPoint.X - lcpx / 2;
+                qy = currentPoint.Y - lcpy / 2;
+            } else {
+                qx = currentPoint.X - lcpx * dCoefcp;
+                qy = currentPoint.Y - lcpy * dCoefcp;
+            }
+
+            const lpnx = nextPoint.X - currentPoint.X;
+            const lpny = nextPoint.Y - currentPoint.Y;
+            const dCoefpn =
+                this.radiusWire / Math.sqrt(lpnx * lpnx + lpny * lpny);
+            let ex, ey;
+            if (dCoefpn >= 0.5) {
+                ex = currentPoint.X + lpnx / 2;
+                ey = currentPoint.Y + lpny / 2;
+            } else {
+                ex = currentPoint.X + lpnx * dCoefpn;
+                ey = currentPoint.Y + lpny * dCoefpn;
+            }
+            path += ` L${qx},${qy}Q${currentPoint.X},${currentPoint.Y},${ex},${ey}`;
+        }
+        path += `L${this.WirePoints[this.WirePoints.length - 1].X},${
+            this.WirePoints[this.WirePoints.length - 1].Y
+        }`;
+        return path;
+    }
+
+    getColorWithState() {
+        if (this._Source && this.Color)
+            return `color-mix(in srgb, ${this.Color.color} ${
+                this._Source.State.value == 1
+                    ? 100
+                    : this._Source.State.value == -1
+                    ? 0
+                    : 25
+            }%, ${Colors.floating.color})`;
+        return "unset";
     }
 }
 export type Pos = { X: number; Y: number };

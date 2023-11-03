@@ -1,15 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ChipModel } from "../../common/Simulating/ChipModel";
 import cl from "./Chip.module.scss";
 import PinInteraction from "./PinInteraction";
 import { debug } from "../../App";
-import { DeleteWire } from "../../common/Simulating/Wire";
+import { DeleteWire, Wire, WireIncomplete } from "../../common/Simulating/Wire";
+import { sideWidth } from "./EditChip";
 
 interface ChipReq {
     chip: ChipModel;
     VisiblePinTitles: boolean;
     MainChip: ChipModel;
+    newWire: { current: WireIncomplete };
     updateAll: () => void;
+    Wires: Wire[];
 }
 
 const Chip: React.FC<ChipReq> = (props) => {
@@ -29,7 +32,7 @@ const Chip: React.FC<ChipReq> = (props) => {
 
     const handleMouseMove = (e: any) => {
         if (first.current) {
-            props.chip.Position[0].X = e.pageX - 45;
+            props.chip.Position[0].X = e.pageX - sideWidth;
             props.chip.Position[0].Y = e.pageY;
             first.current.style.left = props.chip.Position[0].X + "px";
             first.current.style.top = props.chip.Position[0].Y + "px";
@@ -107,6 +110,8 @@ const Chip: React.FC<ChipReq> = (props) => {
                         DragListeners={DragListeners}
                         VisiblePinTitles={props.VisiblePinTitles}
                         updateAll={props.updateAll}
+                        newWire={props.newWire}
+                        Wires={props.Wires}
                     />
                 ))}
             </div>
@@ -124,6 +129,8 @@ const Chip: React.FC<ChipReq> = (props) => {
                         DragListeners={DragListeners}
                         VisiblePinTitles={props.VisiblePinTitles}
                         updateAll={props.updateAll}
+                        newWire={props.newWire}
+                        Wires={props.Wires}
                     />
                 ))}
             </div>

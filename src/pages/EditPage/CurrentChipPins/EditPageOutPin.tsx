@@ -1,13 +1,15 @@
 import { Pin } from "../../../common/Simulating/Pin";
 import cl from "./EditPageOutPin.module.scss";
-import { Colors } from "../../../common/Simulating/Wire";
+import { Colors, Wire, WireIncomplete } from "../../../common/Simulating/Wire";
 import PinInteraction from "../PinInteraction";
 import { useEffect, useRef } from "react";
 
 interface ReqOutPin {
     Pin: Pin;
     VisiblePinTitles?: boolean;
+    newWire: { current: WireIncomplete };
     updateAll?: () => void;
+    Wires: Wire[];
 }
 
 const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
@@ -71,6 +73,8 @@ const EditPageOutPin: React.FC<ReqOutPin> = (props) => {
                     DragListeners={DragListeners}
                     VisiblePinTitles={props.VisiblePinTitles}
                     updateAll={props.updateAll}
+                    newWire={props.newWire}
+                    Wires={props.Wires}
                 />
             </div>
         </div>
