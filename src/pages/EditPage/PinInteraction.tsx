@@ -20,6 +20,7 @@ interface PinReq extends React.HTMLAttributes<HTMLDivElement> {
 const PinInteraction: React.FC<PinReq> = (props) => {
     const ref = useRef<HTMLDivElement>(null);
     const handleStartWire = useCallback((e: any) => {
+        if (e.button != 0) return;
         const handleMove = (e: MouseEvent) => {
             props.newWire.current.LastPos = {
                 X: e.pageX - sideWidth,
@@ -166,7 +167,8 @@ const PinInteraction: React.FC<PinReq> = (props) => {
                     return (
                         <div
                             className={cl.ColorElement}
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 setvisible(false);
                                 props.pin.Color = clr;
                                 props.pin.Wires.forEach((wire) => {
