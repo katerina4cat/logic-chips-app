@@ -30,6 +30,7 @@ const EditChip: React.FC<EditReq> = (props) => {
 
     const setModalEditState = useRef((e: boolean) => {});
     const setModalAddState = useRef((e: boolean) => {});
+    const selectingFieldRef = useRef<SVGRectElement>(null);
     const [setupsInput, setSetupsInput] = useState(0);
     const [VisiblePinTitles, setVisiblePinTitles] = useState<boolean>(
         props.VisiblePinTitles != undefined ? props.VisiblePinTitles : true
@@ -207,6 +208,7 @@ const EditChip: React.FC<EditReq> = (props) => {
                         wires={chipLoaded ? editChip.Connections : []}
                         updateAll={updateAll}
                         draggingWire={newWire}
+                        selectingFieldRef={selectingFieldRef}
                     />
                     {chipLoaded
                         ? editChip.SubChips.map((chip) =>

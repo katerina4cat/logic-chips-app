@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { RefObject, useRef } from "react";
 import cl from "./Bus.module.scss";
 import { ChipModel } from "../../common/Simulating/ChipModel";
 import {
@@ -19,6 +19,7 @@ interface LineDrawReq {
     wires: Wire[];
     draggingWire: { current: WireIncomplete };
     updateAll: () => void;
+    selectingFieldRef: RefObject<SVGRectElement>;
 }
 
 interface BusDrawReq {
@@ -76,25 +77,36 @@ export const BusDrawer: React.FC<BusDrawReq> = (props) => {
 
 export const LineDrawer: React.FC<LineDrawReq> = (props) => {
     let firstSelectedPoint: Pos = { X: 0, Y: 0 };
-    const selectingFieldRef = useRef<HTMLDivElement>();
     const moveMouse = (e: MouseEvent) => {
-        if (selectingFieldRef.current) {
-            selectingFieldRef.current.setAttribute(
+        const deltaX = e.pageX - firstSelectedPoint.X;
+        const deltaY = e.pageY - firstSelectedPoint.Y;
+        if (props.selectingFieldRef.current) {
+            if (deltaX < 0)
+                props.selectingFieldRef.current.setAttribute(
+                    "x",
+                    (e.pageX - sideWidth).toString()
+                );
+            if (deltaY < 0)
+                props.selectingFieldRef.current.setAttribute(
+                    "y",
+                    e.pageY.toString()
+                );
+            props.selectingFieldRef.current.setAttribute(
                 "width",
-                e.pageX - firstSelectedPoint.X + "px"
+                Math.abs(deltaX) + "px"
             );
-            selectingFieldRef.current.setAttribute(
+            props.selectingFieldRef.current.setAttribute(
                 "height",
-                e.pageY - firstSelectedPoint.Y + "px"
+                Math.abs(deltaY) + "px"
             );
         }
     };
     const removeMoveMouse = () => {
-        if (selectingFieldRef.current) {
-            selectingFieldRef.current.style.display = "none";
+        if (props.selectingFieldRef.current) {
+            props.selectingFieldRef.current.style.display = "none";
 
-            selectingFieldRef.current.setAttribute("width", "0");
-            selectingFieldRef.current.setAttribute("height", "0");
+            props.selectingFieldRef.current.setAttribute("width", "0");
+            props.selectingFieldRef.current.setAttribute("height", "0");
         }
         window.removeEventListener("mousemove", moveMouse);
     };
@@ -103,24 +115,24 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
         <svg
             style={{
                 position: "absolute",
-                width: "100%",
                 height: "100%",
+                width: "100%",
                 left: 0,
                 top: 0,
             }}
             id="WireSvg"
             onMouseDown={(e) => {
                 firstSelectedPoint = { X: e.pageX, Y: e.pageY };
-                if (selectingFieldRef.current) {
-                    selectingFieldRef.current.setAttribute(
-                        "left",
+                if (props.selectingFieldRef.current) {
+                    props.selectingFieldRef.current.setAttribute(
+                        "x",
                         firstSelectedPoint.X - sideWidth + "px"
                     );
-                    selectingFieldRef.current.setAttribute(
-                        "top",
+                    props.selectingFieldRef.current.setAttribute(
+                        "y",
                         firstSelectedPoint.Y + "px"
                     );
-                    selectingFieldRef.current.style.display = "block";
+                    props.selectingFieldRef.current.style.display = "block";
                     window.addEventListener("mouseup", removeMoveMouse);
                     window.addEventListener("mousemove", moveMouse);
                 }
@@ -180,7 +192,7 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
                 strokeWidth="6px"
                 fill="none"
             />
-            <div ref={selectingFieldRef} className={cl.SelectingField} />
+            <rect ref={props.selectingFieldRef} className={cl.SelectingField} />
         </svg>
     );
 };
