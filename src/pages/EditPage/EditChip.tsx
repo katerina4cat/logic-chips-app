@@ -25,6 +25,7 @@ const EditChip: React.FC<EditReq> = (props) => {
     const [addSelected, setAddSelected] = useState("");
     const [editChip, setEditChip] = useState(CreateChip(chipSelected, 0));
     const [AddingChips, setAddingChips] = useState<ChipModel[]>([]);
+    const [SelectedChips, setSelectedChips] = useState<ChipModel[]>([]);
     const newWire = useRef(new WireIncomplete(undefined));
 
     const setModalEditState = useRef((e: boolean) => {});
@@ -93,7 +94,13 @@ const EditChip: React.FC<EditReq> = (props) => {
 
     return (
         <HotKeys keyMap={keyMap} handlers={handlers}>
-            <div className={cl.EditPage} ref={editPageRef}>
+            <div
+                className={cl.EditPage}
+                ref={editPageRef}
+                onClick={() => {
+                    setSelectedChips([]);
+                }}
+            >
                 <Modal
                     setOpenedRef={setModalEditState}
                     className={cl.OpenEditChipList}
@@ -207,6 +214,8 @@ const EditChip: React.FC<EditReq> = (props) => {
                                   <Bus chip={chip} />
                               ) : (
                                   <Chip
+                                      setChipSelecting={setSelectedChips}
+                                      ChipSelecting={SelectedChips}
                                       chip={chip}
                                       MainChip={editChip}
                                       VisiblePinTitles={VisiblePinTitles}

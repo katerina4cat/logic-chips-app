@@ -4,11 +4,13 @@ import { ChipModel } from "../../common/Simulating/ChipModel";
 import {
     Colors,
     DeleteWire,
+    Pos,
     Wire,
     WireIncomplete,
 } from "../../common/Simulating/Wire";
 import { BUS } from "../../common/Simulating/BUS";
 import { debug } from "../../App";
+import { sideWidth } from "./EditChip";
 
 interface ChipReq {
     chip: ChipModel;
@@ -73,6 +75,30 @@ export const BusDrawer: React.FC<BusDrawReq> = (props) => {
 };
 
 export const LineDrawer: React.FC<LineDrawReq> = (props) => {
+    let firstSelectedPoint: Pos = { X: 0, Y: 0 };
+    const selectingFieldRef = useRef<HTMLDivElement>();
+    const moveMouse = (e: MouseEvent) => {
+        if (selectingFieldRef.current) {
+            selectingFieldRef.current.setAttribute(
+                "width",
+                e.pageX - firstSelectedPoint.X + "px"
+            );
+            selectingFieldRef.current.setAttribute(
+                "height",
+                e.pageY - firstSelectedPoint.Y + "px"
+            );
+        }
+    };
+    const removeMoveMouse = () => {
+        if (selectingFieldRef.current) {
+            selectingFieldRef.current.style.display = "none";
+
+            selectingFieldRef.current.setAttribute("width", "0");
+            selectingFieldRef.current.setAttribute("height", "0");
+        }
+        window.removeEventListener("mousemove", moveMouse);
+    };
+
     return (
         <svg
             style={{
@@ -83,6 +109,22 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
                 top: 0,
             }}
             id="WireSvg"
+            onMouseDown={(e) => {
+                firstSelectedPoint = { X: e.pageX, Y: e.pageY };
+                if (selectingFieldRef.current) {
+                    selectingFieldRef.current.setAttribute(
+                        "left",
+                        firstSelectedPoint.X - sideWidth + "px"
+                    );
+                    selectingFieldRef.current.setAttribute(
+                        "top",
+                        firstSelectedPoint.Y + "px"
+                    );
+                    selectingFieldRef.current.style.display = "block";
+                    window.addEventListener("mouseup", removeMoveMouse);
+                    window.addEventListener("mousemove", moveMouse);
+                }
+            }}
         >
             {props.wires.map((wire) => {
                 if (!wire.WireGraphObject) wire.WireGraphObject = useRef(null);
@@ -138,6 +180,7 @@ export const LineDrawer: React.FC<LineDrawReq> = (props) => {
                 strokeWidth="6px"
                 fill="none"
             />
+            <div ref={selectingFieldRef} className={cl.SelectingField} />
         </svg>
     );
 };
