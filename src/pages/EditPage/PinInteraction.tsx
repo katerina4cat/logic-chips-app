@@ -6,14 +6,14 @@ import cl from "./PinInteraction.module.scss";
 import Input from "./Input";
 import useOutside from "../../hooks/useOutside";
 import { debug } from "../../App";
-import { sideWidth } from "./EditChip";
+import { sideWidth } from "./CurrentChip";
 
 interface PinReq extends React.HTMLAttributes<HTMLDivElement> {
     pin: Pin;
     NameLeft?: boolean;
     DragListeners: RefObject<{ [key: number]: () => void }>;
     VisiblePinTitles?: boolean;
-    newWire: { current: WireIncomplete };
+    newWire: WireIncomplete;
     Wires: Wire[];
     updateAll?: () => void;
 }
@@ -23,14 +23,14 @@ const PinInteraction: React.FC<PinReq> = (props) => {
     const handleStartWire = useCallback((e: any) => {
         if (e.button != 0) return;
         const handleMove = (e: MouseEvent) => {
-            props.newWire.current.LastPos = {
+            props.newWire.LastPos = {
                 X: e.pageX - sideWidth,
                 Y: e.pageY,
             };
         };
         const handleClick = (e: MouseEvent) => {
-            props.newWire.current.WirePoints = [
-                ...props.newWire.current.WirePoints,
+            props.newWire.WirePoints = [
+                ...props.newWire.WirePoints,
                 {
                     X: e.pageX - sideWidth,
                     Y: e.pageY,
@@ -44,14 +44,11 @@ const PinInteraction: React.FC<PinReq> = (props) => {
                 window.removeEventListener("keydown", handleKeydown);
                 window.removeEventListener("click", handleClick);
                 window.removeEventListener("mousemove", handleMove);
-                props.newWire.current.WireGraphObject.current?.setAttribute(
-                    "d",
-                    ""
-                );
-                props.newWire.current.Source = undefined;
+                props.newWire.WireGraphObject.current?.setAttribute("d", "");
+                props.newWire.Source = undefined;
             }
         };
-        if (props.newWire.current.Source != undefined) {
+        if (props.newWire.Source != undefined) {
             let pinFrom: Pin | undefined = undefined;
             let pinTarget: Pin | undefined = undefined;
 
@@ -69,35 +66,31 @@ const PinInteraction: React.FC<PinReq> = (props) => {
                 }
             };
 
-            const newWirePinEditable =
-                props.newWire.current.Source.Chip.ID == 0;
+            const newWirePinEditable = props.newWire.Source.Chip.ID == 0;
             const currPinEditable = props.pin.Chip.ID == 0;
-            settible(newWirePinEditable, props.newWire.current.Source);
+            settible(newWirePinEditable, props.newWire.Source);
             settible(currPinEditable, props.pin);
 
             if (pinFrom != undefined && pinTarget != undefined) {
                 const newWire = new Wire(
                     pinFrom,
                     pinTarget,
-                    props.newWire.current.WirePoints,
+                    props.newWire.WirePoints,
                     undefined,
                     false
                 );
                 props.Wires.push(newWire);
-                props.newWire.current.Source.Wires.push(newWire);
+                props.newWire.Source.Wires.push(newWire);
                 props.pin.Wires.push(newWire);
             }
 
             window.removeEventListener("keydown", handleKeydown);
             window.removeEventListener("click", handleClick);
             window.removeEventListener("mousemove", handleMove);
-            props.newWire.current.WireGraphObject.current?.setAttribute(
-                "d",
-                ""
-            );
-            props.newWire.current.Source = undefined;
+            props.newWire.WireGraphObject.current?.setAttribute("d", "");
+            props.newWire.Source = undefined;
         } else {
-            props.newWire.current.Source = props.pin;
+            props.newWire.Source = props.pin;
             window.addEventListener("keydown", handleKeydown);
             window.addEventListener("click", handleClick);
             window.addEventListener("mousemove", handleMove);

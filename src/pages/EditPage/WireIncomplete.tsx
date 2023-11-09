@@ -7,7 +7,7 @@ interface RequiredProps {
 
 interface WireIncompleteStates {}
 
-export class CurrentChip extends Component<
+export class WireIncompleteGraphics extends Component<
     RequiredProps,
     WireIncompleteStates
 > {

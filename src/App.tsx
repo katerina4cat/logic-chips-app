@@ -1,4 +1,4 @@
-import EditChip from "./pages/EditPage/EditChip";
+import { CurrentChip } from "./pages/EditPage/CurrentChip";
 
 export const debug = true;
 
@@ -10,7 +10,7 @@ function App() {
     return (
         //onContextMenu={(e) => e.preventDefault()}
         <div>
-            <EditChip
+            <CurrentChip
                 VisibleAllPinTitles={
                     VisibleAllPinTitles != null
                         ? VisibleAllPinTitles === "true"
@@ -21,6 +21,7 @@ function App() {
                         ? VisiblePinTitles === "true"
                         : undefined
                 }
+                chipName={"NAND"}
             />
         </div>
     );

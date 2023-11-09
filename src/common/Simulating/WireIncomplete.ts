@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { Pin } from "./Pin";
 import { Pos, Color, Colors } from "./Wire";
 
@@ -6,7 +5,7 @@ export class WireIncomplete {
     radiusWire = 20;
     private _Source: Pin | undefined;
     WirePoints: Pos[] = [];
-    WireGraphObject = useRef<SVGPathElement>(null);
+    WireGraphObject: React.RefObject<SVGPathElement>;
     public set LastPos(value: Pos) {
         this.WirePoints[this.WirePoints.length - 1] = value;
         this.WireGraphObject?.current?.setAttribute(
@@ -29,8 +28,9 @@ export class WireIncomplete {
     }
     Target?: Pin;
     Color?: Color;
-    constructor() {
+    constructor(WireGraphObject: React.RefObject<SVGPathElement>) {
         this._Source = undefined;
+        this.WireGraphObject = WireGraphObject;
     }
     generateStringPoints() {
         if (this.WirePoints.length < 2) {

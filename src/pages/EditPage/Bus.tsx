@@ -1,20 +1,11 @@
-import React, { RefObject, useRef } from "react";
+import React from "react";
 import cl from "./Bus.module.scss";
 import { ChipModel } from "../../common/Simulating/ChipModel";
-import { Colors, DeleteWire, Pos, Wire } from "../../common/Simulating/Wire";
-import { WireIncomplete } from "../../common/Simulating/WireIncomplete";
+import { Colors } from "../../common/Simulating/Wire";
 import { BUS } from "../../common/Simulating/BUS";
-import { debug } from "../../App";
-import { sideWidth } from "./EditChip";
 
 interface ChipReq {
     chip: ChipModel;
-}
-interface LineDrawReq {
-    wires: Wire[];
-    draggingWire: { current: WireIncomplete };
-    updateAll: () => void;
-    selectingFieldRef: RefObject<SVGRectElement>;
 }
 
 interface BusDrawReq {

@@ -1,7 +1,6 @@
 import { Component, ReactNode, RefObject, createRef } from "react";
-import { WireIncomplete } from "../../common/Simulating/WireIncomplete";
 import { Pos } from "../../common/Simulating/Wire";
-import { sideWidth } from "./EditChip";
+import { sideWidth } from "./CurrentChip";
 
 interface RequiredProps {
     SvgElementRef: RefObject<SVGSVGElement>;
@@ -11,7 +10,7 @@ interface SelectorStates {
     StartCords: Pos;
 }
 
-export class CurrentChip extends Component<RequiredProps, SelectorStates> {
+export class Selector extends Component<RequiredProps, SelectorStates> {
     state: Readonly<SelectorStates> = {
         StartCords: { X: 0, Y: 0 },
     };

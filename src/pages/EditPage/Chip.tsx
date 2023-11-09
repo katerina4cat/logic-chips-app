@@ -5,13 +5,13 @@ import PinInteraction from "./PinInteraction";
 import { debug } from "../../App";
 import { Wire } from "../../common/Simulating/Wire";
 import { WireIncomplete } from "../../common/Simulating/WireIncomplete";
-import { sideWidth } from "./EditChip";
+import { sideWidth } from "./CurrentChip";
 
 interface ChipReq {
     chip: ChipModel;
     VisiblePinTitles: boolean;
     MainChip: ChipModel;
-    newWire: { current: WireIncomplete };
+    newWire: WireIncomplete;
     updateAll: () => void;
     Wires: Wire[];
     ChipSelecting: ChipModel[];

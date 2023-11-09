@@ -8,7 +8,7 @@ import { useEffect, useRef } from "react";
 interface ReqOutPin {
     Pin: Pin;
     VisiblePinTitles?: boolean;
-    newWire: { current: WireIncomplete };
+    newWire: WireIncomplete;
     updateAll?: () => void;
     Wires: Wire[];
 }
