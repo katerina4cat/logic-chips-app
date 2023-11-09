@@ -1,6 +1,7 @@
 import { Pin } from "../../../common/Simulating/Pin";
 import cl from "./EditPageOutPin.module.scss";
-import { Colors, Wire, WireIncomplete } from "../../../common/Simulating/Wire";
+import { Colors, Wire } from "../../../common/Simulating/Wire";
+import { WireIncomplete } from "../../../common/Simulating/WireIncomplete";
 import PinInteraction from "../PinInteraction";
 import { useEffect, useRef } from "react";
 

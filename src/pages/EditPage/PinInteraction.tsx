@@ -1,6 +1,7 @@
 import { RefObject, useCallback, useEffect, useRef } from "react";
 import { Pin } from "../../common/Simulating/Pin";
-import { Colors, Wire, WireIncomplete } from "../../common/Simulating/Wire";
+import { Colors, Wire } from "../../common/Simulating/Wire";
+import { WireIncomplete } from "../../common/Simulating/WireIncomplete";
 import cl from "./PinInteraction.module.scss";
 import Input from "./Input";
 import useOutside from "../../hooks/useOutside";

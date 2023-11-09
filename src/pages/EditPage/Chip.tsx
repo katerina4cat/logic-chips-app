@@ -3,7 +3,8 @@ import { ChipModel } from "../../common/Simulating/ChipModel";
 import cl from "./Chip.module.scss";
 import PinInteraction from "./PinInteraction";
 import { debug } from "../../App";
-import { Wire, WireIncomplete } from "../../common/Simulating/Wire";
+import { Wire } from "../../common/Simulating/Wire";
+import { WireIncomplete } from "../../common/Simulating/WireIncomplete";
 import { sideWidth } from "./EditChip";
 
 interface ChipReq {

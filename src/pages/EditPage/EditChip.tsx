@@ -11,7 +11,7 @@ import EditPageOutPin from "./CurrentChipPins/EditPageOutPin";
 import { Bus, BusDrawer, LineDrawer } from "./Bus";
 import { BUS } from "../../common/Simulating/BUS";
 import { ChipModel } from "../../common/Simulating/ChipModel";
-import { WireIncomplete } from "../../common/Simulating/Wire";
+import { WireIncomplete } from "../../common/Simulating/WireIncomplete";
 
 interface EditReq {
     VisiblePinTitles?: boolean;
@@ -26,7 +26,7 @@ const EditChip: React.FC<EditReq> = (props) => {
     const [editChip, setEditChip] = useState(CreateChip(chipSelected, 0));
     const [AddingChips, setAddingChips] = useState<ChipModel[]>([]);
     const [SelectedChips, setSelectedChips] = useState<ChipModel[]>([]);
-    const newWire = useRef(new WireIncomplete(undefined));
+    const newWire = useRef(new WireIncomplete());
 
     const setModalEditState = useRef((e: boolean) => {});
     const setModalAddState = useRef((e: boolean) => {});
