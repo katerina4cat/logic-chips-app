@@ -1,101 +1,114 @@
-import { useEffect, useRef, useState } from "react";
+import { Component, createRef } from "react";
 import { Pin } from "../../../common/Simulating/Pin";
 import cl from "./EditPagePin.module.scss";
 import { Colors, Wire } from "../../../common/Simulating/Wire";
 import { WireIncomplete } from "../../../common/Simulating/WireIncomplete";
 import PinInteraction from "../PinInteraction";
 
-interface ReqPin {
+interface RequiredProps {
     Pin: Pin;
     handleChangeInputPin: () => void;
     IncrementLoadedInput: () => void;
     VisiblePinTitles?: boolean;
     newWire: WireIncomplete;
-    updateAll?: () => void;
     Wires: Wire[];
 }
+interface EditPinState {
+    PinState: number;
+}
 
-const EditPagePin: React.FC<ReqPin> = (props) => {
-    const [pinState, setpinState] = useState(0);
-    props.Pin.State.value = pinState;
-    useEffect(() => {
-        props.IncrementLoadedInput();
-    }, []);
-    useEffect(() => {
-        props.handleChangeInputPin();
-    }, [pinState]);
-    const DragListeners = useRef<{ [key: number]: () => void }>({});
-    useEffect(() => {
-        Object.values(DragListeners.current).forEach((listener) => listener());
-        console.log("UpdateInputsWires!");
-    }, [props.Pin]);
+class EditPagePin extends Component<RequiredProps, EditPinState> {
+    state: Readonly<EditPinState> = {
+        PinState: 0,
+    };
+    first = createRef<HTMLDivElement>();
+    DragListeners: { [key: string]: () => void } = {};
+    componentDidMount() {
+        Object.values(this.DragListeners).forEach((listener) => listener());
+    }
 
-    const first = useRef<HTMLDivElement | null>(null);
-    const handleMouseDown = () => {
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mouseup", handleMouseUp);
+    constructor(props: RequiredProps) {
+        super(props);
+        this.props.Pin.State.value = this.state.PinState;
+        this.props.IncrementLoadedInput();
+    }
+    ChangePinState = () => {
+        this.setState((prev) => {
+            const res = prev.PinState ? 0 : 1;
+            this.props.Pin.State.value = res;
+            return { PinState: res };
+        });
+        this.props.handleChangeInputPin();
     };
 
-    const handleMouseMove = (e: any) => {
-        if (first.current) {
-            props.Pin.Position.Y = e.pageY;
-            first.current.style.top = props.Pin.Position.Y + "px";
-            Object.values(DragListeners.current).forEach((listener) =>
-                listener()
-            );
+    UpdateWires = () => {
+        Object.values(this.DragListeners).forEach((listener) => listener());
+        console.log("UpdateInputsWires!");
+    };
+
+    handleMouseDown = () => {
+        window.addEventListener("mousemove", this.handleMouseMove);
+        window.addEventListener("mouseup", this.handleMouseUp);
+    };
+
+    handleMouseMove = (e: any) => {
+        if (this.first.current) {
+            this.props.Pin.Position.Y = e.pageY;
+            this.first.current.style.top = this.props.Pin.Position.Y + "px";
+            Object.values(this.DragListeners).forEach((listener) => listener());
         }
     };
 
-    const handleMouseUp = () => {
-        window.addEventListener("mouseup", handleMouseUp);
-        window.removeEventListener("mousemove", handleMouseMove);
+    handleMouseUp = () => {
+        window.addEventListener("mouseup", this.handleMouseUp);
+        window.removeEventListener("mousemove", this.handleMouseMove);
     };
 
-    return (
-        <div
-            key={props.Pin.ID}
-            className={cl.CurrChipPin}
-            ref={first}
-            style={{ top: props.Pin.Position.Y }}
-        >
-            <div className={cl.EditPagePin}>
-                <div className={cl.PinChange} onMouseDown={handleMouseDown} />
-                <div
-                    className={cl.PinButtonChange}
-                    style={{
-                        border: "0.15em solid " + Colors.floating.color,
-                        backgroundColor: props.Pin.getColorWithState(),
-                    }}
-                    onClick={() => {
-                        setpinState((prev) => {
-                            const res = prev ? 0 : 1;
-                            return res;
-                        });
-                    }}
-                />
-                <line
-                    style={{
-                        width: "1.4em",
-                        height: "12.5%",
-                        backgroundColor: Colors.floating.color,
-                    }}
-                />
-                <PinInteraction
-                    pin={props.Pin}
-                    NameLeft={false}
-                    style={{
-                        transform: "translateX(-75%)",
-                        fontSize: "1.2em",
-                    }}
-                    DragListeners={DragListeners}
-                    VisiblePinTitles={props.VisiblePinTitles}
-                    updateAll={props.updateAll}
-                    newWire={props.newWire}
-                    Wires={props.Wires}
-                />
+    render() {
+        return (
+            <div
+                key={this.props.Pin.ID}
+                className={cl.CurrChipPin}
+                ref={this.first}
+                style={{ top: this.props.Pin.Position.Y }}
+            >
+                <div className={cl.EditPagePin}>
+                    <div
+                        className={cl.PinChange}
+                        onMouseDown={this.handleMouseDown}
+                    />
+                    <div
+                        className={cl.PinButtonChange}
+                        style={{
+                            border: "0.15em solid " + Colors.floating.color,
+                            backgroundColor: this.props.Pin.getColorWithState(),
+                        }}
+                        onClick={this.ChangePinState}
+                    />
+                    <line
+                        style={{
+                            width: "1.4em",
+                            height: "12.5%",
+                            backgroundColor: Colors.floating.color,
+                        }}
+                    />
+                    <PinInteraction
+                        pin={this.props.Pin}
+                        NameLeft={false}
+                        style={{
+                            transform: "translateX(-75%)",
+                            fontSize: "1.2em",
+                        }}
+                        DragListeners={this.DragListeners}
+                        VisiblePinTitles={this.props.VisiblePinTitles}
+                        updateAll={this.props.handleChangeInputPin}
+                        newWire={this.props.newWire}
+                        Wires={this.props.Wires}
+                    />
+                </div>
             </div>
-        </div>
-    );
-};
+        );
+    }
+}
 
 export default EditPagePin;

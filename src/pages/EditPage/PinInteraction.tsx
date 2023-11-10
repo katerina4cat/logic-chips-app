@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Pin } from "../../common/Simulating/Pin";
 import { Colors, Wire } from "../../common/Simulating/Wire";
 import { WireIncomplete } from "../../common/Simulating/WireIncomplete";
@@ -11,7 +11,7 @@ import { sideWidth } from "./CurrentChip";
 interface PinReq extends React.HTMLAttributes<HTMLDivElement> {
     pin: Pin;
     NameLeft?: boolean;
-    DragListeners: RefObject<{ [key: number]: () => void }>;
+    DragListeners: { [key: number]: () => void };
     VisiblePinTitles?: boolean;
     newWire: WireIncomplete;
     Wires: Wire[];
@@ -99,20 +99,19 @@ const PinInteraction: React.FC<PinReq> = (props) => {
     const [refColor, visible, setvisible] = useOutside(false);
 
     useEffect(() => {
-        if (props.DragListeners.current)
-            props.DragListeners.current[props.pin.ID] = () => {
-                if (ref.current) {
-                    const rect = ref.current.getBoundingClientRect();
-                    props.pin.Position.X = rect.x - 36;
-                    props.pin.Position.Y = rect.y + 9 + window.scrollY;
-                    props.pin.Wires.map((wire) => {
-                        wire.WireGraphObject?.current?.setAttribute(
-                            "d",
-                            wire.generateStringPoints()
-                        );
-                    });
-                }
-            };
+        props.DragListeners[props.pin.ID] = () => {
+            if (ref.current) {
+                const rect = ref.current.getBoundingClientRect();
+                props.pin.Position.X = rect.x - 36;
+                props.pin.Position.Y = rect.y + 9 + window.scrollY;
+                props.pin.Wires.map((wire) => {
+                    wire.WireGraphObject?.current?.setAttribute(
+                        "d",
+                        wire.generateStringPoints()
+                    );
+                });
+            }
+        };
     }, []);
 
     return (

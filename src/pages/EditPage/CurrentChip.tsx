@@ -6,11 +6,12 @@ import { Pin } from "../../common/Simulating/Pin";
 import cl from "./EditChip.module.scss";
 import { BUS } from "../../common/Simulating/BUS";
 import { BusDrawer, Bus } from "./Bus";
-import Chip from "./Chip";
-import EditPageOutPin from "./CurrentChipPins/EditPageOutPin";
+import { Chip } from "./Chip";
+import { EditPageOutPin } from "./CurrentChipPins/EditPageOutPin";
 import EditPagePin from "./CurrentChipPins/EditPagePin";
-import { WireGraphics } from "./Wire";
+import { WireGraphics } from "./WireGraphics";
 import { WireIncompleteGraphics } from "./WireIncomplete";
+import { Wire } from "../../common/Simulating/Wire";
 
 interface RequiredProps {
     chipName: string;
@@ -25,6 +26,7 @@ interface CurrentChipStates {
     VisiblePinTitles: boolean;
     VisibleAllPinTitles: boolean;
     OutputPins: Pin[];
+    ChipLoaded: boolean;
 }
 
 export const sideWidth = 45;
@@ -43,29 +45,39 @@ export class CurrentChip extends Component<RequiredProps, CurrentChipStates> {
                 ? this.props.VisibleAllPinTitles
                 : true,
         OutputPins: [],
+        ChipLoaded: false,
     };
     SvgElementRef = createRef<SVGSVGElement>();
     WireIncompleteRef = createRef<SVGPathElement>();
     NewWire = new WireIncomplete(this.WireIncompleteRef);
-    ChipLoaded = false;
     constructor(props: RequiredProps) {
         super(props);
     }
 
     updateAll = () => {
-        this.setState({ OutputPins: this.state.OpenedChipModel.OutputPins });
+        console.log("test");
+        this.setState({
+            OutputPins: this.state.OpenedChipModel.OutputPins,
+        });
     };
     IncrementLoadedInput = () => {
         this.setState((prev) => {
             const Loaded = prev.SetupsInput + 1;
-            if (Loaded == this.state.OpenedChipModel.InputPins.length)
-                this.ChipLoaded = true;
-            return { SetupsInput: Loaded };
+            return {
+                SetupsInput: Loaded,
+                ChipLoaded:
+                    Loaded >= this.state.OpenedChipModel.InputPins.length,
+            };
         });
+        this.updateAll();
     };
     SetSelectedChip = (chip: ChipModel[]) => {
         this.setState({ SelectedSubChips: chip });
     };
+    DeleteWire(Wire: Wire) {
+        const index = this.state.OpenedChipModel.Connections.indexOf(Wire);
+        this.state.OpenedChipModel.Connections.splice(index, 1);
+    }
 
     render(): ReactNode {
         return (
@@ -81,7 +93,6 @@ export class CurrentChip extends Component<RequiredProps, CurrentChipStates> {
                                 VisiblePinTitles={
                                     this.state.VisibleAllPinTitles
                                 }
-                                updateAll={this.updateAll}
                                 newWire={this.NewWire}
                                 Wires={this.state.OpenedChipModel.Connections}
                             />
@@ -101,21 +112,26 @@ export class CurrentChip extends Component<RequiredProps, CurrentChipStates> {
                     >
                         <BusDrawer
                             buses={
-                                this.ChipLoaded
+                                this.state.ChipLoaded
                                     ? this.state.OpenedChipModel.SubChips.filter(
                                           (chip) => chip.Name == BUS.name
                                       )
                                     : []
                             }
                         />
-                        {this.state.OpenedChipModel.Connections.map(
-                            (WireObject) => (
-                                <WireGraphics Wire={WireObject} />
-                            )
-                        )}
+                        {this.state.ChipLoaded
+                            ? this.state.OpenedChipModel.Connections.map(
+                                  (WireObject) => (
+                                      <WireGraphics
+                                          Wire={WireObject}
+                                          DeleteWire={this.DeleteWire}
+                                      />
+                                  )
+                              )
+                            : undefined}
                         <WireIncompleteGraphics WireIncomplete={this.NewWire} />
                     </svg>
-                    {this.ChipLoaded
+                    {this.state.ChipLoaded
                         ? this.state.OpenedChipModel.SubChips.map((chip) =>
                               chip.Name == "BUS" ? (
                                   <Bus chip={chip} />
@@ -141,7 +157,7 @@ export class CurrentChip extends Component<RequiredProps, CurrentChipStates> {
                         : undefined}
                 </div>
                 <div className={cl.OutputPins}>
-                    {this.ChipLoaded
+                    {this.state.ChipLoaded
                         ? this.state.OutputPins.map((pin) => (
                               <div>
                                   <EditPageOutPin

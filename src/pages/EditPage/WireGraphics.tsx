@@ -1,10 +1,11 @@
-import { Component, ReactNode } from "react";
+import { Component, ReactNode, createRef } from "react";
 import { Wire } from "../../common/Simulating/Wire";
 import cl from "./Wire.module.scss";
 import { debug } from "../../App";
 
 interface RequiredProps {
     Wire: Wire;
+    DeleteWire: (Wire: Wire) => void;
 }
 
 interface WireState {}
@@ -13,8 +14,11 @@ export class WireGraphics extends Component<RequiredProps, WireState> {
     state: Readonly<WireState> = {};
     constructor(props: RequiredProps) {
         super(props);
+        props.Wire.WireGraphObject = createRef<SVGPathElement>();
     }
-    handleKeyDownDeleting(e: KeyboardEvent) {}
+    handleKeyDownDeleting(e: KeyboardEvent) {
+        this.props.DeleteWire(this.props.Wire);
+    }
     render(): ReactNode {
         return (
             <g key={this.props.Wire.ID}>

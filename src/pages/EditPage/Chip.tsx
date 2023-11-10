@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { Component, createRef, useEffect, useRef } from "react";
 import { ChipModel } from "../../common/Simulating/ChipModel";
 import cl from "./Chip.module.scss";
 import PinInteraction from "./PinInteraction";
@@ -7,7 +7,7 @@ import { Wire } from "../../common/Simulating/Wire";
 import { WireIncomplete } from "../../common/Simulating/WireIncomplete";
 import { sideWidth } from "./CurrentChip";
 
-interface ChipReq {
+interface RequiredProps {
     chip: ChipModel;
     VisiblePinTitles: boolean;
     MainChip: ChipModel;
@@ -17,102 +17,106 @@ interface ChipReq {
     ChipSelecting: ChipModel[];
     setChipSelecting: (e: ChipModel[]) => void;
 }
+interface ChipState {}
 
-const Chip: React.FC<ChipReq> = (props) => {
-    const DragListeners = useRef<{ [key: number]: () => void }>({});
-    useEffect(() => {
-        Object.values(DragListeners.current).forEach((listener) => listener());
-        console.log("UpdateChipsWires!");
-    }, []);
+export class Chip extends Component<RequiredProps, ChipState> {
+    DragListeners: { [key: number]: () => void } = {};
+    first = createRef<HTMLDivElement>();
+    state: Readonly<ChipState> = {};
+    constructor(props: RequiredProps) {
+        super(props);
+    }
 
-    const first = useRef<HTMLDivElement | null>(null);
+    componentDidMount() {
+        Object.values(this.DragListeners).forEach((listener) => listener());
+    }
 
-    const handleMouseDown = (e: any) => {
+    handleMouseDown = (e: any) => {
         if (e.button == 0) {
-            window.addEventListener("mousemove", handleMouseMove);
-            window.addEventListener("mouseup", handleMouseUp);
+            window.addEventListener("mousemove", this.handleMouseMove);
+            window.addEventListener("mouseup", this.handleMouseUp);
         }
     };
-    const handleMouseMove = (e: any) => {
-        if (first.current) {
-            props.chip.Position[0].X = e.pageX - sideWidth;
-            props.chip.Position[0].Y = e.pageY;
-            first.current.style.left = props.chip.Position[0].X + "px";
-            first.current.style.top = props.chip.Position[0].Y + "px";
-            Object.values(DragListeners.current).forEach((listener) =>
-                listener()
-            );
+    handleMouseMove = (e: any) => {
+        if (this.first.current) {
+            this.props.chip.Position[0].X = e.pageX - sideWidth;
+            this.props.chip.Position[0].Y = e.pageY;
+            this.first.current.style.left =
+                this.props.chip.Position[0].X + "px";
+            this.first.current.style.top = this.props.chip.Position[0].Y + "px";
+            Object.values(this.DragListeners).forEach((listener) => listener());
         }
     };
-    const handleMouseUp = () => {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
+    handleMouseUp = () => {
+        window.removeEventListener("mousemove", this.handleMouseMove);
+        window.removeEventListener("mouseup", this.handleMouseUp);
     };
-
-    return (
-        <div
-            key={props.chip.ID}
-            ref={first}
-            className={`${cl.Chip} ${
-                props.ChipSelecting.includes(props.chip) ? cl.Selected : ""
-            }`}
-            style={{
-                left: props.chip.Position[0].X,
-                top: props.chip.Position[0].Y,
-                backgroundColor: props.chip.Colour,
-                position: "absolute",
-            }}
-            onMouseDown={(e) => {
-                handleMouseDown(e);
-                props.setChipSelecting([props.chip]);
-            }}
-            onClick={(e) => e.stopPropagation()}
-            onContextMenu={(e) => {
-                if (debug) console.log(props.chip);
-                alert("Заглушка при пкм по чипу");
-                e.stopPropagation();
-                e.preventDefault();
-            }}
-        >
+    render() {
+        return (
             <div
-                className={cl.PinList}
+                key={this.props.chip.ID}
+                ref={this.first}
+                className={`${cl.Chip} ${
+                    this.props.ChipSelecting.includes(this.props.chip)
+                        ? cl.Selected
+                        : ""
+                }`}
                 style={{
-                    transform: "translateX(-60%)",
+                    left: this.props.chip.Position[0].X,
+                    top: this.props.chip.Position[0].Y,
+                    backgroundColor: this.props.chip.Colour,
+                    position: "absolute",
+                }}
+                onMouseDown={(e) => {
+                    this.handleMouseDown(e);
+                    this.props.setChipSelecting([this.props.chip]);
+                }}
+                onClick={(e) => e.stopPropagation()}
+                onContextMenu={(e) => {
+                    if (debug) console.log(this.props.chip);
+                    alert("Заглушка при пкм по чипу");
+                    e.stopPropagation();
+                    e.preventDefault();
                 }}
             >
-                {props.chip.InputPins.map((pin) => (
-                    <PinInteraction
-                        key={pin.ID}
-                        pin={pin}
-                        DragListeners={DragListeners}
-                        VisiblePinTitles={props.VisiblePinTitles}
-                        updateAll={props.updateAll}
-                        newWire={props.newWire}
-                        Wires={props.Wires}
-                    />
-                ))}
+                <div
+                    className={cl.PinList}
+                    style={{
+                        transform: "translateX(-60%)",
+                    }}
+                >
+                    {this.props.chip.InputPins.map((pin) => (
+                        <PinInteraction
+                            key={pin.ID}
+                            pin={pin}
+                            DragListeners={this.DragListeners}
+                            VisiblePinTitles={this.props.VisiblePinTitles}
+                            updateAll={this.props.updateAll}
+                            newWire={this.props.newWire}
+                            Wires={this.props.Wires}
+                        />
+                    ))}
+                </div>
+                {this.props.chip.Name}
+                <div
+                    className={cl.PinList}
+                    style={{
+                        transform: "translateX(60%)",
+                    }}
+                >
+                    {this.props.chip.OutputPins.map((pin) => (
+                        <PinInteraction
+                            key={pin.ID}
+                            pin={pin}
+                            DragListeners={this.DragListeners}
+                            VisiblePinTitles={this.props.VisiblePinTitles}
+                            updateAll={this.props.updateAll}
+                            newWire={this.props.newWire}
+                            Wires={this.props.Wires}
+                        />
+                    ))}
+                </div>
             </div>
-            {props.chip.Name}
-            <div
-                className={cl.PinList}
-                style={{
-                    transform: "translateX(60%)",
-                }}
-            >
-                {props.chip.OutputPins.map((pin) => (
-                    <PinInteraction
-                        key={pin.ID}
-                        pin={pin}
-                        DragListeners={DragListeners}
-                        VisiblePinTitles={props.VisiblePinTitles}
-                        updateAll={props.updateAll}
-                        newWire={props.newWire}
-                        Wires={props.Wires}
-                    />
-                ))}
-            </div>
-        </div>
-    );
-};
-
-export default Chip;
+        );
+    }
+}
