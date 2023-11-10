@@ -1,18 +1,18 @@
-import { ChipModel } from "./ChipModel";
+import { ChipModel, ChipModelRequiredProps } from "./ChipModel";
 import { Pin } from "./Pin";
-import { Pos } from "./Wire";
 
 export class TRI_STATE_BUFFER extends ChipModel {
-    constructor(chipID: number, Position: Array<Pos> = []) {
-        super(
+    constructor(props: ChipModelRequiredProps) {
+        super(props);
+        this.setConfigsChip(
             "TRI-STATE BUFFER",
-            chipID,
+            props.chipID,
             "#262626",
             undefined,
             undefined,
             undefined,
             undefined,
-            Position
+            props.Position
         );
         this.IsBasedChip = true;
         this.InputPins = [

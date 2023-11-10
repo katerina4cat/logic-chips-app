@@ -1,18 +1,18 @@
-import { ChipModel } from "./ChipModel";
+import { ChipModel, ChipModelRequiredProps } from "./ChipModel";
 import { Pin, PinStates } from "./Pin";
-import { Pos } from "./Wire";
 
 export class BUS extends ChipModel {
-    constructor(chipID: number, Position: Array<Pos> = []) {
-        super(
+    constructor(props: ChipModelRequiredProps) {
+        super(props);
+        this.setConfigsChip(
             "BUS",
-            chipID,
+            props.chipID,
             "#fcc",
             undefined,
             undefined,
             undefined,
             undefined,
-            Position
+            props.Position
         );
         this.IsBasedChip = true;
         this.InputPins = [new Pin(true, this, "", 0)];

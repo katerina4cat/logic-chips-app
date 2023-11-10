@@ -6,7 +6,7 @@ import cl from "./PinInteraction.module.scss";
 import Input from "./Input";
 import useOutside from "../../hooks/useOutside";
 import { debug } from "../../App";
-import { sideWidth } from "./CurrentChip";
+import { sideWidth } from "../../common/Simulating/EditChip";
 
 interface PinReq extends React.HTMLAttributes<HTMLDivElement> {
     pin: Pin;

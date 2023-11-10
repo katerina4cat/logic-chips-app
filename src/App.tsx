@@ -1,4 +1,4 @@
-import { CurrentChip } from "./pages/EditPage/CurrentChip";
+import { CreateChip } from "./common/LoadSave/LoadSave";
 
 export const debug = true;
 
@@ -10,19 +10,7 @@ function App() {
     return (
         //onContextMenu={(e) => e.preventDefault()}
         <div>
-            <CurrentChip
-                VisibleAllPinTitles={
-                    VisibleAllPinTitles != null
-                        ? VisibleAllPinTitles === "true"
-                        : undefined
-                }
-                VisiblePinTitles={
-                    VisiblePinTitles != null
-                        ? VisiblePinTitles === "true"
-                        : undefined
-                }
-                chipName={"NAND"}
-            />
+            <CreateChip chipName={"NAND"} chipID={0} isEditChip={true} />
         </div>
     );
 }

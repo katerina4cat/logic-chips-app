@@ -5,7 +5,7 @@ import PinInteraction from "./PinInteraction";
 import { debug } from "../../App";
 import { Wire } from "../../common/Simulating/Wire";
 import { WireIncomplete } from "../../common/Simulating/WireIncomplete";
-import { sideWidth } from "./CurrentChip";
+import { sideWidth } from "../../common/Simulating/EditChip";
 
 interface RequiredProps {
     chip: ChipModel;

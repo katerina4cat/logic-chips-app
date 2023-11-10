@@ -1,18 +1,18 @@
-import { ChipModel } from "./ChipModel";
+import { ChipModel, ChipModelRequiredProps } from "./ChipModel";
 import { Pin } from "./Pin";
-import { Pos } from "./Wire";
 
 export class NOT extends ChipModel {
-    constructor(chipID: number, Position: Array<Pos> = []) {
-        super(
+    constructor(props: ChipModelRequiredProps) {
+        super(props);
+        this.setConfigsChip(
             "NOT",
-            chipID,
+            props.chipID,
             "#8c1f1a",
             undefined,
             undefined,
             undefined,
             undefined,
-            Position
+            props.Position
         );
         this.IsBasedChip = true;
         this.InputPins = [new Pin(true, this, "In", 0, { X: 0, Y: 0.5 })];
