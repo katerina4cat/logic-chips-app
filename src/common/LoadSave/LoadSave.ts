@@ -1,4 +1,3 @@
-import { Pos } from "../Simulating/Wire";
 import { chips } from "./chips";
 import { AND } from "../Simulating/AND";
 import { NOT } from "../Simulating/NOT";
@@ -6,6 +5,7 @@ import { TRI_STATE_BUFFER } from "../Simulating/TRI-STATE BUFFER";
 import { ChipModel } from "../Simulating/ChipModel";
 import { BUS } from "../Simulating/BUS";
 import { InitilizeChipModel } from "./InitializeComponent";
+import { Pos } from "../Simulating/Wire";
 
 export function CreateChip(
     chipName: string,
@@ -22,40 +22,45 @@ export function CreateChip(
         case "TRI-STATE BUFFER":
             return new TRI_STATE_BUFFER(chipID, Points);
         default:
-            return InitilizeChipModel(LoadChipInfo(chipName), chipID, Points);
+            return InitilizeChipModel(
+                LoadChipInfo(chipName),
+                chipID,
+                { current: null },
+                Points
+            );
     }
 }
 
-interface PinInfo {
+interface LoadedPin {
     Name: string;
     ID: number;
     PositionY: number;
 }
 
-interface ChipInfo {
+interface LoadedSubChip {
     Name: string;
     ID: number;
     Points: Array<Pos>;
 }
 
-interface WireInfo {
-    Source: { SubChipID: number; PinID: number };
-    Target: { SubChipID: number; PinID: number };
+interface LoadedWire {
+    Source: { SubChipID: number; PinID: number; PinType: number };
+    Target: { SubChipID: number; PinID: number; PinType: number };
     WirePoints: Array<Pos>;
     ColourThemeName: string;
 }
 
-export interface ChipSaveStruct {
+export interface LoadedChipSave {
     Name: string;
     Colour: string;
-    InputPins: Array<PinInfo>;
-    OutputPins: Array<PinInfo>;
-    SubChips: Array<ChipInfo>;
-    Connections: Array<WireInfo>;
+    InputPins: Array<LoadedPin>;
+    OutputPins: Array<LoadedPin>;
+    SubChips: Array<LoadedSubChip>;
+    Connections: Array<LoadedWire>;
 }
 
 export function LoadChipInfo(ChipName: string) {
-    return chips[ChipName] as ChipSaveStruct;
+    return chips[ChipName] as LoadedChipSave;
 }
 export function ChipHasInChip(ChipName: string, SubChipName: string) {
     if (chips[SubChipName]?.SubChips)

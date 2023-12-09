@@ -1,5 +1,5 @@
 import { Pin } from "./Pin";
-import { Pos, Wire, fixPos } from "./Wire";
+import { Pos, Wire } from "./Wire";
 
 export class ChipModel {
     Name: string;
@@ -30,7 +30,7 @@ export class ChipModel {
         this.Connections = Connections;
         this.SubChips = SubChips;
         this.ID = ID;
-        this.Position = Position.map((pos) => fixPos(pos));
+        this.Position = Position.map((pos) => pos.fixPos());
     }
 
     RefreshedLogic = false;

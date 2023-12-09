@@ -1,24 +1,28 @@
-import React from "react";
 import { Pin, PinState } from "./Pin";
 
 let wireID = 0;
 export class Wire {
-    WireGraphObject?: React.RefObject<SVGPathElement>;
+    WireGraphObject: SVGPathElement;
     State: PinState;
     ID: number;
     Source: Pin;
     Target: Pin;
     WirePoints: Pos[];
     Color: Color;
+
     constructor(
         Source: Pin,
         Target: Pin,
         WirePoints: Pos[] = [],
         Color: Color = Colors.red,
-        fixing = true
+        fixing = true,
+        Canvas: React.RefObject<SVGSVGElement>
     ) {
         this.Source = Source;
         this.State = Source.State;
+
+        this.WireGraphObject = new SVGPathElement();
+        Canvas.current?.appendChild(this.WireGraphObject);
 
         // Если назначение провода это шина, то создаётся новый пин и добавляется в входные пины шины
         if (Target.Chip.Name == "BUS") {
@@ -33,7 +37,7 @@ export class Wire {
         this.Target.ReLinkPins();
         // Возможно опасное место
         if (fixing)
-            this.WirePoints = WirePoints.map((WirePoint) => fixPos(WirePoint));
+            this.WirePoints = WirePoints.map((WirePoint) => WirePoint.fixPos());
         else this.WirePoints = WirePoints;
         //Если чип не шина, то привязывается позиция пина
         if (Source.Chip.Name != "BUS") this.WirePoints[0] = Source.Position;
@@ -69,49 +73,49 @@ export class Wire {
 
     private radiusWire = 20;
 
-    generateStringPoints() {
+    regenerate() {
         if (this.WirePoints.length < 2) {
             return "";
         }
 
-        let path = `M${this.WirePoints[0].X},${this.WirePoints[0].Y}`;
+        let path = `M${this.WirePoints[0].x},${this.WirePoints[0].y}`;
 
         for (let i = 1; i < this.WirePoints.length - 1; i++) {
             const previousPoint = this.WirePoints[i - 1];
             const currentPoint = this.WirePoints[i];
             const nextPoint = this.WirePoints[i + 1];
 
-            const lcpx = currentPoint.X - previousPoint.X;
-            const lcpy = currentPoint.Y - previousPoint.Y;
+            const lcpx = currentPoint.x - previousPoint.x;
+            const lcpy = currentPoint.y - previousPoint.y;
             let dCoefcp =
                 this.radiusWire / Math.sqrt(lcpx * lcpx + lcpy * lcpy);
             let qx, qy;
             if (dCoefcp >= 0.5) {
-                qx = currentPoint.X - lcpx / 2;
-                qy = currentPoint.Y - lcpy / 2;
+                qx = currentPoint.x - lcpx / 2;
+                qy = currentPoint.y - lcpy / 2;
             } else {
-                qx = currentPoint.X - lcpx * dCoefcp;
-                qy = currentPoint.Y - lcpy * dCoefcp;
+                qx = currentPoint.x - lcpx * dCoefcp;
+                qy = currentPoint.y - lcpy * dCoefcp;
             }
 
-            const lpnx = nextPoint.X - currentPoint.X;
-            const lpny = nextPoint.Y - currentPoint.Y;
+            const lpnx = nextPoint.x - currentPoint.x;
+            const lpny = nextPoint.y - currentPoint.y;
             const dCoefpn =
                 this.radiusWire / Math.sqrt(lpnx * lpnx + lpny * lpny);
             let ex, ey;
             if (dCoefpn >= 0.5) {
-                ex = currentPoint.X + lpnx / 2;
-                ey = currentPoint.Y + lpny / 2;
+                ex = currentPoint.x + lpnx / 2;
+                ey = currentPoint.y + lpny / 2;
             } else {
-                ex = currentPoint.X + lpnx * dCoefpn;
-                ey = currentPoint.Y + lpny * dCoefpn;
+                ex = currentPoint.x + lpnx * dCoefpn;
+                ey = currentPoint.y + lpny * dCoefpn;
             }
-            path += ` L${qx},${qy}Q${currentPoint.X},${currentPoint.Y},${ex},${ey}`;
+            path += ` L${qx},${qy}Q${currentPoint.x},${currentPoint.y},${ex},${ey}`;
         }
-        path += `L${this.WirePoints[this.WirePoints.length - 1].X},${
-            this.WirePoints[this.WirePoints.length - 1].Y
+        path += `L${this.WirePoints[this.WirePoints.length - 1].x},${
+            this.WirePoints[this.WirePoints.length - 1].y
         }`;
-        return path;
+        this.WireGraphObject.setAttribute("d", path);
     }
 
     getColorWithState() {
@@ -121,15 +125,27 @@ export class Wire {
     }
 }
 
-export type Pos = { X: number; Y: number };
-export const fixPosX = (X: number) =>
-    ((X + 8.349655) / 16.69931) * window.innerWidth;
-export const fixPosY = (Y: number) =>
-    ((Y - 4.611875) / -9.22375) * window.innerHeight;
-export const fixPos: (pos: Pos) => Pos = (pos) => ({
-    X: fixPosX(pos.X),
-    Y: fixPosY(pos.Y),
-});
+export class Pos {
+    x: number;
+    y: number;
+    constructor(x: number = 0, y: number = 0) {
+        this.x = x;
+        this.y = y;
+    }
+    fixPosX() {
+        this.x = ((this.x + 8.349655) / 16.69931) * window.innerWidth;
+        return this;
+    }
+    fixPosY() {
+        this.y = ((this.y - 4.611875) / -9.22375) * window.innerHeight;
+        return this;
+    }
+    fixPos() {
+        this.fixPosY();
+        this.fixPosX();
+        return this;
+    }
+}
 export type Color = { color: string; title: string };
 export const Colors: { [key: string]: Color } = {
     floating: { color: "#000", title: "" },

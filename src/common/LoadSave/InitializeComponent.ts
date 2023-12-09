@@ -1,11 +1,12 @@
 import { ChipModel } from "../Simulating/ChipModel";
 import { Pin } from "../Simulating/Pin";
 import { Pos, Wire, Colors } from "../Simulating/Wire";
-import { ChipSaveStruct, CreateChip } from "./LoadSave";
+import { LoadedChipSave, CreateChip } from "./LoadSave";
 
 export function InitilizeChipModel(
-    ChipInfo: ChipSaveStruct,
+    ChipInfo: LoadedChipSave,
     chipID: number = 0,
+    Canvas: React.RefObject<SVGSVGElement>,
     Points?: Array<Pos>
 ) {
     const res = new ChipModel(
@@ -21,19 +22,25 @@ export function InitilizeChipModel(
     // Инициализация пинов входов загружаемого чипа
     ChipInfo.InputPins.map((pinInfo) =>
         res.InputPins.push(
-            new Pin(true, res, pinInfo.Name, pinInfo.ID, {
-                X: 0,
-                Y: pinInfo.PositionY,
-            })
+            new Pin(
+                true,
+                res,
+                pinInfo.Name,
+                pinInfo.ID,
+                new Pos(0, pinInfo.PositionY)
+            )
         )
     );
     // Инициализация пинов выходов загружаемого чипа
     ChipInfo.OutputPins.map((pinInfo) =>
         res.OutputPins.push(
-            new Pin(false, res, pinInfo.Name, pinInfo.ID, {
-                X: 0,
-                Y: pinInfo.PositionY,
-            })
+            new Pin(
+                false,
+                res,
+                pinInfo.Name,
+                pinInfo.ID,
+                new Pos(0, pinInfo.PositionY)
+            )
         )
     );
     // Инициализация дочерних чипов загружаемого чипа
@@ -94,7 +101,9 @@ export function InitilizeChipModel(
                 buff.SourcePin,
                 buff.TargetPin,
                 wireInfo.WirePoints,
-                Colors[wireInfo.ColourThemeName.toLocaleLowerCase()]
+                Colors[wireInfo.ColourThemeName.toLocaleLowerCase()],
+                false,
+                Canvas
             )
         );
     });

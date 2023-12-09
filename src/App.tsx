@@ -1,28 +1,23 @@
-import { CurrentChip } from "./pages/EditPage/CurrentChip";
+import { EditPage } from "./EditPage/EditPage";
 
 export const debug = true;
 
 function App() {
-    const VisibleAllPinTitles = window.localStorage.getItem(
-        "VisibleAllPinTitles"
-    );
-    const VisiblePinTitles = window.localStorage.getItem("VisiblePinTitles");
+    let VisibleAllPinTitles: string | null | undefined | boolean =
+        window.localStorage.getItem("VisibleAllPinTitles");
+    let VisiblePinTitles: string | null | undefined | boolean =
+        window.localStorage.getItem("VisiblePinTitles");
+
+    VisiblePinTitles =
+        VisiblePinTitles != null ? VisiblePinTitles === "true" : undefined;
+    VisibleAllPinTitles =
+        VisibleAllPinTitles != null
+            ? VisibleAllPinTitles === "true"
+            : undefined;
     return (
         //onContextMenu={(e) => e.preventDefault()}
-        <div>
-            <CurrentChip
-                VisibleAllPinTitles={
-                    VisibleAllPinTitles != null
-                        ? VisibleAllPinTitles === "true"
-                        : undefined
-                }
-                VisiblePinTitles={
-                    VisiblePinTitles != null
-                        ? VisiblePinTitles === "true"
-                        : undefined
-                }
-                chipName={"NAND"}
-            />
+        <div style={{ width: "100%", height: "100%" }}>
+            <EditPage />
         </div>
     );
 }

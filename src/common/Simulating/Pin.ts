@@ -1,5 +1,5 @@
 import { ChipModel } from "./ChipModel";
-import { Color, Colors, Pos, Wire, fixPosY } from "./Wire";
+import { Color, Colors, Pos, Wire } from "./Wire";
 
 export enum PinStates {
     "FLOATING" = -1,
@@ -7,6 +7,7 @@ export enum PinStates {
     "HIGH" = 1,
 }
 let StatesID = 0;
+
 export class PinState {
     private _value: PinStates;
     private listeners: Array<ChipModel> = [];
@@ -128,13 +129,13 @@ export class Pin {
         Chip: ChipModel,
         Name: string = "Pin",
         ID?: number,
-        Position: Pos = { X: 0, Y: 0 }
+        Position: Pos = new Pos()
     ) {
         this.IsInput = IsInput;
         this.Name = Name;
         this.Chip = Chip;
         this.ID = ID !== undefined ? ID : PinID;
-        this.Position = { X: Position.X, Y: fixPosY(Position.Y) };
+        this.Position = new Pos(Position.x, Position.y).fixPosY();
         this._State.value = PinStates.FLOATING;
         if (ID == undefined) PinID--;
     }
