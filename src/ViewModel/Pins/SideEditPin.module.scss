@@ -1,0 +1,22 @@
+.SideEditPin {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    .MoveBar {
+        width: 0.5em;
+        height: 3em;
+        cursor: n-resize;
+        background-color: #222;
+    }
+    .SwitchButton {
+        height: 2.35em;
+        width: 2.35em;
+        border-radius: 50%;
+        border: 0.2em solid black;
+    }
+    .DecorativeWire {
+        background-color: black;
+        width: 1em;
+        height: 0.35em;
+    }
+}
