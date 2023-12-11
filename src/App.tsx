@@ -1,9 +1,4 @@
-<<<<<<< Updated upstream
-import EditChip from "./pages/EditPage/EditChip";
-=======
-import { useRef } from "react";
 import { EditPage } from "./ViewModel/EditPage";
->>>>>>> Stashed changes
 
 export const debug = true;
 
@@ -23,26 +18,9 @@ function App() {
 
     return (
         //onContextMenu={(e) => e.preventDefault()}
-<<<<<<< Updated upstream
-        <div>
-            <EditChip
-                VisibleAllPinTitles={
-                    VisibleAllPinTitles != null
-                        ? VisibleAllPinTitles === "true"
-                        : undefined
-                }
-                VisiblePinTitles={
-                    VisiblePinTitles != null
-                        ? VisiblePinTitles === "true"
-                        : undefined
-                }
-            />
-        </div>
-=======
         <>
             <EditPage />
         </>
->>>>>>> Stashed changes
     );
 }
 

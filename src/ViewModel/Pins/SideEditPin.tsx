@@ -72,7 +72,7 @@ export class SideEditPin extends Component<RequiredProps, States> {
                     className={cl.SwitchButton}
                     style={{
                         backgroundColor: getColorWithState(
-                            this.state.State,
+                            this.props.Pin.getResultState(),
                             Colors[this.state.ColorType]
                         ),
                         marginLeft: this.props.Input ? "0.6em" : "",
