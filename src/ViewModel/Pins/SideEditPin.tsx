@@ -1,4 +1,4 @@
-import { Component, ReactNode } from "react";
+import { Component, ReactNode, createRef, useRef } from "react";
 import cl from "./SideEditPin.module.scss";
 import { Colors, getColorWithState } from "../Colors";
 import { Pin, State } from "../../Simulating/Pin";
@@ -14,18 +14,23 @@ interface States {
     State: State.States;
     PositionY: number;
     ColorType: string;
+    Name: string;
 }
 
 export class SideEditPin extends Component<RequiredProps, States> {
     constructor(props: RequiredProps) {
         super(props);
         this.state = {
-            State: props.Pin.getResultState(),
+            State: props.Pin.totalState,
             PositionY: props.Pin.position.y,
             ColorType:
                 Object.keys(Colors).find(
                     (key) => Colors[key] === props.Pin.color
                 ) || "green",
+            Name: props.Pin.name,
+        };
+        props.Pin.updateObject = () => {
+            this.setState({ State: props.Pin.totalState });
         };
     }
 
@@ -40,6 +45,7 @@ export class SideEditPin extends Component<RequiredProps, States> {
     processGrabbing = (e: MouseEvent) => {
         this.setState({ PositionY: e.pageY + this.delta });
         this.props.Pin.position.y = this.state.PositionY;
+        if (this.props.Pin.updatePos) this.props.Pin.updatePos();
     };
     stopGrabbing = () => {
         window.removeEventListener("mouseup", this.stopGrabbing);
@@ -72,7 +78,7 @@ export class SideEditPin extends Component<RequiredProps, States> {
                     className={cl.SwitchButton}
                     style={{
                         backgroundColor: getColorWithState(
-                            this.props.Pin.getResultState(),
+                            this.props.Pin.totalState,
                             Colors[this.state.ColorType]
                         ),
                         marginLeft: this.props.Input ? "0.6em" : "",
@@ -83,7 +89,15 @@ export class SideEditPin extends Component<RequiredProps, States> {
                     onClick={this.changeState}
                 />
                 <div className={cl.DecorativeWire} />
-                <RPin Pin={this.props.Pin} />
+                <RPin Pin={this.props.Pin} State={this.state.State} />
+                <input
+                    className={cl.sidePinTitle}
+                    onChange={(e) => {
+                        this.props.Pin.name = e.target.value;
+                        this.setState({ Name: e.target.value });
+                    }}
+                    value={this.state.Name}
+                />
             </div>
         );
     }

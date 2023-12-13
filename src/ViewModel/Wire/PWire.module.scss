@@ -1,0 +1,8 @@
+.PWire {
+    stroke-width: 4px;
+    fill: transparent;
+    &:hover {
+        stroke-width: 6px;
+        cursor: pointer;
+    }
+}

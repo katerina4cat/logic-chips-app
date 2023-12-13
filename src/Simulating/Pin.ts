@@ -8,11 +8,15 @@ export class Pin {
     position: Pos;
     color: Color = Colors.red;
     private _states: State[];
+    totalState: State.States = State.States.UNDEFINED;
+    updateObject?: () => void;
+    updatePos?: () => void;
     get states() {
         return this._states;
     }
     chip: Chip;
-    wires: Wire[];
+    outWires: Wire[];
+    inWires: Wire[];
     constructor(
         chip: Chip,
         id = Date.now(),
@@ -24,15 +28,16 @@ export class Pin {
         this.name = name;
         this._states = [];
         this.chip = chip;
-        this.wires = [];
+        this.outWires = [];
+        this.inWires = [];
         this.position = new Pos(undefined, y);
         if (hasDefaultState) {
-            this._states.push(new State());
+            this._states.push(new State(this));
             this._states[0].value = State.States.LOW;
         }
     }
 
-    getResultState() {
+    private getResultState() {
         let res = State.States.UNDEFINED;
         for (const state of this.states) {
             if (
@@ -48,14 +53,27 @@ export class Pin {
         return res;
     }
 
+    refreshState() {
+        const prevState = this.totalState;
+        this.totalState = this.getResultState();
+        if (prevState == this.totalState) return;
+        this.outWires.forEach((wire) => {
+            if (wire.target != this) wire.target.refreshState();
+        });
+        if (this.updateObject) {
+            this.updateObject();
+            this.outWires.forEach((wire) => wire.updateColor());
+        }
+    }
+
     addState(state: State | State[]) {
         if (Array.isArray(state)) {
             state.forEach((oneState) => this.addState(oneState));
             return;
         }
         this._states.push(state);
-        if (this.chip.isBase) state.addListener(this.chip.updateLogic);
-        this.wires.forEach((wire) => {
+        state.value = state.value;
+        this.outWires.forEach((wire) => {
             if (wire.target != this) wire.target.addState(state);
         });
     }
@@ -68,7 +86,7 @@ export class Pin {
         const indexIn = this.states.indexOf(state);
         if (indexIn != -1) this.states.slice(indexIn, 1);
         else console.log("Ошибка при удалении связей -> Pin.ts:33");
-        this.wires.forEach((wire) => {
+        this.outWires.forEach((wire) => {
             if (wire.target != this) wire.target.removeState(state);
         });
     }
@@ -84,20 +102,16 @@ export class Pos {
 }
 export class State {
     private _value: State.States = State.States.UNDEFINED;
-    private listeners: (() => void)[] = [];
+    listener: Pin;
+    constructor(listener: Pin) {
+        this.listener = listener;
+    }
     set value(value: State.States) {
         this._value = value;
-        this.listeners.forEach((listener) => listener());
+        this.listener.refreshState();
     }
     get value() {
         return this._value;
-    }
-    addListener(listener: () => void) {
-        this.listeners.push(listener);
-    }
-    removeListener(listener: () => void) {
-        const indexIn = this.listeners.indexOf(listener);
-        if (indexIn != -1) this.listeners.splice(indexIn, 1);
     }
 }
 
