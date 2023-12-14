@@ -4,7 +4,8 @@ import { SideEditPin } from "./Pins/SideEditPin";
 import { Pin, Pos } from "../Simulating/Pin";
 import { Chip } from "../Simulating/Chip";
 import { Wire } from "../Simulating/Wire";
-import { PWire } from "./Wire/PWire";
+import { RWire } from "./Wire/RWire";
+import { removeElement } from "./RemoveElement";
 
 interface RequiredProps {}
 
@@ -41,22 +42,37 @@ export class EditPage extends Component<RequiredProps, States> {
             new Wire(this.state.Inputs[0], this.state.Outputs[1], [])
         );
     }
+    removeWire = (wire: Wire) => {
+        wire.deletingWire();
+
+        this.setState((prev) => {
+            removeElement(prev.Wires, wire);
+            return {
+                Wires: prev.Wires,
+            };
+        });
+    };
 
     render(): ReactNode {
         return (
             <div className={cl.EditPage}>
+                <svg className={cl.EditView}>
+                    <g transform="translate(7,7)">
+                        {this.state.Wires.map((wire) => (
+                            <RWire
+                                wire={wire}
+                                deleteWire={this.removeWire}
+                                key={wire.id}
+                            />
+                        ))}
+                    </g>
+                </svg>
                 <div className={cl.InputFiled}>
                     {this.state.Inputs.map((pin) => (
                         <SideEditPin Pin={pin} Input />
                     ))}
                 </div>
-                <svg className={cl.EditView}>
-                    <g transform="translate(-44,7)">
-                        {this.state.Wires.map((wire) => (
-                            <PWire wire={wire} />
-                        ))}
-                    </g>
-                </svg>
+                <div className={cl.ChipField}></div>
                 <div className={cl.OutputField}>
                     {this.state.Outputs.map((pin) => (
                         <SideEditPin Pin={pin} disabled />

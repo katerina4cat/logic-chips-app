@@ -1,4 +1,5 @@
 import { Color, Colors } from "../ViewModel/Colors";
+import { removeElement } from "../ViewModel/RemoveElement";
 import { Chip } from "./Chip";
 import { Wire } from "./Wire";
 
@@ -54,9 +55,7 @@ export class Pin {
     }
 
     refreshState() {
-        const prevState = this.totalState;
         this.totalState = this.getResultState();
-        if (prevState == this.totalState) return;
         this.outWires.forEach((wire) => {
             if (wire.target != this) wire.target.refreshState();
         });
@@ -83,9 +82,8 @@ export class Pin {
             state.forEach((oneState) => this.removeState(oneState));
             return;
         }
-        const indexIn = this.states.indexOf(state);
-        if (indexIn != -1) this.states.slice(indexIn, 1);
-        else console.log("Ошибка при удалении связей -> Pin.ts:33");
+        removeElement(this.states, state);
+        this.refreshState();
         this.outWires.forEach((wire) => {
             if (wire.target != this) wire.target.removeState(state);
         });

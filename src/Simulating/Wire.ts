@@ -1,14 +1,19 @@
 import { getColorWithState } from "../ViewModel/Colors";
+import { removeElement } from "../ViewModel/RemoveElement";
 import { Pin, Pos } from "./Pin";
 
 const radiusWire = 20;
+let wireIDs = 0;
 
 export class Wire {
     source: Pin;
     target: Pin;
     points: Pos[];
     graphicObject?: React.RefObject<SVGPathElement>;
+    id: number;
     constructor(source: Pin, target: Pin, points: Pos[]) {
+        this.id = wireIDs;
+        wireIDs++;
         this.source = source;
         this.target = target;
         this.points = points;
@@ -25,6 +30,12 @@ export class Wire {
                 this.source.totalState,
                 this.source.color
             );
+    }
+
+    deletingWire() {
+        this.target.removeState(this.source.states);
+        removeElement(this.target.inWires, this);
+        removeElement(this.source.outWires, this);
     }
 
     drawWire() {

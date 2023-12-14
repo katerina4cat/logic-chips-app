@@ -30,8 +30,12 @@ export class SideEditPin extends Component<RequiredProps, States> {
             Name: props.Pin.name,
         };
         props.Pin.updateObject = () => {
-            this.setState({ State: props.Pin.totalState });
+            this.setState({ State: this.props.Pin.totalState });
         };
+    }
+
+    componentDidMount(): void {
+        if (this.props.Input) this.props.Pin.states[0].value = State.States.LOW;
     }
 
     grabbing = false;
