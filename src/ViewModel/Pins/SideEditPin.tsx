@@ -1,14 +1,19 @@
-import { Component, ReactNode, createRef, useRef } from "react";
+import { Component, ReactNode } from "react";
 import cl from "./SideEditPin.module.scss";
 import { Colors, getColorWithState } from "../../common/Colors";
 import { Pin } from "../../Simulating/Pin";
 import { State } from "../../common/State";
 import { RPin } from "./RPin";
+import OutsideClickHandler from "react-outside-click-handler";
 
 interface RequiredProps {
     Pin: Pin;
     disabled?: boolean;
     interactPin: { current: (pin: Pin) => void };
+    style?: React.CSSProperties;
+    position?: number;
+    isPreview?: boolean;
+    deletePin?: (pin: Pin) => void;
 }
 
 interface States {
@@ -16,6 +21,7 @@ interface States {
     PositionY: number;
     ColorType: string;
     Name: string;
+    deletingOpen: boolean;
 }
 
 export class SideEditPin extends Component<RequiredProps, States> {
@@ -29,6 +35,7 @@ export class SideEditPin extends Component<RequiredProps, States> {
                     (key) => Colors[key] === props.Pin.color
                 ) || "green",
             Name: props.Pin.name,
+            deletingOpen: false,
         };
         props.Pin.updateObject = () => {
             this.setState({ State: this.props.Pin.totalState });
@@ -36,7 +43,7 @@ export class SideEditPin extends Component<RequiredProps, States> {
     }
 
     componentDidMount(): void {
-        if (this.props.Pin.isInput)
+        if (this.props.Pin.isInput && this.props.Pin.states[0])
             this.props.Pin.states[0].value = State.States.LOW;
     }
 
@@ -73,15 +80,64 @@ export class SideEditPin extends Component<RequiredProps, States> {
             <div
                 className={cl.SideEditPin}
                 style={{
-                    left: this.props.Pin.isInput ? "0.75em" : "",
-                    right: this.props.Pin.isInput ? "" : "0.75em",
-                    top: this.state.PositionY,
-                    flexDirection: this.props.Pin.isInput
-                        ? "row"
-                        : "row-reverse",
+                    ...{
+                        left: this.props.Pin.isInput ? "0.75em" : "",
+                        right: this.props.Pin.isInput ? "" : "0.75em",
+                        top: this.props.position || this.state.PositionY,
+                        flexDirection: this.props.Pin.isInput
+                            ? "row"
+                            : "row-reverse",
+                    },
+                    ...this.props.style,
                 }}
             >
-                <div className={cl.MoveBar} onMouseDown={this.startGrabbing} />
+                <div
+                    className={cl.MoveBar}
+                    onMouseDown={
+                        this.props.isPreview ? undefined : this.startGrabbing
+                    }
+                    onContextMenu={(e) => {
+                        e.preventDefault();
+                        this.setState({ deletingOpen: true });
+                    }}
+                >
+                    <OutsideClickHandler
+                        onOutsideClick={() => {
+                            if (this.state.deletingOpen)
+                                this.setState({ deletingOpen: false });
+                        }}
+                    >
+                        <div
+                            className={cl.DeletingConfirm}
+                            style={{
+                                display: this.state.deletingOpen
+                                    ? "block"
+                                    : "none",
+                                marginLeft: this.props.Pin.isInput
+                                    ? "3em"
+                                    : "unset",
+                                marginRight: this.props.Pin.isInput
+                                    ? "unset"
+                                    : "3em",
+                                transform: this.props.Pin.isInput
+                                    ? "unset"
+                                    : "translateX(-125%)",
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                        >
+                            Пин: {this.props.Pin.name}
+                            <br />
+                            <button
+                                onClick={() => {
+                                    if (this.props.deletePin)
+                                        this.props.deletePin(this.props.Pin);
+                                }}
+                            >
+                                Удалить
+                            </button>
+                        </div>
+                    </OutsideClickHandler>
+                </div>
                 <circle
                     className={cl.SwitchButton}
                     style={{
@@ -102,14 +158,16 @@ export class SideEditPin extends Component<RequiredProps, States> {
                     State={this.state.State}
                     interactPin={this.props.interactPin}
                 />
-                <input
-                    className={cl.sidePinTitle}
-                    onChange={(e) => {
-                        this.props.Pin.name = e.target.value;
-                        this.setState({ Name: e.target.value });
-                    }}
-                    value={this.state.Name}
-                />
+                {this.props.isPreview ? undefined : (
+                    <input
+                        className={cl.sidePinTitle}
+                        onChange={(e) => {
+                            this.props.Pin.name = e.target.value;
+                            this.setState({ Name: e.target.value });
+                        }}
+                        value={this.state.Name}
+                    />
+                )}
             </div>
         );
     }

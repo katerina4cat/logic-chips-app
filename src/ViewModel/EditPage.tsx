@@ -8,6 +8,7 @@ import { Wire } from "../Simulating/Wire";
 import { RWire } from "./Wires/RWire";
 import { removeElement } from "../common/RemoveElement";
 import { RWireIncomplete } from "./Wires/RWireIncomplete";
+import { SidePinField } from "./SidePinField";
 
 interface RequiredProps {}
 
@@ -58,8 +59,25 @@ export class EditPage extends Component<RequiredProps, States> {
     addWire = (wire: Wire) => {
         this.setState((prev) => ({ Wires: [...prev.Wires, wire] }));
     };
+    addPin = (pin: Pin) => {
+        if (pin.isInput)
+            this.setState((prev) => ({ Inputs: [...prev.Inputs, pin] }));
+        else this.setState((prev) => ({ Outputs: [...prev.Outputs, pin] }));
+    };
+    removePin = (pin: Pin) => {
+        while (pin.inWires.length != 0) this.removeWire(pin.inWires[0]);
+        while (pin.outWires.length != 0) this.removeWire(pin.outWires[0]);
+        if (pin.isInput)
+            this.setState((prev) => ({
+                Inputs: removeElement(prev.Inputs, pin),
+            }));
+        else
+            this.setState((prev) => ({
+                Outputs: removeElement(prev.Outputs, pin),
+            }));
+    };
 
-    interactPin = { current: (pin: Pin) => {} }; // Переопределяется в VM->Wires->RWireIncomplete.tsx
+    interactPin = { current: (pin: Pin) => {} }; // Переопределяется в VM->Wires->RWireIncomplete.tsx Необходим для протягивания провода
     wirePointClick = {
         current: (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {},
     }; // Переопределяется в VM->Wires->RWireIncomplete.tsx
@@ -92,21 +110,23 @@ export class EditPage extends Component<RequiredProps, States> {
                         WirePointClick={this.wirePointClick}
                     />
                 </svg>
-                <div className={cl.InputFiled}>
-                    {this.state.Inputs.map((pin) => (
-                        <SideEditPin Pin={pin} interactPin={this.interactPin} />
-                    ))}
-                </div>
+                <SidePinField
+                    Pins={this.state.Inputs}
+                    interactPin={this.interactPin}
+                    currentChip={this.state.CurrentChip}
+                    isInput
+                    addNewPin={this.addPin}
+                    deletePin={this.removePin}
+                />
                 <div className={cl.ChipField}></div>
-                <div className={cl.OutputField}>
-                    {this.state.Outputs.map((pin) => (
-                        <SideEditPin
-                            Pin={pin}
-                            interactPin={this.interactPin}
-                            disabled
-                        />
-                    ))}
-                </div>
+                <SidePinField
+                    Pins={this.state.Outputs}
+                    interactPin={this.interactPin}
+                    currentChip={this.state.CurrentChip}
+                    disabled
+                    addNewPin={this.addPin}
+                    deletePin={this.removePin}
+                />
             </div>
         );
     }

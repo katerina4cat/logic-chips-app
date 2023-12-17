@@ -7,6 +7,16 @@
         height: 3em;
         cursor: n-resize;
         background-color: #222;
+        position: relative;
+        .DeletingConfirm {
+            position: absolute;
+            background-color: #222;
+            border-radius: 8px;
+            padding: 1em;
+            width: max-content;
+            cursor: default;
+            margin-top: 3em;
+        }
     }
     .SwitchButton {
         height: 2.35em;
