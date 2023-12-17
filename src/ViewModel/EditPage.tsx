@@ -3,12 +3,13 @@ import cl from "./EditPage.module.scss";
 import { SideEditPin } from "./Pins/SideEditPin";
 import { Pin } from "../Simulating/Pin";
 import { Pos } from "../common/Pos";
-import { Chip } from "../Simulating/Chip";
+import { AND, Chip, NOT, TRI_STATE_BUFFER } from "../Simulating/Chip";
 import { Wire } from "../Simulating/Wire";
 import { RWire } from "./Wires/RWire";
 import { removeElement } from "../common/RemoveElement";
 import { RWireIncomplete } from "./Wires/RWireIncomplete";
 import { SidePinField } from "./SidePinField";
+import { DefaultChip } from "./Chips/DefaultChip";
 
 interface RequiredProps {}
 
@@ -18,6 +19,8 @@ interface States {
     SubChips: Chip[];
     Wires: Wire[];
     CurrentChip: Chip;
+    showChipPinTitles: boolean;
+    showAllPinTitles: boolean;
 }
 
 export class EditPage extends Component<RequiredProps, States> {
@@ -27,6 +30,10 @@ export class EditPage extends Component<RequiredProps, States> {
         SubChips: [],
         Wires: [],
         CurrentChip: new Chip(undefined, 0),
+        showChipPinTitles:
+            (localStorage.getItem("showingPinTitles") || "true") == "true",
+        showAllPinTitles:
+            (localStorage.getItem("showingAllPinTitles") || "true") == "true",
     };
     constructor(props: RequiredProps) {
         super(props);
@@ -44,7 +51,51 @@ export class EditPage extends Component<RequiredProps, States> {
             ]),
             new Wire(this.state.Inputs[0], this.state.Outputs[1], [])
         );
+        this.state.SubChips.push(
+            new AND(Date.now(), new Pos(200, 400)),
+            new NOT(Date.now(), new Pos(200, 600)),
+            new TRI_STATE_BUFFER(Date.now(), new Pos(200, 800))
+        );
     }
+
+    handleKeyDown = (e: KeyboardEvent) => {
+        console.log(e);
+        if (e.key == "Tab") {
+            e.preventDefault();
+            this.setState((prev) => {
+                localStorage.setItem(
+                    "showingAllPinTitles",
+                    prev.showAllPinTitles ? "false" : "true"
+                );
+                localStorage.setItem(
+                    "showingPinTitles",
+                    prev.showAllPinTitles ? "false" : "true"
+                );
+                return {
+                    showAllPinTitles: !prev.showAllPinTitles,
+                    showChipPinTitles: !prev.showAllPinTitles,
+                };
+            });
+        }
+        if (e.key == "Q" || e.key == "q" || e.key == "Й" || e.key == "й") {
+            e.preventDefault();
+            this.setState((prev) => {
+                localStorage.setItem(
+                    "showingPinTitles",
+                    prev.showChipPinTitles ? "false" : "true"
+                );
+                return { showChipPinTitles: !prev.showChipPinTitles };
+            });
+        }
+    };
+
+    componentDidMount(): void {
+        document.addEventListener("keydown", this.handleKeyDown);
+    }
+    componentWillUnmount(): void {
+        document.removeEventListener("keydown", this.handleKeyDown);
+    }
+
     removeWire = (wire: Wire) => {
         wire.deletingWire();
 
@@ -55,7 +106,6 @@ export class EditPage extends Component<RequiredProps, States> {
             };
         });
     };
-
     addWire = (wire: Wire) => {
         this.setState((prev) => ({ Wires: [...prev.Wires, wire] }));
     };
@@ -117,8 +167,21 @@ export class EditPage extends Component<RequiredProps, States> {
                     isInput
                     addNewPin={this.addPin}
                     deletePin={this.removePin}
+                    showPinTitle={this.state.showAllPinTitles}
                 />
-                <div className={cl.ChipField}></div>
+                <div className={cl.ChipField}>
+                    {this.state.SubChips.map((chip) => (
+                        <DefaultChip
+                            chip={chip}
+                            interactPin={this.interactPin}
+                            showPinTitles={
+                                this.state.showAllPinTitles
+                                    ? this.state.showChipPinTitles
+                                    : false
+                            }
+                        />
+                    ))}
+                </div>
                 <SidePinField
                     Pins={this.state.Outputs}
                     interactPin={this.interactPin}
@@ -126,6 +189,7 @@ export class EditPage extends Component<RequiredProps, States> {
                     disabled
                     addNewPin={this.addPin}
                     deletePin={this.removePin}
+                    showPinTitle={this.state.showAllPinTitles}
                 />
             </div>
         );

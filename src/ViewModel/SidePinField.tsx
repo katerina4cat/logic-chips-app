@@ -7,8 +7,9 @@ import { Chip } from "../Simulating/Chip";
 interface RequiredProps {
     Pins: Pin[];
     interactPin: { current: (pin: Pin) => void };
-    isInput?: boolean;
     currentChip: Chip;
+    showPinTitle?: boolean;
+    isInput?: boolean;
     disabled?: boolean;
     addNewPin: (pin: Pin) => void;
     deletePin: (pin: Pin) => void;
@@ -85,6 +86,7 @@ export class SidePinField extends Component<RequiredProps, States> {
                         interactPin={this.props.interactPin}
                         disabled={this.props.disabled}
                         deletePin={this.props.deletePin}
+                        showPinTitle={this.props.showPinTitle}
                     />
                 ))}
                 <SideEditPin
@@ -92,7 +94,6 @@ export class SidePinField extends Component<RequiredProps, States> {
                         display: this.state.hiden ? "none" : "flex",
                     }}
                     Pin={this.previewPin}
-                    interactPin={{ current: () => {} }}
                     position={this.state.positionY}
                     disabled
                     isPreview

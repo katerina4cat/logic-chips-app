@@ -8,8 +8,9 @@ import OutsideClickHandler from "react-outside-click-handler";
 
 interface RequiredProps {
     Pin: Pin;
+    showPinTitle?: boolean;
     disabled?: boolean;
-    interactPin: { current: (pin: Pin) => void };
+    interactPin?: { current: (pin: Pin) => void };
     style?: React.CSSProperties;
     position?: number;
     isPreview?: boolean;
@@ -155,7 +156,6 @@ export class SideEditPin extends Component<RequiredProps, States> {
                 <div className={cl.DecorativeWire} />
                 <RPin
                     Pin={this.props.Pin}
-                    State={this.state.State}
                     interactPin={this.props.interactPin}
                 />
                 {this.props.isPreview ? undefined : (
@@ -166,6 +166,9 @@ export class SideEditPin extends Component<RequiredProps, States> {
                             this.setState({ Name: e.target.value });
                         }}
                         value={this.state.Name}
+                        style={{
+                            display: this.props.showPinTitle ? "block" : "none",
+                        }}
                     />
                 )}
             </div>

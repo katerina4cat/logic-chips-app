@@ -34,16 +34,16 @@ export class Chip {
 
 export class AND extends Chip {
     isBase = true;
-    constructor(id = Date.now()) {
-        super(undefined, id, "AND", "#267ab2");
-        this.input = [new Pin(this, 0, "A"), new Pin(this, 1, "B")];
-        this.output.push(new Pin(this, 2, "R"));
-        this.output[0].addState(new State());
+    constructor(id = Date.now(), position?: Pos) {
+        super(undefined, id, "AND", "#267ab2", position);
+        this.input = [new Pin(this, true, 0, "A"), new Pin(this, true, 1, "B")];
+        this.output.push(new Pin(this, false, 2, "R"));
+        this.output[0].addState(new State(this.output[0], State.States.LOW));
     }
 
     override updateLogic(): void {
-        const A = this.input[0].getResultState();
-        const B = this.input[1].getResultState();
+        const A = this.input[0].totalState;
+        const B = this.input[1].totalState;
         let res = State.States.UNDEFINED;
         if (A == State.States.FLOATING || B == State.States.FLOATING)
             res = State.States.FLOATING;
@@ -60,15 +60,15 @@ export class AND extends Chip {
 
 export class NOT extends Chip {
     isBase = true;
-    constructor(id = Date.now()) {
-        super(undefined, id, "NOT", "#8c1f1a");
-        this.input.push(new Pin(this, 0, "A"));
-        this.output.push(new Pin(this, 1, "R"));
-        this.output[0].addState(new State());
+    constructor(id = Date.now(), position?: Pos) {
+        super(undefined, id, "NOT", "#8c1f1a", position);
+        this.input.push(new Pin(this, true, 0, "A"));
+        this.output.push(new Pin(this, false, 1, "R"));
+        this.output[0].addState(new State(this.output[0], State.States.HIGH));
     }
 
     override updateLogic(): void {
-        const A = this.input[0].getResultState();
+        const A = this.input[0].totalState;
         let res = State.States.UNDEFINED;
         if (A == State.States.FLOATING) res = State.States.FLOATING;
         else if (A == State.States.UNDEFINED) res = State.States.HIGH;
@@ -79,16 +79,19 @@ export class NOT extends Chip {
 
 export class TRI_STATE_BUFFER extends Chip {
     isBase = true;
-    constructor(id = Date.now()) {
-        super(undefined, id, "TRI-STATE BUFFER", "#262626");
-        this.input = [new Pin(this, 0, "Data"), new Pin(this, 1, "Enable")];
-        this.output.push(new Pin(this, 1, "Output"));
-        this.output[0].addState(new State());
+    constructor(id = Date.now(), position?: Pos) {
+        super(undefined, id, "TRI-STATE BUFFER", "#262626", position);
+        this.input = [
+            new Pin(this, true, 0, "Data"),
+            new Pin(this, true, 1, "Enable"),
+        ];
+        this.output.push(new Pin(this, false, 1, "Output"));
+        this.output[0].addState(new State(this.output[0]));
     }
 
     override updateLogic(): void {
-        const A = this.input[0].getResultState();
-        const B = this.input[1].getResultState();
+        const A = this.input[0].totalState;
+        const B = this.input[1].totalState;
         let res = State.States.UNDEFINED;
         if (B == State.States.FLOATING) res = State.States.FLOATING;
         else if (B == State.States.HIGH) res = A;

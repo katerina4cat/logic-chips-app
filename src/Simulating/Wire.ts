@@ -2,6 +2,7 @@ import { getColorWithState } from "../common/Colors";
 import { removeElement } from "../common/RemoveElement";
 import { Pin } from "./Pin";
 import { Pos } from "../common/Pos";
+import { createRef } from "react";
 
 const radiusWire = 20;
 let wireIDs = 0;
@@ -10,7 +11,7 @@ export class Wire {
     source: Pin;
     target: Pin;
     points: Pos[];
-    graphicObject?: React.RefObject<SVGPathElement>;
+    graphicObject: React.RefObject<SVGPathElement>;
     id: number;
     constructor(source: Pin, target: Pin, points: Pos[]) {
         this.id = wireIDs;
@@ -24,8 +25,12 @@ export class Wire {
         this.source.outWires.push(this);
         this.target.inWires.push(this);
         this.source.refreshState();
+        this.graphicObject = createRef();
     }
 
+    /**
+     * Обновляет цвет провода, исходя из состояния исходящего пина.
+     */
     updateColor() {
         if (this.graphicObject && this.graphicObject.current)
             this.graphicObject.current.style.stroke = getColorWithState(
@@ -34,12 +39,21 @@ export class Wire {
             );
     }
 
+    /**
+     * Удаляет у связь у связанного пина и удаляет из внутренних списков проводов текущий провод.
+     */
     deletingWire() {
         this.target.removeState(this.source.states);
         removeElement(this.target.inWires, this);
         removeElement(this.source.outWires, this);
     }
 
+    /**
+     * Устанавливает точки провода с расчётом закругления
+     * TODO:
+     * Нужно оптимизировать периросовка должна реализовываться по первой и последней точки провода
+     * @returns
+     */
     drawWire() {
         let path = `M${this.points[0].x},${this.points[0].y}`;
 

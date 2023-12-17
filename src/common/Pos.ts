@@ -5,4 +5,9 @@ export class Pos {
         this.x = x;
         this.y = y;
     }
+    add(value: Pos) {
+        this.x += value.x;
+        this.y += value.y;
+        return this;
+    }
 }

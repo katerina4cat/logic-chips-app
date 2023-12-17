@@ -4,4 +4,10 @@
     border-radius: 50%;
     border: 0.1em solid black;
     cursor: pointer;
+    position: relative;
+    .PinTitle {
+        position: absolute;
+        transform: translateY(-25%);
+        font-size: 0.7em;
+    }
 }

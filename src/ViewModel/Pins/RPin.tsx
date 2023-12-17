@@ -1,13 +1,12 @@
-import { Component, ReactNode, createRef } from "react";
+import { Component, ReactNode } from "react";
 import cl from "./RPin.module.scss";
 import { Pin } from "../../Simulating/Pin";
-import { State } from "../../common/State";
 import { getColorWithState } from "../../common/Colors";
 
 interface RequiredProps {
     Pin: Pin;
-    State: State.States;
-    interactPin: { current: (pin: Pin) => void };
+    interactPin?: { current: (pin: Pin) => void };
+    drawTitle?: boolean;
 }
 
 interface States {}
@@ -16,7 +15,8 @@ export class RPin extends Component<RequiredProps, States> {
     constructor(props: RequiredProps) {
         super(props);
         props.Pin.updatePos = () => {
-            const box = this.graphicPin?.current?.getBoundingClientRect();
+            const box =
+                this.props.Pin.graphicalObject.current?.getBoundingClientRect();
             if (box) {
                 this.props.Pin.position.x = box.x + 7;
                 this.props.Pin.position.y = box.y + 7;
@@ -25,7 +25,6 @@ export class RPin extends Component<RequiredProps, States> {
             }
         };
     }
-    graphicPin = createRef<SVGCircleElement>();
 
     componentDidMount(): void {
         if (this.props.Pin.updatePos) this.props.Pin.updatePos();
@@ -33,22 +32,35 @@ export class RPin extends Component<RequiredProps, States> {
 
     handleClick = (e: React.MouseEvent<SVGCircleElement, MouseEvent>) => {
         e.stopPropagation();
-        this.props.interactPin.current(this.props.Pin);
+        if (this.props.interactPin)
+            this.props.interactPin.current(this.props.Pin);
     };
 
     render(): ReactNode {
         return (
             <circle
                 className={cl.RPin}
-                ref={this.graphicPin}
+                ref={this.props.Pin.graphicalObject}
                 style={{
                     backgroundColor: getColorWithState(
-                        this.props.State,
+                        this.props.Pin.totalState,
                         this.props.Pin.color
                     ),
                 }}
+                onMouseDown={(e) => e.stopPropagation()}
                 onClick={this.handleClick}
-            ></circle>
+            >
+                <div
+                    className={cl.PinTitle}
+                    style={{
+                        display: this.props.drawTitle ? "block" : "none",
+                        left: this.props.Pin.isInput ? "unset" : "1.5em",
+                        right: this.props.Pin.isInput ? "1.5em" : "unset",
+                    }}
+                >
+                    {this.props.Pin.name}
+                </div>
+            </circle>
         );
     }
 }

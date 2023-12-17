@@ -1,0 +1,26 @@
+.DefaultChip {
+    position: absolute;
+    display: flex;
+    width: max-content;
+    height: min-content;
+    align-items: center;
+    cursor: move;
+    font-size: 1.25em;
+    & > :first-child {
+        margin: 0.25em auto 0.25em -0.5em;
+    }
+    & > :last-child {
+        margin: 0.25em -0.5em 0.25em auto;
+    }
+    .ChipName {
+        padding: 0 0.75em;
+    }
+    .PinList {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        & > circle {
+            margin: 0.125em 0em;
+        }
+    }
+}

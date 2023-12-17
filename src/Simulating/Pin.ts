@@ -1,9 +1,10 @@
-import { Color, Colors } from "../common/Colors";
+import { Color, Colors, getColorWithState } from "../common/Colors";
 import { removeElement } from "../common/RemoveElement";
 import { Chip } from "./Chip";
 import { Pos } from "../common/Pos";
 import { Wire } from "./Wire";
 import { State } from "../common/State";
+import React, { createRef } from "react";
 
 export class Pin {
     id: number;
@@ -13,6 +14,7 @@ export class Pin {
     isInput: boolean;
     private _states: State[];
     totalState: State.States = State.States.UNDEFINED;
+    graphicalObject: React.RefObject<SVGCircleElement>;
     updateObject?: () => void;
     updatePos?: () => void;
     get states() {
@@ -37,12 +39,17 @@ export class Pin {
         this.outWires = [];
         this.inWires = [];
         this.position = new Pos(undefined, y);
+        this.graphicalObject = createRef();
         if (hasDefaultState) {
             this._states.push(new State(this));
             this._states[0].value = State.States.LOW;
         }
     }
 
+    /**
+     * Получает результирующий результат от связанных состояний
+     * @returns
+     */
     private getResultState() {
         let res = State.States.UNDEFINED;
         for (const state of this.states) {
@@ -59,29 +66,49 @@ export class Pin {
         return res;
     }
 
-    refreshState() {
+    /**
+     * Обновнялет состояние пина, по цепочке обновляет связанные пины.
+     */
+    refreshState = () => {
         this.totalState = this.getResultState();
+        if (this.graphicalObject.current)
+            this.graphicalObject.current.style.backgroundColor =
+                getColorWithState(this.totalState, this.color);
+
         this.outWires.forEach((wire) => {
-            if (wire.target != this) wire.target.refreshState();
+            if (wire.target != this) {
+                wire.target.refreshState();
+                if (wire.target.chip.isBase) wire.target.chip.updateLogic();
+            }
         });
         if (this.updateObject) {
             this.updateObject();
-            this.outWires.forEach((wire) => wire.updateColor());
         }
-    }
+        this.outWires.forEach((wire) => wire.updateColor());
+    };
 
+    /**
+     * Добавляет состояние связанного пина в список
+     * @param state Состояние связанного пина
+     * @returns
+     */
     addState(state: State | State[]) {
         if (Array.isArray(state)) {
             state.forEach((oneState) => this.addState(oneState));
             return;
         }
         this._states.push(state);
-        state.value = state.value;
+        this.refreshState();
         this.outWires.forEach((wire) => {
             if (wire.target != this) wire.target.addState(state);
         });
     }
 
+    /**
+     * Удаляет состояние из списка
+     * @param state Состояние удаляемой связи
+     * @returns
+     */
     removeState(state: State | State[]) {
         if (Array.isArray(state)) {
             state.forEach((oneState) => this.removeState(oneState));
@@ -89,6 +116,7 @@ export class Pin {
         }
         removeElement(this.states, state);
         this.refreshState();
+        if (this.chip.isBase) this.chip.updateLogic();
         this.outWires.forEach((wire) => {
             if (wire.target != this) wire.target.removeState(state);
         });

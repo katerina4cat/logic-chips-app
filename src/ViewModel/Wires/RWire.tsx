@@ -13,7 +13,6 @@ export class RWire extends Component<RequiredProps, States> {
     state: Readonly<States> = {};
     constructor(props: RequiredProps) {
         super(props);
-        props.wire.graphicObject = createRef();
     }
 
     componentDidMount(): void {
