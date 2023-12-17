@@ -1,13 +1,14 @@
 import { Component, ReactNode, createRef, useRef } from "react";
 import cl from "./SideEditPin.module.scss";
-import { Colors, getColorWithState } from "../Colors";
-import { Pin, State } from "../../Simulating/Pin";
+import { Colors, getColorWithState } from "../../common/Colors";
+import { Pin } from "../../Simulating/Pin";
+import { State } from "../../common/State";
 import { RPin } from "./RPin";
 
 interface RequiredProps {
     Pin: Pin;
-    Input?: boolean;
     disabled?: boolean;
+    interactPin: { current: (pin: Pin) => void };
 }
 
 interface States {
@@ -35,7 +36,8 @@ export class SideEditPin extends Component<RequiredProps, States> {
     }
 
     componentDidMount(): void {
-        if (this.props.Input) this.props.Pin.states[0].value = State.States.LOW;
+        if (this.props.Pin.isInput)
+            this.props.Pin.states[0].value = State.States.LOW;
     }
 
     grabbing = false;
@@ -71,10 +73,12 @@ export class SideEditPin extends Component<RequiredProps, States> {
             <div
                 className={cl.SideEditPin}
                 style={{
-                    left: this.props.Input ? "0.75em" : "",
-                    right: this.props.Input ? "" : "0.75em",
+                    left: this.props.Pin.isInput ? "0.75em" : "",
+                    right: this.props.Pin.isInput ? "" : "0.75em",
                     top: this.state.PositionY,
-                    flexDirection: this.props.Input ? "row" : "row-reverse",
+                    flexDirection: this.props.Pin.isInput
+                        ? "row"
+                        : "row-reverse",
                 }}
             >
                 <div className={cl.MoveBar} onMouseDown={this.startGrabbing} />
@@ -85,15 +89,19 @@ export class SideEditPin extends Component<RequiredProps, States> {
                             this.props.Pin.totalState,
                             Colors[this.state.ColorType]
                         ),
-                        marginLeft: this.props.Input ? "0.6em" : "",
-                        marginRight: this.props.Input ? "" : "0.6em",
+                        marginLeft: this.props.Pin.isInput ? "0.6em" : "",
+                        marginRight: this.props.Pin.isInput ? "" : "0.6em",
                         cursor: this.props.disabled ? "default" : "pointer",
                         pointerEvents: this.props.disabled ? "none" : "auto",
                     }}
                     onClick={this.changeState}
                 />
                 <div className={cl.DecorativeWire} />
-                <RPin Pin={this.props.Pin} State={this.state.State} />
+                <RPin
+                    Pin={this.props.Pin}
+                    State={this.state.State}
+                    interactPin={this.props.interactPin}
+                />
                 <input
                     className={cl.sidePinTitle}
                     onChange={(e) => {

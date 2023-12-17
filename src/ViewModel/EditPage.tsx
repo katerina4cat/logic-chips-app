@@ -1,11 +1,13 @@
 import { Component, ReactNode } from "react";
 import cl from "./EditPage.module.scss";
 import { SideEditPin } from "./Pins/SideEditPin";
-import { Pin, Pos } from "../Simulating/Pin";
+import { Pin } from "../Simulating/Pin";
+import { Pos } from "../common/Pos";
 import { Chip } from "../Simulating/Chip";
 import { Wire } from "../Simulating/Wire";
-import { RWire } from "./Wire/RWire";
-import { removeElement } from "./RemoveElement";
+import { RWire } from "./Wires/RWire";
+import { removeElement } from "../common/RemoveElement";
+import { RWireIncomplete } from "./Wires/RWireIncomplete";
 
 interface RequiredProps {}
 
@@ -28,11 +30,11 @@ export class EditPage extends Component<RequiredProps, States> {
     constructor(props: RequiredProps) {
         super(props);
         this.state.Inputs.push(
-            new Pin(this.state.CurrentChip, 0, "test", 230, true)
+            new Pin(this.state.CurrentChip, true, 0, "test", 230, true)
         );
         this.state.Outputs.push(
-            new Pin(this.state.CurrentChip, 1, "test2", 230),
-            new Pin(this.state.CurrentChip, 2, "test3", 400)
+            new Pin(this.state.CurrentChip, false, 1, "test2", 230),
+            new Pin(this.state.CurrentChip, false, 2, "test3", 400)
         );
         this.state.Wires.push(
             new Wire(this.state.Inputs[0], this.state.Outputs[0], [
@@ -53,11 +55,29 @@ export class EditPage extends Component<RequiredProps, States> {
         });
     };
 
+    addWire = (wire: Wire) => {
+        this.setState((prev) => ({ Wires: [...prev.Wires, wire] }));
+    };
+
+    interactPin = { current: (pin: Pin) => {} }; // Переопределяется в VM->Wires->RWireIncomplete.tsx
+    wirePointClick = {
+        current: (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {},
+    }; // Переопределяется в VM->Wires->RWireIncomplete.tsx
+
     render(): ReactNode {
         return (
             <div className={cl.EditPage}>
-                <svg className={cl.EditView}>
-                    <g transform="translate(7,7)">
+                <svg
+                    className={cl.EditView}
+                    onClick={(e) => {
+                        this.wirePointClick.current(e);
+                    }}
+                >
+                    <g
+                        onClick={(e) => {
+                            e.stopPropagation();
+                        }}
+                    >
                         {this.state.Wires.map((wire) => (
                             <RWire
                                 wire={wire}
@@ -66,16 +86,25 @@ export class EditPage extends Component<RequiredProps, States> {
                             />
                         ))}
                     </g>
+                    <RWireIncomplete
+                        addWire={this.addWire}
+                        interactPin={this.interactPin}
+                        WirePointClick={this.wirePointClick}
+                    />
                 </svg>
                 <div className={cl.InputFiled}>
                     {this.state.Inputs.map((pin) => (
-                        <SideEditPin Pin={pin} Input />
+                        <SideEditPin Pin={pin} interactPin={this.interactPin} />
                     ))}
                 </div>
                 <div className={cl.ChipField}></div>
                 <div className={cl.OutputField}>
                     {this.state.Outputs.map((pin) => (
-                        <SideEditPin Pin={pin} disabled />
+                        <SideEditPin
+                            Pin={pin}
+                            interactPin={this.interactPin}
+                            disabled
+                        />
                     ))}
                 </div>
             </div>

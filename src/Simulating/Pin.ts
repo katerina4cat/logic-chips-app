@@ -1,13 +1,16 @@
-import { Color, Colors } from "../ViewModel/Colors";
-import { removeElement } from "../ViewModel/RemoveElement";
+import { Color, Colors } from "../common/Colors";
+import { removeElement } from "../common/RemoveElement";
 import { Chip } from "./Chip";
+import { Pos } from "../common/Pos";
 import { Wire } from "./Wire";
+import { State } from "../common/State";
 
 export class Pin {
     id: number;
     name: string;
     position: Pos;
     color: Color = Colors.red;
+    isInput: boolean;
     private _states: State[];
     totalState: State.States = State.States.UNDEFINED;
     updateObject?: () => void;
@@ -20,12 +23,14 @@ export class Pin {
     inWires: Wire[];
     constructor(
         chip: Chip,
+        input: boolean,
         id = Date.now(),
         name = "Pin",
         y = 0,
         hasDefaultState = false
     ) {
         this.id = id;
+        this.isInput = input;
         this.name = name;
         this._states = [];
         this.chip = chip;
@@ -87,37 +92,5 @@ export class Pin {
         this.outWires.forEach((wire) => {
             if (wire.target != this) wire.target.removeState(state);
         });
-    }
-}
-
-export class Pos {
-    x: number;
-    y: number;
-    constructor(x = 0, y = 0) {
-        this.x = x;
-        this.y = y;
-    }
-}
-export class State {
-    private _value: State.States = State.States.UNDEFINED;
-    listener: Pin;
-    constructor(listener: Pin) {
-        this.listener = listener;
-    }
-    set value(value: State.States) {
-        this._value = value;
-        this.listener.refreshState();
-    }
-    get value() {
-        return this._value;
-    }
-}
-
-export namespace State {
-    export enum States {
-        "LOW" = 0,
-        "HIGH" = 1,
-        "FLOATING" = -2,
-        "UNDEFINED" = -1,
     }
 }

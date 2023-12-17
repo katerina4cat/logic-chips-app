@@ -1,6 +1,7 @@
-import { getColorWithState } from "../ViewModel/Colors";
-import { removeElement } from "../ViewModel/RemoveElement";
-import { Pin, Pos } from "./Pin";
+import { getColorWithState } from "../common/Colors";
+import { removeElement } from "../common/RemoveElement";
+import { Pin } from "./Pin";
+import { Pos } from "../common/Pos";
 
 const radiusWire = 20;
 let wireIDs = 0;
@@ -22,6 +23,7 @@ export class Wire {
         this.target.addState(source.states);
         this.source.outWires.push(this);
         this.target.inWires.push(this);
+        this.source.refreshState();
     }
 
     updateColor() {

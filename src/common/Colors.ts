@@ -1,4 +1,4 @@
-import { State } from "../Simulating/Pin";
+import { State } from "./State";
 
 export type Color = { color: string; title: string };
 export const Colors: { [key: string]: Color } = {

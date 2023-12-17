@@ -1,4 +1,6 @@
-import { Pin, Pos, State } from "./Pin";
+import { Pin } from "./Pin";
+import { State } from "../common/State";
+import { Pos } from "../common/Pos";
 import { Wire } from "./Wire";
 
 export class Chip {

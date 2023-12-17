@@ -16,6 +16,15 @@ export class RWire extends Component<RequiredProps, States> {
         props.wire.graphicObject = createRef();
     }
 
+    componentDidMount(): void {
+        this.props.wire.drawWire();
+        this.props.wire.updateColor();
+    }
+
+    componentWillUnmount(): void {
+        document.removeEventListener("keydown", this.handleKeydown);
+    }
+
     handleKeydown = (e: KeyboardEvent) => {
         if (e.key == "Backspace") this.props.deleteWire(this.props.wire);
     };
@@ -24,13 +33,12 @@ export class RWire extends Component<RequiredProps, States> {
         return (
             <path
                 className={cl.RWire}
-                fill="none"
                 ref={this.props.wire.graphicObject}
-                onMouseEnter={() =>
-                    window.addEventListener("keydown", this.handleKeydown)
+                onMouseOver={() =>
+                    document.addEventListener("keydown", this.handleKeydown)
                 }
-                onMouseLeave={() =>
-                    window.removeEventListener("keydown", this.handleKeydown)
+                onMouseOut={() =>
+                    document.removeEventListener("keydown", this.handleKeydown)
                 }
             ></path>
         );
