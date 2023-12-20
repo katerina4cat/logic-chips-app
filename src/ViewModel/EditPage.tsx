@@ -10,6 +10,8 @@ import { removeElement } from "../common/RemoveElement";
 import { RWireIncomplete } from "./Wires/RWireIncomplete";
 import { SidePinField } from "./SidePinField";
 import { DefaultChip } from "./Chips/DefaultChip";
+import { CircleAdding } from "./CircleAdding/CircleAdding";
+import { ChipMinimalInfo } from "../Structs/ChipMinimalInfo";
 
 interface RequiredProps {}
 
@@ -21,6 +23,7 @@ interface States {
     CurrentChip: Chip;
     showChipPinTitles: boolean;
     showAllPinTitles: boolean;
+    showCircleAdding: boolean;
 }
 
 export class EditPage extends Component<RequiredProps, States> {
@@ -34,6 +37,7 @@ export class EditPage extends Component<RequiredProps, States> {
             (localStorage.getItem("showingPinTitles") || "true") == "true",
         showAllPinTitles:
             (localStorage.getItem("showingAllPinTitles") || "true") == "true",
+        showCircleAdding: true,
     };
     constructor(props: RequiredProps) {
         super(props);
@@ -59,7 +63,6 @@ export class EditPage extends Component<RequiredProps, States> {
     }
 
     handleKeyDown = (e: KeyboardEvent) => {
-        console.log(e);
         if (e.key == "Tab") {
             e.preventDefault();
             this.setState((prev) => {
@@ -86,6 +89,14 @@ export class EditPage extends Component<RequiredProps, States> {
                 );
                 return { showChipPinTitles: !prev.showChipPinTitles };
             });
+        }
+        if (e.key == "a" || e.key == "A" || e.key == "ф" || e.key == "Ф") {
+            this.setState((prev) => ({
+                showCircleAdding: !prev.showCircleAdding,
+            }));
+        }
+        if (e.key == "Escape") {
+            this.setState({ showCircleAdding: false });
         }
     };
 
@@ -191,6 +202,24 @@ export class EditPage extends Component<RequiredProps, States> {
                     deletePin={this.removePin}
                     showPinTitle={this.state.showAllPinTitles}
                 />
+                <CircleAdding
+                    enabled={this.state.showCircleAdding}
+                    elements={[
+                        new ChipMinimalInfo("NAND", 2, 1, 1),
+                        new ChipMinimalInfo("NOT", 1, 1, 1),
+                        new ChipMinimalInfo("AND", 2, 1, 1),
+                        new ChipMinimalInfo("TRI-STATE-BUFFER", 2, 1, 1),
+                        new ChipMinimalInfo("NAND", 2, 1, 1),
+                        new ChipMinimalInfo("NOT", 1, 1, 1),
+                        new ChipMinimalInfo("AND", 2, 1, 1),
+                        new ChipMinimalInfo("TRI-STATE-BUFFER", 2, 1, 1),
+                        new ChipMinimalInfo("NAND", 2, 1, 1),
+                        new ChipMinimalInfo("NOT", 1, 1, 1),
+                        new ChipMinimalInfo("AND", 2, 1, 1),
+                        new ChipMinimalInfo("TRI-STATE-BUFFER", 2, 1, 1),
+                    ]}
+                />
+                {/** maximum 12 элементов */}
             </div>
         );
     }

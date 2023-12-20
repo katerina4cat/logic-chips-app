@@ -1,0 +1,22 @@
+.CircleAdding {
+    position: fixed;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    width: 75svh;
+    height: 75svh;
+    border-radius: 50%;
+    .CircleItem {
+        fill: none;
+        stroke: rgba($color: white, $alpha: 0.3);
+        stroke-width: 30;
+        transform-origin: center;
+        &:hover {
+            stroke: rgba($color: white, $alpha: 0.5);
+            stroke-width: 34;
+        }
+    }
+    .TitleItem {
+        font-size: 2.5px;
+    }
+}
