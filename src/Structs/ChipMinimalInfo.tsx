@@ -1,3 +1,5 @@
+import { Color } from "../common/Colors";
+
 export class ChipMinimalInfo {
     name: string;
     inputPins: number;

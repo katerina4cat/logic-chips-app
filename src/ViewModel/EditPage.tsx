@@ -12,6 +12,7 @@ import { SidePinField } from "./SidePinField";
 import { DefaultChip } from "./Chips/DefaultChip";
 import { CircleAdding } from "./CircleAdding/CircleAdding";
 import { ChipMinimalInfo } from "../Structs/ChipMinimalInfo";
+import { Colors } from "../common/Colors";
 
 interface RequiredProps {}
 
@@ -215,8 +216,6 @@ export class EditPage extends Component<RequiredProps, States> {
                         new ChipMinimalInfo("TRI-STATE-BUFFER", 2, 1, 1),
                         new ChipMinimalInfo("NAND", 2, 1, 1),
                         new ChipMinimalInfo("NOT", 1, 1, 1),
-                        new ChipMinimalInfo("AND", 2, 1, 1),
-                        new ChipMinimalInfo("TRI-STATE-BUFFER", 2, 1, 1),
                     ]}
                 />
                 {/** maximum 12 элементов */}

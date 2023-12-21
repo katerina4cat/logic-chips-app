@@ -9,14 +9,16 @@
     .CircleItem {
         fill: none;
         stroke: rgba($color: white, $alpha: 0.3);
-        stroke-width: 30;
+        stroke-width: 40;
         transform-origin: center;
+        transition: stroke 0.2s ease-in-out, stroke-width 0.3s ease-in-out;
         &:hover {
-            stroke: rgba($color: white, $alpha: 0.5);
-            stroke-width: 34;
+            stroke: rgba($color: white, $alpha: 0.75);
+            stroke-width: 42;
         }
     }
     .TitleItem {
+        pointer-events: none;
         font-size: 2.5px;
     }
 }
