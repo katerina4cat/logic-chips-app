@@ -2,10 +2,13 @@ import { Component, ReactNode } from "react";
 import cl from "./CircleAdding.module.scss";
 import { Pos } from "../../common/Pos";
 import { ChipMinimalInfo } from "../../Structs/ChipMinimalInfo";
+import { Chip } from "../../Simulating/Chip";
+import { loadChipByName } from "../../Simulating/LoadChip";
 
 interface RequiredProps {
     enabled?: boolean;
     elements: ChipMinimalInfo[];
+    addNewChip: (chip: Chip) => void;
 }
 
 interface States {}
@@ -34,22 +37,38 @@ export class CircleAdding extends Component<RequiredProps, States> {
                     const y1 = Math.sin(this.getAngle(i)) * 26 + 50;
                     const x2 = Math.cos(this.getAngle(i + 1)) * 26 + 50;
                     const y2 = Math.sin(this.getAngle(i + 1)) * 26 + 50;
-                    const textx = Math.cos(this.getAngle(i + 0.5)) * 50 + 50;
-                    const texty = Math.sin(this.getAngle(i + 0.5)) * 50 + 50;
+                    const rawTextx = Math.cos(this.getAngle(i + 0.5));
+                    const rawTexty = Math.sin(this.getAngle(i + 0.5));
                     return (
                         <>
                             <path
                                 className={cl.CircleItem}
-                                d={`
-                                M${x1},${y1}A26,26,0,0,${1},${x2},${y2}
-                                `}
+                                d={
+                                    this.props.elements.length == 1
+                                        ? `M${x1},${y1}A26,26,0,0,${1},${
+                                              rawTextx * 26 + 50
+                                          },${
+                                              rawTexty * 26 + 50
+                                          }A26,26,0,0,${1},${x2},${y2}`
+                                        : `M${x1},${y1}A26,26,0,0,${1},${x2},${y2}`
+                                }
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    this.props.addNewChip(
+                                        loadChipByName(element.name)
+                                    );
+                                }}
                             ></path>
                             <path
                                 id={"selector_" + i + element.name}
                                 d={
-                                    textx < 50
-                                        ? `M${textx},${texty}L50,50`
-                                        : `M50,50L${textx},${texty}`
+                                    rawTextx < 0
+                                        ? `M${rawTextx * 50 + 50},${
+                                              rawTexty * 50 + 50
+                                          }L50,50`
+                                        : `M50,50L${rawTextx * 50 + 50},${
+                                              rawTexty * 50 + 50
+                                          }`
                                 }
                             ></path>
                             <text text-anchor="middle">

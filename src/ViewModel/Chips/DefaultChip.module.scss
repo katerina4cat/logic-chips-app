@@ -1,9 +1,9 @@
 .DefaultChip {
-    position: absolute;
     display: flex;
     width: max-content;
     height: min-content;
     align-items: center;
+    margin: 0.1em 0;
     cursor: move;
     font-size: 1.25em;
     & > :first-child {

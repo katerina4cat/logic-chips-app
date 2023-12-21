@@ -1,6 +1,5 @@
-import { Component, ReactNode } from "react";
+import { Component, ReactNode, createRef } from "react";
 import cl from "./EditPage.module.scss";
-import { SideEditPin } from "./Pins/SideEditPin";
 import { Pin } from "../Simulating/Pin";
 import { Pos } from "../common/Pos";
 import { AND, Chip, NOT, TRI_STATE_BUFFER } from "../Simulating/Chip";
@@ -12,7 +11,8 @@ import { SidePinField } from "./SidePinField";
 import { DefaultChip } from "./Chips/DefaultChip";
 import { CircleAdding } from "./CircleAdding/CircleAdding";
 import { ChipMinimalInfo } from "../Structs/ChipMinimalInfo";
-import { Colors } from "../common/Colors";
+import { loadChipByName } from "../Simulating/LoadChip";
+import React from "react";
 
 interface RequiredProps {}
 
@@ -22,9 +22,12 @@ interface States {
     SubChips: Chip[];
     Wires: Wire[];
     CurrentChip: Chip;
+    AddingChip?: Chip;
+    AddingChipCount: number;
     showChipPinTitles: boolean;
     showAllPinTitles: boolean;
     showCircleAdding: boolean;
+    CursorPosition: Pos;
 }
 
 export class EditPage extends Component<RequiredProps, States> {
@@ -34,33 +37,20 @@ export class EditPage extends Component<RequiredProps, States> {
         SubChips: [],
         Wires: [],
         CurrentChip: new Chip(undefined, 0),
+        AddingChipCount: 1,
+        CursorPosition: new Pos(),
         showChipPinTitles:
             (localStorage.getItem("showingPinTitles") || "true") == "true",
         showAllPinTitles:
             (localStorage.getItem("showingAllPinTitles") || "true") == "true",
-        showCircleAdding: true,
+        showCircleAdding: false,
     };
     constructor(props: RequiredProps) {
         super(props);
-        this.state.Inputs.push(
-            new Pin(this.state.CurrentChip, true, 0, "test", 230, true)
-        );
-        this.state.Outputs.push(
-            new Pin(this.state.CurrentChip, false, 1, "test2", 230),
-            new Pin(this.state.CurrentChip, false, 2, "test3", 400)
-        );
-        this.state.Wires.push(
-            new Wire(this.state.Inputs[0], this.state.Outputs[0], [
-                new Pos(500, 25),
-                new Pos(700, 300),
-            ]),
-            new Wire(this.state.Inputs[0], this.state.Outputs[1], [])
-        );
-        this.state.SubChips.push(
-            new AND(Date.now(), new Pos(200, 400)),
-            new NOT(Date.now(), new Pos(200, 600)),
-            new TRI_STATE_BUFFER(Date.now(), new Pos(200, 800))
-        );
+        this.state.Inputs.push();
+        this.state.Outputs.push();
+        this.state.Wires.push();
+        this.state.SubChips.push();
     }
 
     handleKeyDown = (e: KeyboardEvent) => {
@@ -91,21 +81,53 @@ export class EditPage extends Component<RequiredProps, States> {
                 return { showChipPinTitles: !prev.showChipPinTitles };
             });
         }
-        if (e.key == "a" || e.key == "A" || e.key == "ф" || e.key == "Ф") {
+        if (e.key == "1" && e.altKey) {
             this.setState((prev) => ({
                 showCircleAdding: !prev.showCircleAdding,
             }));
         }
-        if (e.key == "Escape") {
-            this.setState({ showCircleAdding: false });
+        if (e.key == "ArrowUp" || e.key == "ArrowRight") {
+            this.setState((prev) => ({
+                AddingChipCount: prev.AddingChipCount + 1,
+            }));
         }
+        if (e.key == "ArrowDown" || e.key == "ArrowLeft") {
+            this.setState((prev) => ({
+                AddingChipCount:
+                    prev.AddingChipCount - 1 > 0
+                        ? prev.AddingChipCount - 1
+                        : prev.AddingChipCount,
+            }));
+        }
+        if (e.key == "Escape") {
+            this.setState({
+                showCircleAdding: false,
+                AddingChip: undefined,
+                AddingChipCount: 1,
+            });
+            document.removeEventListener(
+                "mousedown",
+                this.handleClickToPlaceChip
+            );
+        }
+    };
+
+    handleMouseMove = (e: MouseEvent) => {
+        this.setState((prev) => {
+            prev.CursorPosition.x = e.pageX;
+            prev.CursorPosition.y = e.pageY;
+            return { CursorPosition: prev.CursorPosition };
+        });
     };
 
     componentDidMount(): void {
         document.addEventListener("keydown", this.handleKeyDown);
+        window.addEventListener("mousemove", this.handleMouseMove);
     }
     componentWillUnmount(): void {
         document.removeEventListener("keydown", this.handleKeyDown);
+        window.removeEventListener("mousemove", this.handleMouseMove);
+        document.removeEventListener("mousedown", this.handleClickToPlaceChip);
     }
 
     removeWire = (wire: Wire) => {
@@ -138,11 +160,45 @@ export class EditPage extends Component<RequiredProps, States> {
                 Outputs: removeElement(prev.Outputs, pin),
             }));
     };
+    setAddingChip = (chip: Chip) => {
+        this.setState({
+            AddingChip: chip,
+            AddingChipCount: 1,
+            showCircleAdding: false,
+        });
+        document.addEventListener("mousedown", this.handleClickToPlaceChip);
+    };
+
+    handleClickToPlaceChip = (e: MouseEvent) => {
+        if (!this.state.AddingChip || !this.addingChipBoxRef.current) return;
+        const curretTime = Date.now();
+        this.setState((prev) => ({
+            SubChips: [
+                ...prev.SubChips,
+                ...(Array.from(this.addingChipBoxRef.current?.children || [])
+                    .map((child, i) => {
+                        const box = child?.getBoundingClientRect();
+                        return prev.AddingChip
+                            ? loadChipByName(
+                                  prev.AddingChip.name,
+                                  new Pos(box?.x, box?.y),
+                                  curretTime + i
+                              )
+                            : undefined;
+                    })
+                    .filter(Boolean) as Chip[]),
+            ],
+            AddingChipCount: 1,
+            AddingChip: undefined,
+        }));
+    };
 
     interactPin = { current: (pin: Pin) => {} }; // Переопределяется в VM->Wires->RWireIncomplete.tsx Необходим для протягивания провода
     wirePointClick = {
         current: (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {},
     }; // Переопределяется в VM->Wires->RWireIncomplete.tsx
+
+    addingChipBoxRef = createRef<HTMLDivElement>();
 
     render(): ReactNode {
         return (
@@ -193,6 +249,29 @@ export class EditPage extends Component<RequiredProps, States> {
                             }
                         />
                     ))}
+
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            position: "absolute",
+                            left: this.state.CursorPosition.x - 10,
+                            top: this.state.CursorPosition.y - 5,
+                        }}
+                        ref={this.addingChipBoxRef}
+                    >
+                        {new Array(this.state.AddingChipCount)
+                            .fill(1)
+                            .map((e) => (
+                                <DefaultChip
+                                    isPreview
+                                    chip={this.state.AddingChip}
+                                    interactPin={{
+                                        current: function (pin: Pin): void {},
+                                    }}
+                                />
+                            ))}
+                    </div>
                 </div>
                 <SidePinField
                     Pins={this.state.Outputs}
@@ -206,17 +285,11 @@ export class EditPage extends Component<RequiredProps, States> {
                 <CircleAdding
                     enabled={this.state.showCircleAdding}
                     elements={[
-                        new ChipMinimalInfo("NAND", 2, 1, 1),
-                        new ChipMinimalInfo("NOT", 1, 1, 1),
                         new ChipMinimalInfo("AND", 2, 1, 1),
-                        new ChipMinimalInfo("TRI-STATE-BUFFER", 2, 1, 1),
-                        new ChipMinimalInfo("NAND", 2, 1, 1),
-                        new ChipMinimalInfo("NOT", 1, 1, 1),
-                        new ChipMinimalInfo("AND", 2, 1, 1),
-                        new ChipMinimalInfo("TRI-STATE-BUFFER", 2, 1, 1),
-                        new ChipMinimalInfo("NAND", 2, 1, 1),
-                        new ChipMinimalInfo("NOT", 1, 1, 1),
+                        new ChipMinimalInfo("NOT", 2, 1, 1),
+                        new ChipMinimalInfo("TRI-STATE BUFFER", 2, 1, 1),
                     ]}
+                    addNewChip={this.setAddingChip}
                 />
                 {/** maximum 12 элементов */}
             </div>

@@ -6,9 +6,10 @@ import { Pin } from "../../Simulating/Pin";
 import { Pos } from "../../common/Pos";
 
 interface RequiredProps {
-    chip: Chip;
+    chip: Chip | undefined;
     interactPin: { current: (pin: Pin) => void };
     showPinTitles?: boolean;
+    isPreview?: boolean;
 }
 
 interface States {
@@ -18,7 +19,7 @@ interface States {
 export class DefaultChip extends Component<RequiredProps, States> {
     constructor(props: RequiredProps) {
         super(props);
-        this.state = { position: props.chip.position };
+        this.state = { position: props.chip?.position || new Pos() };
     }
 
     grabbing = false;
@@ -33,6 +34,7 @@ export class DefaultChip extends Component<RequiredProps, States> {
         window.addEventListener("mousemove", this.processGrabbing);
     };
     processGrabbing = (e: MouseEvent) => {
+        if (!this.props.chip) return;
         this.setState({ position: new Pos(e.pageX, e.pageY).add(this.delta) });
         this.props.chip.position = this.state.position;
         this.props.chip.input.forEach((pin) => {
@@ -48,15 +50,20 @@ export class DefaultChip extends Component<RequiredProps, States> {
     };
 
     render(): ReactNode {
+        if (!this.props.chip) return <></>;
         return (
             <div
                 style={{
                     backgroundColor: this.props.chip.color,
+                    position: this.props.isPreview ? "relative" : "absolute",
+                    cursor: this.props.isPreview ? "default" : "pointer",
                     left: this.props.chip.position.x,
                     top: this.props.chip.position.y,
                 }}
                 className={cl.DefaultChip}
-                onMouseDown={this.startGrabbing}
+                onMouseDown={
+                    this.props.isPreview ? undefined : this.startGrabbing
+                }
             >
                 <div className={cl.PinList}>
                     {this.props.chip.input.map((pin) => (
