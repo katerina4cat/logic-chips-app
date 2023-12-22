@@ -171,6 +171,14 @@ export class EditPage extends Component<RequiredProps, States> {
     componentDidMount(): void {
         window.addEventListener("keydown", this.handleKeyDown);
         window.addEventListener("mousemove", this.handleMouseMove);
+        const chip = this.saveManager.loadChipByName("NAND", undefined, 0);
+
+        this.setState({
+            Wires: chip.wires,
+            Inputs: chip.input,
+            Outputs: chip.output,
+            SubChips: chip.subChips,
+        });
     }
     componentWillUnmount(): void {
         window.removeEventListener("keydown", this.handleKeyDown);

@@ -59,8 +59,9 @@ export class DefaultChip extends Component<RequiredProps, States> {
     };
     processGrabbing = (e: MouseEvent) => {
         if (!this.props.chip) return;
-        this.setState({ position: new Pos(e.pageX, e.pageY).add(this.delta) });
-        this.props.chip.position = this.state.position;
+        const newPosition = new Pos(e.pageX, e.pageY).add(this.delta);
+        this.setState({ position: newPosition });
+        this.props.chip.position = newPosition;
         this.props.chip.input.forEach((pin) => {
             if (pin.updatePos) pin.updatePos();
         });

@@ -48,16 +48,17 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
                 (pin.isInput && pin.chip.id === 0) ||
                 (!pin.isInput && pin.chip.id !== 0);
             if (firstIsSource && !pinIsSource) {
-                const copyPoints = [...this.points];
-                copyPoints.pop();
-                props.addWire(new Wire(this.firstPin, pin, copyPoints));
+                this.points.pop();
+                this.points.shift();
+                props.addWire(new Wire(this.firstPin, pin, [...this.points]));
                 if (!ctrlKey) this.clear();
                 return;
             }
             if (pinIsSource && !firstIsSource) {
-                this.points.splice(-1, 1);
                 this.points.reverse();
-                props.addWire(new Wire(pin, this.firstPin, this.points));
+                this.points.pop();
+                this.points.shift();
+                props.addWire(new Wire(pin, this.firstPin, [...this.points]));
                 this.clear();
                 return;
             }

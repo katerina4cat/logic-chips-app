@@ -38,12 +38,10 @@ export class SaveInfo {
     }
 
     saveNewChip(chip: Chip, name: string, color: string, chipType: number = 1) {
-        console.log(chip);
         const savingChip = new ChipMinimalInfo(
             name,
             chipType,
             color,
-            chip.position,
             chip.input.map(
                 (pin) =>
                     new PinSaveInfo(
@@ -64,18 +62,24 @@ export class SaveInfo {
                         pin.position.y
                     )
             ),
-            chip.wires.map(
-                (wire) =>
-                    new WireSaveInfo(
-                        wire.id,
-                        wire.points,
-                        { chipID: wire.source.chip.id, pinID: wire.source.id },
-                        { chipID: wire.target.chip.id, pinID: wire.target.id }
-                    )
-            ),
-            chip.subChips.map((chip) => ({ name: chip.name, id: chip.id }))
+            chip.wires.map((wire) => {
+                const buffPoints = [...wire.points];
+                buffPoints.shift();
+                buffPoints.pop();
+                return new WireSaveInfo(
+                    wire.id,
+                    buffPoints,
+                    { chipID: wire.source.chip.id, pinID: wire.source.id },
+                    { chipID: wire.target.chip.id, pinID: wire.target.id }
+                );
+            }),
+            chip.subChips.map((chip) => ({
+                name: chip.name,
+                id: chip.id,
+                position: chip.position,
+            }))
         );
-        if (name in this.Chips) {
+        if (this.Chips.find((chip) => chip.name == name)) {
             this.Chips = this.Chips.map((chip) =>
                 chip.name == name ? savingChip : chip
             );
@@ -110,23 +114,29 @@ export class SaveInfo {
                     );
                     return new Chip();
                 }
-                const SubChips = chipInfo.SubChips.map((subChipName) =>
+                const SubChips = chipInfo.SubChips.map((subChip) =>
                     this.loadChipByName(
-                        subChipName.name,
-                        undefined,
-                        subChipName.id
+                        subChip.name,
+                        subChip.position,
+                        subChip.id
                     )
                 );
                 const res = new Chip(
                     SubChips,
                     chipID,
                     chipName,
-                    chipInfo.color,
-                    chipInfo.position
+                    chipInfo.color
                 );
                 chipInfo.inputPins.forEach((pin) => {
                     res.input.push(
-                        new Pin(res, true, pin.id, pin.name, pin.positionY)
+                        new Pin(
+                            res,
+                            true,
+                            pin.id,
+                            pin.name,
+                            pin.positionY,
+                            chipID == 0
+                        )
                     );
                 });
                 chipInfo.outputPins.forEach((pin) => {

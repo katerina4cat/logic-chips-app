@@ -18,7 +18,7 @@ export class Wire {
         wireIDs++;
         this.source = source;
         this.target = target;
-        this.points = points;
+        this.points = [...points];
         this.points.unshift(this.source.position);
         this.points.push(this.target.position);
         this.target.addState(source.states);

@@ -6,25 +6,22 @@ export class ChipMinimalInfo {
     name: string;
     chipStyleType: number;
     color: string;
-    position: Pos;
     inputPins: PinSaveInfo[];
     outputPins: PinSaveInfo[];
     Wires: WireSaveInfo[];
-    SubChips: { name: string; id: number }[];
+    SubChips: { name: string; id: number; position: Pos }[];
     constructor(
         name: string,
         chipStyleType: number = 1,
         color: string = "#909090",
-        position: Pos = new Pos(),
         inputPins: PinSaveInfo[] = [],
         outputPins: PinSaveInfo[] = [],
         Wires: WireSaveInfo[] = [],
-        SubChips: { name: string; id: number }[] = []
+        SubChips: { name: string; id: number; position: Pos }[] = []
     ) {
         this.name = name;
         this.chipStyleType = chipStyleType;
         this.color = color;
-        this.position = position;
         this.inputPins = inputPins;
         this.outputPins = outputPins;
         this.Wires = Wires;
