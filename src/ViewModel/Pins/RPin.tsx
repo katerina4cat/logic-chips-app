@@ -5,8 +5,9 @@ import { getColorWithState } from "../../common/Colors";
 
 interface RequiredProps {
     Pin: Pin;
-    interactPin?: { current: (pin: Pin) => void };
+    interactPin?: { current: (pin: Pin, ctrlKey: boolean) => void };
     drawTitle?: boolean;
+    isPreview?: boolean;
 }
 
 interface States {}
@@ -33,7 +34,7 @@ export class RPin extends Component<RequiredProps, States> {
     handleClick = (e: React.MouseEvent<SVGCircleElement, MouseEvent>) => {
         e.stopPropagation();
         if (this.props.interactPin)
-            this.props.interactPin.current(this.props.Pin);
+            this.props.interactPin.current(this.props.Pin, e.ctrlKey);
     };
 
     render(): ReactNode {
@@ -47,8 +48,12 @@ export class RPin extends Component<RequiredProps, States> {
                         this.props.Pin.color
                     ),
                 }}
-                onMouseDown={(e) => e.stopPropagation()}
-                onClick={this.handleClick}
+                onMouseDown={
+                    this.props.isPreview
+                        ? undefined
+                        : (e) => e.stopPropagation()
+                }
+                onClick={this.props.isPreview ? undefined : this.handleClick}
             >
                 <div
                     className={cl.PinTitle}

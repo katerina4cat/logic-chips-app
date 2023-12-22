@@ -6,7 +6,7 @@ import { Chip } from "../Simulating/Chip";
 
 interface RequiredProps {
     Pins: Pin[];
-    interactPin: { current: (pin: Pin) => void };
+    interactPin: { current: (pin: Pin, ctrlKey: boolean) => void };
     currentChip: Chip;
     showPinTitle?: boolean;
     isInput?: boolean;

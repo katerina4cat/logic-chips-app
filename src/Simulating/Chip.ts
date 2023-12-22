@@ -13,6 +13,7 @@ export class Chip {
     color: string;
     isBase = false;
     position: Pos;
+    selected: boolean;
     constructor(
         subChips: Chip[] = [],
         id = Date.now(),
@@ -28,6 +29,7 @@ export class Chip {
         this.input = [];
         this.output = [];
         this.position = position;
+        this.selected = false;
     }
     updateLogic() {}
 }

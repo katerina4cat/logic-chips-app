@@ -10,7 +10,7 @@ interface RequiredProps {
     Pin: Pin;
     showPinTitle?: boolean;
     disabled?: boolean;
-    interactPin?: { current: (pin: Pin) => void };
+    interactPin?: { current: (pin: Pin, ctrlKey: boolean) => void };
     style?: React.CSSProperties;
     position?: number;
     isPreview?: boolean;

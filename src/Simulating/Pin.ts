@@ -121,4 +121,20 @@ export class Pin {
             if (wire.target != this) wire.target.removeState(state);
         });
     }
+
+    /**
+     * Удаляет все внешнии провода пина
+     * @param allChipWire Все провода текущего редактируемого чипа, которые нужно удалить для корректного отображения.
+     */
+    removeAllWire(allChipWire: Wire[]) {
+        while (
+            (this.isInput ? this.inWires.length : this.outWires.length) > 0
+        ) {
+            removeElement(
+                allChipWire,
+                (this.isInput ? this.inWires : this.outWires)[0]
+            );
+            (this.isInput ? this.inWires : this.outWires)[0].deletingWire();
+        }
+    }
 }

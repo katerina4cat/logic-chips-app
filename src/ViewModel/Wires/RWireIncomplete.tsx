@@ -7,7 +7,7 @@ import { getColorWithState } from "../../common/Colors";
 
 interface RequiredProps {
     addWire: (wire: Wire) => void;
-    interactPin: { current: (pin: Pin) => void };
+    interactPin: { current: (pin: Pin, ctrlKey: boolean) => void };
     WirePointClick: {
         current: (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => void;
     };
@@ -28,7 +28,7 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
         ) => {
             if (this.firstPin) this.points.push(new Pos(e.pageX, e.pageY));
         };
-        props.interactPin.current = (pin: Pin) => {
+        props.interactPin.current = (pin: Pin, ctrlKey: boolean) => {
             if (!this.firstPin) {
                 this.firstPin = pin;
                 this.points = [pin.position, new Pos()];
@@ -48,9 +48,10 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
                 (pin.isInput && pin.chip.id === 0) ||
                 (!pin.isInput && pin.chip.id !== 0);
             if (firstIsSource && !pinIsSource) {
-                this.points.splice(-1, 1);
-                props.addWire(new Wire(this.firstPin, pin, this.points));
-                this.clear();
+                const copyPoints = [...this.points];
+                copyPoints.pop();
+                props.addWire(new Wire(this.firstPin, pin, copyPoints));
+                if (!ctrlKey) this.clear();
                 return;
             }
             if (pinIsSource && !firstIsSource) {
