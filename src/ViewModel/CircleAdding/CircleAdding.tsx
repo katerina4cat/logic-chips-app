@@ -3,12 +3,13 @@ import cl from "./CircleAdding.module.scss";
 import { Pos } from "../../common/Pos";
 import { ChipMinimalInfo } from "../../Structs/ChipMinimalInfo";
 import { Chip } from "../../Simulating/Chip";
-import { loadChipByName } from "../../Simulating/LoadChip";
+import { SaveInfo } from "../../Structs/SaveInfo";
 
 interface RequiredProps {
     enabled?: boolean;
     elements: ChipMinimalInfo[];
     addNewChip: (chip: Chip) => void;
+    saveManager: SaveInfo;
 }
 
 interface States {}
@@ -55,7 +56,9 @@ export class CircleAdding extends Component<RequiredProps, States> {
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     this.props.addNewChip(
-                                        loadChipByName(element.name)
+                                        this.props.saveManager.loadChipByName(
+                                            element.name
+                                        )
                                     );
                                 }}
                             ></path>

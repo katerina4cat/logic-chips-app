@@ -2,7 +2,7 @@ import { Component, ReactNode, createRef } from "react";
 import cl from "./EditPage.module.scss";
 import { Pin } from "../Simulating/Pin";
 import { Pos } from "../common/Pos";
-import { AND, Chip, NOT, TRI_STATE_BUFFER } from "../Simulating/Chip";
+import { Chip } from "../Simulating/Chip";
 import { Wire } from "../Simulating/Wire";
 import { RWire } from "./Wires/RWire";
 import { removeElement } from "../common/RemoveElement";
@@ -10,11 +10,15 @@ import { RWireIncomplete } from "./Wires/RWireIncomplete";
 import { SidePinField } from "./SidePinField";
 import { DefaultChip } from "./Chips/DefaultChip";
 import { CircleAdding } from "./CircleAdding/CircleAdding";
-import { ChipMinimalInfo } from "../Structs/ChipMinimalInfo";
-import { loadChipByName } from "../Simulating/LoadChip";
 import React from "react";
+import { SaveInfo } from "../Structs/SaveInfo";
+import { ChipMinimalInfo } from "../Structs/ChipMinimalInfo";
+import { Modal } from "./Modal/Modal";
+import { SaveChip } from "./Modal/SaveChip";
 
-interface RequiredProps {}
+interface RequiredProps {
+    saveName: string;
+}
 
 interface States {
     Inputs: Pin[];
@@ -28,6 +32,8 @@ interface States {
     showAllPinTitles: boolean;
     showCircleAdding: boolean;
     CursorPosition: Pos;
+    enabledModal: boolean;
+    modalContent?: ReactNode;
 }
 
 export class EditPage extends Component<RequiredProps, States> {
@@ -44,14 +50,28 @@ export class EditPage extends Component<RequiredProps, States> {
         showAllPinTitles:
             (localStorage.getItem("showingAllPinTitles") || "true") == "true",
         showCircleAdding: false,
+        enabledModal: false,
     };
+    saveManager: SaveInfo;
     constructor(props: RequiredProps) {
         super(props);
-        this.state.Inputs.push();
-        this.state.Outputs.push();
-        this.state.Wires.push();
-        this.state.SubChips.push();
+        this.saveManager = SaveInfo.loadSave(props.saveName);
     }
+
+    componentDidUpdate(
+        prevProps: Readonly<RequiredProps>,
+        prevState: Readonly<States>,
+        snapshot?: any
+    ): void {
+        this.state.CurrentChip.input = this.state.Inputs;
+        this.state.CurrentChip.output = this.state.Outputs;
+        this.state.CurrentChip.wires = this.state.Wires;
+        this.state.CurrentChip.subChips = this.state.SubChips;
+    }
+
+    setModal = (state: boolean) => {
+        this.setState({ enabledModal: state });
+    };
 
     handleKeyDown = (e: KeyboardEvent) => {
         if (e.key == "Tab") {
@@ -110,6 +130,22 @@ export class EditPage extends Component<RequiredProps, States> {
                 this.handleClickToPlaceChip
             );
         }
+        if (
+            (e.key == "s" || e.key == "S" || e.key == "ы" || e.key == "Ы") &&
+            e.ctrlKey
+        ) {
+            this.setState({
+                enabledModal: true,
+                modalContent: (
+                    <SaveChip
+                        saveManager={this.saveManager}
+                        currentChip={this.state.CurrentChip}
+                        setEnabled={this.setModal}
+                    />
+                ),
+            });
+            e.preventDefault();
+        }
     };
 
     handleMouseMove = (e: MouseEvent) => {
@@ -129,7 +165,6 @@ export class EditPage extends Component<RequiredProps, States> {
         window.removeEventListener("mousemove", this.handleMouseMove);
         document.removeEventListener("mousedown", this.handleClickToPlaceChip);
     }
-
     removeWire = (wire: Wire) => {
         wire.deletingWire();
 
@@ -169,7 +204,7 @@ export class EditPage extends Component<RequiredProps, States> {
         document.addEventListener("mousedown", this.handleClickToPlaceChip);
     };
 
-    handleClickToPlaceChip = (e: MouseEvent) => {
+    handleClickToPlaceChip = () => {
         if (!this.state.AddingChip || !this.addingChipBoxRef.current) return;
         const curretTime = Date.now();
         this.setState((prev) => ({
@@ -179,7 +214,7 @@ export class EditPage extends Component<RequiredProps, States> {
                     .map((child, i) => {
                         const box = child?.getBoundingClientRect();
                         return prev.AddingChip
-                            ? loadChipByName(
+                            ? this.saveManager.loadChipByName(
                                   prev.AddingChip.name,
                                   new Pos(box?.x, box?.y),
                                   curretTime + i
@@ -284,14 +319,25 @@ export class EditPage extends Component<RequiredProps, States> {
                 />
                 <CircleAdding
                     enabled={this.state.showCircleAdding}
-                    elements={[
-                        new ChipMinimalInfo("AND", 2, 1, 1),
-                        new ChipMinimalInfo("NOT", 2, 1, 1),
-                        new ChipMinimalInfo("TRI-STATE BUFFER", 2, 1, 1),
-                    ]}
+                    elements={
+                        this.saveManager.Wheels[0]
+                            .map((wheelItem) =>
+                                this.saveManager.Chips.find(
+                                    (chip) => chip.name == wheelItem
+                                )
+                            )
+                            .filter(Boolean) as ChipMinimalInfo[]
+                    }
                     addNewChip={this.setAddingChip}
+                    saveManager={this.saveManager}
                 />
                 {/** maximum 12 элементов */}
+                <Modal
+                    setEnabled={this.setModal}
+                    enabled={this.state.enabledModal}
+                >
+                    {this.state.modalContent}
+                </Modal>
             </div>
         );
     }

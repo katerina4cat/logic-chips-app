@@ -16,7 +16,7 @@ export class Chip {
     constructor(
         subChips: Chip[] = [],
         id = Date.now(),
-        name = "Untitled",
+        name = "",
         color: string = "#fff",
         position = new Pos()
     ) {
