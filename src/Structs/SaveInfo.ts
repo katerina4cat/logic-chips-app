@@ -28,7 +28,7 @@ export class SaveInfo {
     static loadSave(saveName: string) {
         const res = JSON.parse(
             localStorage.getItem(saveName) ||
-                `{"Chips":[], "Wheels":[["AND","NOT","TRI-STATE BUFFER"]]}`
+                `{"Chips":[], "Wheels":[["AND","NOT","TRI-STATE BUFFER"],[],[],[],[],[],[],[],[]]}`
         ) as SaveInfo;
         return new SaveInfo(res.Chips, res.Wheels, saveName);
     }
@@ -91,6 +91,22 @@ export class SaveInfo {
         return false;
     }
 
+    canAddedChipToCurrentEdit = (
+        currentChip: string,
+        chipName: string
+    ): boolean => {
+        if (chipName == currentChip) return false;
+        const chipInfo = this.Chips.find((chip) => chip.name == chipName);
+        if (!chipInfo) return false;
+        console.log(chipInfo.SubChips);
+        for (let subTestChip of chipInfo.SubChips)
+            return this.canAddedChipToCurrentEdit(
+                currentChip,
+                subTestChip.name
+            );
+        return true;
+    };
+
     loadChipByName = (
         chipName: string,
         position: Pos = new Pos(),
@@ -125,7 +141,8 @@ export class SaveInfo {
                     SubChips,
                     chipID,
                     chipName,
-                    chipInfo.color
+                    chipInfo.color,
+                    position
                 );
                 chipInfo.inputPins.forEach((pin) => {
                     res.input.push(

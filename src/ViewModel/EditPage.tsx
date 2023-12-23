@@ -15,6 +15,7 @@ import { SaveInfo } from "../Structs/SaveInfo";
 import { ChipMinimalInfo } from "../Structs/ChipMinimalInfo";
 import { Modal } from "./Modal/Modal";
 import { SaveChip } from "./Modal/SaveChip";
+import { ChipList } from "./Modal/ChipList";
 
 interface RequiredProps {
     saveName: string;
@@ -30,7 +31,8 @@ interface States {
     AddingChipCount: number;
     showChipPinTitles: boolean;
     showAllPinTitles: boolean;
-    showCircleAdding: boolean;
+    showCircleAdding: boolean[];
+    showLibrary: boolean;
     CursorPosition: Pos;
     enabledModal: boolean;
     modalContent?: ReactNode;
@@ -49,7 +51,8 @@ export class EditPage extends Component<RequiredProps, States> {
             (localStorage.getItem("showingPinTitles") || "true") == "true",
         showAllPinTitles:
             (localStorage.getItem("showingAllPinTitles") || "true") == "true",
-        showCircleAdding: false,
+        showCircleAdding: new Array(9).fill(false),
+        showLibrary: false,
         enabledModal: false,
     };
     saveManager: SaveInfo;
@@ -67,6 +70,10 @@ export class EditPage extends Component<RequiredProps, States> {
 
     setModal = (state: boolean) => {
         this.setState({ enabledModal: state });
+    };
+
+    setLibrary = (state: boolean) => {
+        this.setState({ showLibrary: state });
     };
 
     handleKeyDown = (e: KeyboardEvent) => {
@@ -97,9 +104,26 @@ export class EditPage extends Component<RequiredProps, States> {
                 return { showChipPinTitles: !prev.showChipPinTitles };
             });
         }
-        if (e.key == "1" && e.altKey) {
+        for (let i = 0; i < 9; i++)
+            if (e.key == (i + 1).toString() && e.altKey) {
+                this.setState((prev) => {
+                    const newCircleState = new Array(9).fill(false);
+                    newCircleState[i] = !prev.showCircleAdding[i];
+                    return {
+                        showCircleAdding: newCircleState,
+                        showLibrary: false,
+                        enabledModal: false,
+                    };
+                });
+            }
+        if (
+            (e.key == "a" || e.key == "A" || e.key == "ф" || e.key == "Ф") &&
+            e.ctrlKey
+        ) {
             this.setState((prev) => ({
-                showCircleAdding: !prev.showCircleAdding,
+                showLibrary: !prev.showLibrary,
+                showCircleAdding: new Array(9).fill(false),
+                enabledModal: false,
             }));
         }
         if (e.key == "ArrowUp" || e.key == "ArrowRight") {
@@ -117,7 +141,7 @@ export class EditPage extends Component<RequiredProps, States> {
         }
         if (e.key == "Escape") {
             this.setState({
-                showCircleAdding: false,
+                showCircleAdding: new Array(9).fill(false),
                 AddingChip: undefined,
                 AddingChipCount: 1,
             });
@@ -168,17 +192,19 @@ export class EditPage extends Component<RequiredProps, States> {
         });
     };
 
-    componentDidMount(): void {
-        window.addEventListener("keydown", this.handleKeyDown);
-        window.addEventListener("mousemove", this.handleMouseMove);
-        const chip = this.saveManager.loadChipByName("NAND", undefined, 0);
-
+    loadChip = (chipName: string) => {
+        const chip = this.saveManager.loadChipByName(chipName, undefined, 0);
         this.setState({
             Wires: chip.wires,
             Inputs: chip.input,
             Outputs: chip.output,
             SubChips: chip.subChips,
         });
+    };
+
+    componentDidMount(): void {
+        window.addEventListener("keydown", this.handleKeyDown);
+        window.addEventListener("mousemove", this.handleMouseMove);
     }
     componentWillUnmount(): void {
         window.removeEventListener("keydown", this.handleKeyDown);
@@ -218,7 +244,7 @@ export class EditPage extends Component<RequiredProps, States> {
         this.setState({
             AddingChip: chip,
             AddingChipCount: 1,
-            showCircleAdding: false,
+            showCircleAdding: new Array(9).fill(false),
         });
     };
 
@@ -260,9 +286,9 @@ export class EditPage extends Component<RequiredProps, States> {
         this.state.SubChips.forEach((chip) => (chip.selected = false));
     };
 
-    interactPin = { current: (pin: Pin, ctrlKey: boolean) => {} }; // Переопределяется в VM->Wires->RWireIncomplete.tsx Необходим для протягивания провода
+    interactPin = { current: (_pin: Pin, _ctrlKey: boolean) => {} }; // Переопределяется в VM->Wires->RWireIncomplete.tsx Необходим для протягивания провода
     wirePointClick = {
-        current: (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {},
+        current: (_e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {},
     }; // Переопределяется в VM->Wires->RWireIncomplete.tsx
 
     addingChipBoxRef = createRef<HTMLDivElement>();
@@ -332,12 +358,12 @@ export class EditPage extends Component<RequiredProps, States> {
                     >
                         {new Array(this.state.AddingChipCount)
                             .fill(1)
-                            .map((e) => (
+                            .map((_e) => (
                                 <DefaultChip
                                     isPreview
                                     chip={this.state.AddingChip}
                                     interactPin={{
-                                        current: function (pin: Pin): void {},
+                                        current: function (_pin: Pin): void {},
                                     }}
                                     clearSelection={() => {}}
                                     CursorPosition={this.state.CursorPosition}
@@ -370,22 +396,38 @@ export class EditPage extends Component<RequiredProps, States> {
                         this.handleClickToPlaceChip();
                     }}
                 ></div>
-                <CircleAdding
-                    enabled={this.state.showCircleAdding}
-                    elements={
-                        this.saveManager.Wheels[0]
-                            .map((wheelItem) =>
-                                this.saveManager.Chips.find(
-                                    (chip) => chip.name == wheelItem
+                {this.state.showCircleAdding.map((enabledI, i) => (
+                    <CircleAdding
+                        key={i}
+                        circleNumber={i}
+                        enabled={enabledI}
+                        elements={
+                            this.saveManager.Wheels[i]
+                                .map((wheelItem) =>
+                                    this.saveManager.Chips.find(
+                                        (chip) => chip.name == wheelItem
+                                    )
                                 )
-                            )
-                            .filter(Boolean) as ChipMinimalInfo[]
-                    }
-                    addNewChip={this.setAddingChip}
-                    setEnabled={(e: boolean) => {
-                        this.setState({ showCircleAdding: e });
-                    }}
+                                .filter(Boolean) as ChipMinimalInfo[]
+                        }
+                        addNewChip={this.setAddingChip}
+                        setEnabled={(e: boolean) => {
+                            this.setState((prev) => {
+                                const newCircleState = new Array(9).fill(false);
+                                newCircleState[i] = e;
+                                return { showCircleAdding: newCircleState };
+                            });
+                        }}
+                        saveManager={this.saveManager}
+                    />
+                ))}
+                <ChipList
+                    enabled={this.state.showLibrary}
+                    currentChip={this.state.CurrentChip}
+                    setEnabled={this.setLibrary}
                     saveManager={this.saveManager}
+                    loadChip={this.loadChip}
+                    addChip={this.setAddingChip}
                 />
                 {/** maximum 12 элементов */}
                 <Modal

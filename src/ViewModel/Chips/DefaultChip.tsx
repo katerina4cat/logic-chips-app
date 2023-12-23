@@ -1,4 +1,4 @@
-import { Component, ReactNode, createRef } from "react";
+import { Component, ReactNode } from "react";
 import cl from "./DefaultChip.module.scss";
 import { Chip } from "../../Simulating/Chip";
 import { RPin } from "../Pins/RPin";

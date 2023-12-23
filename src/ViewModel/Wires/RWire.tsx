@@ -1,4 +1,4 @@
-import { Component, ReactNode, createRef } from "react";
+import { Component, ReactNode } from "react";
 import cl from "./RWire.module.scss";
 import { Wire } from "../../Simulating/Wire";
 

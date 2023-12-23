@@ -11,6 +11,7 @@ interface RequiredProps {
     elements: ChipMinimalInfo[];
     addNewChip: (chip: Chip) => void;
     saveManager: SaveInfo;
+    circleNumber: number;
 }
 
 interface States {}
@@ -26,6 +27,7 @@ export class CircleAdding extends Component<RequiredProps, States> {
     };
 
     render(): ReactNode {
+        const disabled = this.props.elements.length == 0;
         return (
             <div
                 onClick={(e) => {
@@ -36,12 +38,20 @@ export class CircleAdding extends Component<RequiredProps, States> {
                     width: "100%",
                     height: "100%",
                     backgroundColor: "rgba(0,0,0,0.4)",
-                    display: this.props.enabled ? "block" : "none",
+                    display: this.props.enabled ? "flex" : "none",
                     position: "fixed",
+                    justifyContent: "center",
+                    alignItems: "center",
                     left: 0,
                     top: 0,
                 }}
             >
+                <h1 style={{ color: disabled ? "#d32326" : "#fff" }}>
+                    {disabled
+                        ? `В круге #${this.props.circleNumber + 1} нет ни одного
+                        элемента`
+                        : `#${this.props.circleNumber + 1}`}
+                </h1>
                 <svg className={cl.CircleAdding} viewBox="0 0 100 100">
                     {this.props.elements.map((element, i) => {
                         const x1 = Math.cos(this.getAngle(i)) * 26 + 50;
