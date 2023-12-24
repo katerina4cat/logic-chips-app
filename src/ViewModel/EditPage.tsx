@@ -1,6 +1,5 @@
-import { Component, ReactNode, createRef } from "react";
+import { Component, ReactNode } from "react";
 import { Pin } from "../Simulating/Pin";
-import { Pos } from "../common/Pos";
 import { Chip } from "../Simulating/Chip";
 import { Wire } from "../Simulating/Wire";
 import { RWire } from "./Wires/RWire";
@@ -369,7 +368,7 @@ export class EditPage extends Component<RequiredProps, States> {
                         }
                         addNewChip={this.setAddingChip}
                         setEnabled={(e: boolean) => {
-                            this.setState((prev) => {
+                            this.setState(() => {
                                 const newCircleState = new Array(9).fill(false);
                                 newCircleState[i] = e;
                                 return { showCircleAdding: newCircleState };
