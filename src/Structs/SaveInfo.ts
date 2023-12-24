@@ -37,7 +37,13 @@ export class SaveInfo {
         localStorage.setItem(this.saveName, JSON.stringify(this));
     }
 
-    saveNewChip(chip: Chip, name: string, color: string, chipType: number = 1) {
+    saveNewChip(
+        chip: Chip,
+        name: string,
+        color: string,
+        chipType: number = 1,
+        rewrite: boolean = false
+    ) {
         const savingChip = new ChipMinimalInfo(
             name,
             chipType,
@@ -80,9 +86,12 @@ export class SaveInfo {
             }))
         );
         if (this.Chips.find((chip) => chip.name == name)) {
-            this.Chips = this.Chips.map((chip) =>
-                chip.name == name ? savingChip : chip
-            );
+            if (rewrite) {
+                this.Chips = this.Chips.map((chip) =>
+                    chip.name == name ? savingChip : chip
+                );
+                alert("Чип сохранён!");
+            }
         } else {
             this.Chips.push(savingChip);
             this.save();
@@ -98,7 +107,6 @@ export class SaveInfo {
         if (chipName == currentChip) return false;
         const chipInfo = this.Chips.find((chip) => chip.name == chipName);
         if (!chipInfo) return false;
-        console.log(chipInfo.SubChips);
         for (let subTestChip of chipInfo.SubChips)
             return this.canAddedChipToCurrentEdit(
                 currentChip,

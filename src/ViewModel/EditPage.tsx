@@ -1,5 +1,4 @@
 import { Component, ReactNode, createRef } from "react";
-import cl from "./EditPage.module.scss";
 import { Pin } from "../Simulating/Pin";
 import { Pos } from "../common/Pos";
 import { Chip } from "../Simulating/Chip";
@@ -10,12 +9,14 @@ import { RWireIncomplete } from "./Wires/RWireIncomplete";
 import { SidePinField } from "./SidePinField";
 import { DefaultChip } from "./Chips/DefaultChip";
 import { CircleAdding } from "./CircleAdding/CircleAdding";
-import React from "react";
 import { SaveInfo } from "../Structs/SaveInfo";
 import { ChipMinimalInfo } from "../Structs/ChipMinimalInfo";
 import { Modal } from "./Modal/Modal";
 import { SaveChip } from "./Modal/SaveChip";
 import { ChipList } from "./Modal/ChipList";
+import React from "react";
+import cl from "./EditPage.module.scss";
+import { AddingChipsBox } from "./Chips/AddingChipsBox";
 
 interface RequiredProps {
     saveName: string;
@@ -33,7 +34,6 @@ interface States {
     showAllPinTitles: boolean;
     showCircleAdding: boolean[];
     showLibrary: boolean;
-    CursorPosition: Pos;
     enabledModal: boolean;
     modalContent?: ReactNode;
 }
@@ -46,7 +46,6 @@ export class EditPage extends Component<RequiredProps, States> {
         Wires: [],
         CurrentChip: new Chip(undefined, 0),
         AddingChipCount: 1,
-        CursorPosition: new Pos(),
         showChipPinTitles:
             (localStorage.getItem("showingPinTitles") || "true") == "true",
         showAllPinTitles:
@@ -150,16 +149,29 @@ export class EditPage extends Component<RequiredProps, States> {
             (e.key == "s" || e.key == "S" || e.key == "ы" || e.key == "Ы") &&
             e.ctrlKey
         ) {
-            this.setState({
-                enabledModal: true,
-                modalContent: (
-                    <SaveChip
-                        saveManager={this.saveManager}
-                        currentChip={this.state.CurrentChip}
-                        setEnabled={this.setModal}
-                    />
-                ),
-            });
+            if (
+                this.saveManager.Chips.find(
+                    (chip) => chip.name == this.state.CurrentChip.name
+                )
+            )
+                this.saveManager.saveNewChip(
+                    this.state.CurrentChip,
+                    this.state.CurrentChip.name,
+                    this.state.CurrentChip.color,
+                    undefined,
+                    true
+                );
+            else
+                this.setState({
+                    enabledModal: true,
+                    modalContent: (
+                        <SaveChip
+                            saveManager={this.saveManager}
+                            currentChip={this.state.CurrentChip}
+                            setEnabled={this.setModal}
+                        />
+                    ),
+                });
             e.preventDefault();
         }
         if (e.key == "Backspace") {
@@ -184,31 +196,35 @@ export class EditPage extends Component<RequiredProps, States> {
         }
     };
 
-    handleMouseMove = (e: MouseEvent) => {
-        this.setState((prev) => {
-            prev.CursorPosition.x = e.pageX;
-            prev.CursorPosition.y = e.pageY;
-            return { CursorPosition: prev.CursorPosition };
-        });
-    };
-
     loadChip = (chipName: string) => {
         const chip = this.saveManager.loadChipByName(chipName, undefined, 0);
         this.setState({
+            CurrentChip: chip,
             Wires: chip.wires,
             Inputs: chip.input,
             Outputs: chip.output,
             SubChips: chip.subChips,
+            showLibrary: false,
+        });
+    };
+
+    newChip = () => {
+        const chip = new Chip(undefined, 0);
+        this.setState({
+            CurrentChip: chip,
+            Wires: chip.wires,
+            Inputs: chip.input,
+            Outputs: chip.output,
+            SubChips: chip.subChips,
+            showLibrary: false,
         });
     };
 
     componentDidMount(): void {
         window.addEventListener("keydown", this.handleKeyDown);
-        window.addEventListener("mousemove", this.handleMouseMove);
     }
     componentWillUnmount(): void {
         window.removeEventListener("keydown", this.handleKeyDown);
-        window.removeEventListener("mousemove", this.handleMouseMove);
     }
     removeWire = (wire: Wire) => {
         wire.deletingWire();
@@ -248,38 +264,16 @@ export class EditPage extends Component<RequiredProps, States> {
         });
     };
 
-    handleClickToPlaceChip = () => {
-        if (!this.state.AddingChip || !this.addingChipBoxRef.current) return;
-        try {
-            const curretTime = Date.now();
-            if (this.addingChipBoxRef.current?.children.length > 0)
-                this.setState((prev) => {
-                    return {
-                        SubChips: [
-                            ...prev.SubChips,
-                            ...(Array.from(
-                                this.addingChipBoxRef.current?.children || []
-                            )
-                                .map((child, i) => {
-                                    const box = child?.getBoundingClientRect();
-                                    return prev.AddingChip
-                                        ? this.saveManager.loadChipByName(
-                                              prev.AddingChip.name,
-                                              new Pos(box?.x, box?.y),
-                                              curretTime + i
-                                          )
-                                        : undefined;
-                                })
-                                .filter(Boolean) as Chip[]),
-                        ],
-                    };
-                });
-        } catch (err: any) {
-            console.log(err);
-        }
-        setTimeout(() => {
-            this.setState({ AddingChip: undefined, AddingChipCount: 1 });
-        }, 1);
+    addChips = (chips: Chip[]) => {
+        this.setState((prev) => {
+            return {
+                SubChips: [...prev.SubChips, ...chips],
+            };
+        });
+    };
+
+    clearAdding = () => {
+        this.setState({ AddingChip: undefined, AddingChipCount: 1 });
     };
 
     clearSelections = () => {
@@ -290,8 +284,6 @@ export class EditPage extends Component<RequiredProps, States> {
     wirePointClick = {
         current: (_e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {},
     }; // Переопределяется в VM->Wires->RWireIncomplete.tsx
-
-    addingChipBoxRef = createRef<HTMLDivElement>();
 
     render(): ReactNode {
         return (
@@ -342,34 +334,15 @@ export class EditPage extends Component<RequiredProps, States> {
                                     : false
                             }
                             clearSelection={this.clearSelections}
-                            CursorPosition={this.state.CursorPosition}
                         />
                     ))}
-
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            position: "absolute",
-                            left: this.state.CursorPosition.x - 25,
-                            top: this.state.CursorPosition.y - 25,
-                        }}
-                        ref={this.addingChipBoxRef}
-                    >
-                        {new Array(this.state.AddingChipCount)
-                            .fill(1)
-                            .map((_e) => (
-                                <DefaultChip
-                                    isPreview
-                                    chip={this.state.AddingChip}
-                                    interactPin={{
-                                        current: function (_pin: Pin): void {},
-                                    }}
-                                    clearSelection={() => {}}
-                                    CursorPosition={this.state.CursorPosition}
-                                />
-                            ))}
-                    </div>
+                    <AddingChipsBox
+                        AddingChip={this.state.AddingChip}
+                        AddingChipCount={this.state.AddingChipCount}
+                        saveManager={this.saveManager}
+                        addChips={this.addChips}
+                        clearAdding={this.clearAdding}
+                    />
                 </div>
                 <SidePinField
                     Pins={this.state.Outputs}
@@ -380,22 +353,6 @@ export class EditPage extends Component<RequiredProps, States> {
                     deletePin={this.removePin}
                     showPinTitle={this.state.showAllPinTitles}
                 />
-                <div
-                    style={{
-                        width: "100%",
-                        height: "100%",
-                        display: this.state.AddingChip ? "block" : "none",
-                        position: "fixed",
-                        left: 0,
-                        top: 0,
-                    }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    onMouseUp={(e) => {
-                        e.stopPropagation();
-                        this.handleClickToPlaceChip();
-                    }}
-                ></div>
                 {this.state.showCircleAdding.map((enabledI, i) => (
                     <CircleAdding
                         key={i}
@@ -428,6 +385,7 @@ export class EditPage extends Component<RequiredProps, States> {
                     saveManager={this.saveManager}
                     loadChip={this.loadChip}
                     addChip={this.setAddingChip}
+                    newChip={this.newChip}
                 />
                 {/** maximum 12 элементов */}
                 <Modal

@@ -12,6 +12,7 @@ interface RequiredProps {
     setEnabled: (e: boolean) => void;
     loadChip: (chipName: string) => void;
     addChip: (chip: Chip) => void;
+    newChip: () => void;
 }
 
 interface States {
@@ -22,6 +23,11 @@ export class ChipList extends Component<RequiredProps, States> {
     state: Readonly<States> = {};
     constructor(props: RequiredProps) {
         super(props);
+    }
+
+    componentDidUpdate(): void {
+        if (!this.props.enabled && this.state.currentSelect != undefined)
+            this.setState({ currentSelect: undefined });
     }
 
     render(): ReactNode {
@@ -57,12 +63,13 @@ export class ChipList extends Component<RequiredProps, States> {
                             !this.state.currentSelect ||
                             /^(AND|NOT|TRI-STATE BUFFER|BUS)$/.test(
                                 this.state.currentSelect
-                            )
+                            ) ||
+                            this.props.currentChip.name ==
+                                this.state.currentSelect
                         }
                         onClick={() => {
                             if (this.state.currentSelect) {
                                 this.props.loadChip(this.state.currentSelect);
-                                this.props.setEnabled(false);
                             }
                         }}
                     >
@@ -107,7 +114,9 @@ export class ChipList extends Component<RequiredProps, States> {
                     >
                         Закрепить
                     </button>
-                    <button className={cl.Button}>Новый чип</button>
+                    <button className={cl.Button} onClick={this.props.newChip}>
+                        Новый чип
+                    </button>
                 </div>
             </Modal>
         );

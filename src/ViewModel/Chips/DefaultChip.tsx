@@ -11,17 +11,26 @@ interface RequiredProps {
     showPinTitles?: boolean;
     isPreview?: boolean;
     clearSelection: () => void;
-    CursorPosition: Pos;
 }
 
 interface States {
     position: Pos;
+    CursorPosition: Pos;
 }
 
 export class DefaultChip extends Component<RequiredProps, States> {
     constructor(props: RequiredProps) {
         super(props);
-        this.state = { position: props.chip?.position || new Pos() };
+        this.state = {
+            position: props.chip?.position || new Pos(),
+            CursorPosition: new Pos(),
+        };
+    }
+    componentDidMount(): void {
+        window.addEventListener("mousemove", this.handleMouseMove);
+    }
+    componentWillUnmount(): void {
+        window.removeEventListener("mousemove", this.handleMouseMove);
     }
 
     grabbing = false;
@@ -31,12 +40,20 @@ export class DefaultChip extends Component<RequiredProps, States> {
             window.removeEventListener("keyup", this.handleKeyUp);
             this.grabbing = true;
             this.delta = new Pos(
-                this.state.position.x - this.props.CursorPosition.x,
-                this.state.position.y - this.props.CursorPosition.y
+                this.state.position.x - this.state.CursorPosition.x,
+                this.state.position.y - this.state.CursorPosition.y
             );
             window.addEventListener("mouseup", this.stopGrabbing);
             window.addEventListener("mousemove", this.processGrabbing);
         }
+    };
+
+    handleMouseMove = (e: MouseEvent) => {
+        this.setState((prev) => {
+            prev.CursorPosition.x = e.pageX;
+            prev.CursorPosition.y = e.pageY;
+            return { CursorPosition: prev.CursorPosition };
+        });
     };
     lastStartTouch = new Pos();
     startGrabbing = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
