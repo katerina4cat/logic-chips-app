@@ -70,6 +70,7 @@ export class CircleAdding extends Component<RequiredProps, States> {
                                 addNewChip={this.props.addNewChip}
                                 updateCircle={() => {}}
                                 circleID={this.props.circleID}
+                                contextMenu={() => {}}
                             />
                         )
                     )}

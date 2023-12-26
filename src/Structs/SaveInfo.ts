@@ -33,13 +33,6 @@ export class SaveInfo {
         forward: boolean
     ) => {
         const elementIndex = this.Wheels[wheelId].indexOf(elementName);
-        console.log(elementIndex);
-        console.log(
-            elementIndex - 1 < 0
-                ? this.Wheels[wheelId].length - 1
-                : elementIndex - 1
-        );
-        console.log(this.Wheels[wheelId]);
         if (forward)
             this.swapWheelElements(
                 wheelId,
@@ -56,7 +49,7 @@ export class SaveInfo {
                     ? 0
                     : elementIndex + 1
             );
-        console.log(this.Wheels[wheelId]);
+        this.save();
     };
 
     private swapWheelElements = (

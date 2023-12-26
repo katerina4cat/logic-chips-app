@@ -1,7 +1,5 @@
 import { Component, ReactNode } from "react";
-
 import cl from "./ChipList.module.scss";
-import { Modal } from "./Modal";
 import { SaveInfo } from "../../Structs/SaveInfo";
 import { Chip } from "../../Simulating/Chip";
 import { EditCircleAdding } from "../CircleAdding/EditCircleAdding";
@@ -61,7 +59,11 @@ export class ChipList extends Component<RequiredProps, States> {
                 style={{ display: this.props.enabled ? "flex" : "none" }}
                 className={cl.ChipListEditor}
             >
-                <div className={cl.ChipList}>
+                <div
+                    className={cl.ChipList}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className={cl.Title}>Chip library</div>
                     <div
                         className={cl.List}
                         onClick={(e) => e.stopPropagation()}
@@ -78,6 +80,10 @@ export class ChipList extends Component<RequiredProps, States> {
                                             ? "rgba(84,174,37,0.25)"
                                             : "rgba(255,255,255,0.25)",
                                 }}
+                                draggable
+                                onDragStart={(e) =>
+                                    e.dataTransfer.setData("chip", chip.name)
+                                }
                             >
                                 {chip.name}
                             </div>
@@ -152,7 +158,7 @@ export class ChipList extends Component<RequiredProps, States> {
                     </div>
                 </div>
                 <EditCircleAdding
-                    enabled
+                    enabled={this.props.enabled}
                     setEnabled={() => {}}
                     saveManager={this.props.saveManager}
                     circleID={this.state.circleID}

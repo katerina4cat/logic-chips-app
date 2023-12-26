@@ -13,6 +13,7 @@ interface RequiredProps {
     addNewChip: (chip: Chip) => void;
     updateCircle: () => void;
     saveManager: SaveInfo;
+    contextMenu: (chipName: string, positionCursor: Pos) => void;
     edit?: boolean;
 }
 
@@ -134,7 +135,9 @@ export class CircleItem extends Component<RequiredProps, States> {
         return (
             <g>
                 <path
-                    className={`${cl.CircleItem} ${cl.CircleItemEdit}`}
+                    className={`${cl.CircleItem} ${
+                        this.props.edit ? cl.CircleItemEdit : undefined
+                    }`}
                     d={
                         this.props.saveManager.Wheels[this.props.circleID]
                             .length == 1
@@ -157,15 +160,22 @@ export class CircleItem extends Component<RequiredProps, States> {
                                   );
                               }
                     }
+                    onContextMenu={(e) => {
+                        e.preventDefault();
+                        this.props.contextMenu(
+                            this.props.element,
+                            new Pos(e.pageX, e.pageY)
+                        );
+                    }}
                     onMouseDown={
                         this.props.edit ? this.startGrabbing : undefined
                     }
                     ref={this.elementBackgroundRef}
                 />
                 <path
-                    id={`selector_${this.props.edit ? "e" : ""}${
-                        this.props.element
-                    }`}
+                    id={`selector_${this.props.circleID}${
+                        this.props.edit ? "e" : ""
+                    }${this.props.element}`}
                     ref={this.elementTitleRef}
                     d={
                         rawTextx < 0
@@ -179,9 +189,9 @@ export class CircleItem extends Component<RequiredProps, States> {
                 />
                 <text text-anchor="middle">
                     <textPath
-                        href={`#selector_${this.props.edit ? "e" : ""}${
-                            this.props.element
-                        }`}
+                        href={`#selector_${this.props.circleID}${
+                            this.props.edit ? "e" : ""
+                        }${this.props.element}`}
                         className={cl.TitleItem}
                         startOffset="50%"
                     >
