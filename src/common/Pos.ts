@@ -10,4 +10,12 @@ export class Pos {
         this.y += value.y;
         return this;
     }
+    angleFromZero = (): number => {
+        return this.y < 0
+            ? Math.PI * 2 -
+                  Math.acos(
+                      this.x / Math.sqrt(this.x * this.x + this.y * this.y)
+                  )
+            : Math.acos(this.x / Math.sqrt(this.x * this.x + this.y * this.y));
+    };
 }

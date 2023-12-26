@@ -1,25 +1,23 @@
-import { Component, ReactNode } from "react";
-import cl from "./CircleAdding.module.scss";
-import { Pos } from "../../common/Pos";
-import { Chip } from "../../Simulating/Chip";
+import { Component, ReactNode, createRef } from "react";
+import cl from "./EditCircleAdding.module.scss";
 import { SaveInfo } from "../../Structs/SaveInfo";
 import { CircleItem } from "./CircleItem";
 
 interface RequiredProps {
     enabled?: boolean;
     setEnabled: (e: boolean) => void;
-    addNewChip: (chip: Chip) => void;
     saveManager: SaveInfo;
     circleID: number;
 }
 
 interface States {}
 
-export class CircleAdding extends Component<RequiredProps, States> {
-    state: Readonly<States> = { position: new Pos() };
+export class EditCircleAdding extends Component<RequiredProps, States> {
+    state: Readonly<States> = {};
     constructor(props: RequiredProps) {
         super(props);
     }
+    currentCircleRef = createRef<SVGSVGElement>();
 
     private getAngle = (iter: number) => {
         return (
@@ -33,43 +31,40 @@ export class CircleAdding extends Component<RequiredProps, States> {
     render(): ReactNode {
         const disabled =
             this.props.saveManager.Wheels[this.props.circleID].length == 0;
+
         return (
             <div
-                onClick={(e) => {
-                    e.preventDefault();
-                    this.props.setEnabled(false);
-                }}
                 style={{
-                    width: "100%",
-                    height: "100%",
-                    backgroundColor: "rgba(0,0,0,0.4)",
                     display: this.props.enabled ? "flex" : "none",
-                    position: "fixed",
                     justifyContent: "center",
                     alignItems: "center",
-                    left: 0,
-                    top: 0,
                 }}
+                className={cl.EditCircleAddingBox}
             >
                 <h1 style={{ color: disabled ? "#d32326" : "#fff" }}>
-                    {disabled
-                        ? `В круге #${this.props.circleID + 1} нет ни одного
-                        элемента`
-                        : `#${this.props.circleID + 1}`}
+                    {`#${this.props.circleID + 1}`}
                 </h1>
-                <svg className={cl.CircleAdding} viewBox="0 0 100 100">
+                <svg
+                    className={cl.EditCircleAdding}
+                    viewBox="0 0 100 100"
+                    ref={this.currentCircleRef}
+                    onClick={(e) => e.stopPropagation()}
+                >
                     {this.props.saveManager.Wheels[this.props.circleID].map(
                         (element, i) => (
                             <CircleItem
-                                key={i}
+                                key={element}
                                 centerAngle={this.getAngle(i)}
                                 halfAngle={this.getAngle(0.5)}
-                                elementInd={i}
                                 element={element}
+                                elementInd={i}
                                 saveManager={this.props.saveManager}
-                                addNewChip={this.props.addNewChip}
-                                updateCircle={() => {}}
+                                addNewChip={() => {}}
                                 circleID={this.props.circleID}
+                                updateCircle={() => {
+                                    this.forceUpdate();
+                                }}
+                                edit
                             />
                         )
                     )}

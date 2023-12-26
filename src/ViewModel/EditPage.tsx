@@ -9,7 +9,6 @@ import { SidePinField } from "./SidePinField";
 import { DefaultChip } from "./Chips/DefaultChip";
 import { CircleAdding } from "./CircleAdding/CircleAdding";
 import { SaveInfo } from "../Structs/SaveInfo";
-import { ChipMinimalInfo } from "../Structs/ChipMinimalInfo";
 import { Modal } from "./Modal/Modal";
 import { SaveChip } from "./Modal/SaveChip";
 import { ChipList } from "./Modal/ChipList";
@@ -124,6 +123,18 @@ export class EditPage extends Component<RequiredProps, States> {
                 enabledModal: false,
             }));
         }
+        if (
+            (e.key == "d" || e.key == "D" || e.key == "в" || e.key == "В") &&
+            e.ctrlKey
+        ) {
+            this.setState({
+                showLibrary: false,
+                showCircleAdding: new Array(9).fill(false),
+                enabledModal: false,
+            });
+            this.newChip();
+            e.preventDefault();
+        }
         if (e.key == "ArrowUp" || e.key == "ArrowRight") {
             this.setState((prev) => ({
                 AddingChipCount: prev.AddingChipCount + 1,
@@ -141,6 +152,7 @@ export class EditPage extends Component<RequiredProps, States> {
             this.setState({
                 showCircleAdding: new Array(9).fill(false),
                 AddingChip: undefined,
+                showLibrary: false,
                 AddingChipCount: 1,
             });
         }
@@ -355,17 +367,8 @@ export class EditPage extends Component<RequiredProps, States> {
                 {this.state.showCircleAdding.map((enabledI, i) => (
                     <CircleAdding
                         key={i}
-                        circleNumber={i}
+                        circleID={i}
                         enabled={enabledI}
-                        elements={
-                            this.saveManager.Wheels[i]
-                                .map((wheelItem) =>
-                                    this.saveManager.Chips.find(
-                                        (chip) => chip.name == wheelItem
-                                    )
-                                )
-                                .filter(Boolean) as ChipMinimalInfo[]
-                        }
                         addNewChip={this.setAddingChip}
                         setEnabled={(e: boolean) => {
                             this.setState(() => {

@@ -4,6 +4,7 @@ import cl from "./ChipList.module.scss";
 import { Modal } from "./Modal";
 import { SaveInfo } from "../../Structs/SaveInfo";
 import { Chip } from "../../Simulating/Chip";
+import { EditCircleAdding } from "../CircleAdding/EditCircleAdding";
 
 interface RequiredProps {
     enabled: boolean;
@@ -17,10 +18,11 @@ interface RequiredProps {
 
 interface States {
     currentSelect?: string;
+    circleID: number;
 }
 
 export class ChipList extends Component<RequiredProps, States> {
-    state: Readonly<States> = {};
+    state: Readonly<States> = { circleID: 0 };
     constructor(props: RequiredProps) {
         super(props);
     }
@@ -28,97 +30,134 @@ export class ChipList extends Component<RequiredProps, States> {
     componentDidUpdate(): void {
         if (!this.props.enabled && this.state.currentSelect != undefined)
             this.setState({ currentSelect: undefined });
+        if (this.props.enabled)
+            window.addEventListener("keydown", this.handleKeyDown);
+        else window.removeEventListener("keydown", this.handleKeyDown);
     }
+
+    componentDidMount(): void {
+        window.addEventListener("keydown", this.handleKeyDown);
+    }
+    componentWillUnmount(): void {
+        window.removeEventListener("keydown", this.handleKeyDown);
+    }
+
+    handleKeyDown = (e: KeyboardEvent) => {
+        for (let i = 0; i < 9; i++)
+            if (
+                (!e.altKey || !e.ctrlKey || !e.shiftKey) &&
+                e.key == (i + 1).toString()
+            ) {
+                this.setState({ circleID: i });
+            }
+    };
 
     render(): ReactNode {
         return (
-            <Modal
-                setEnabled={this.props.setEnabled}
-                enabled={this.props.enabled}
-                className={cl.ChipList}
-                modalBG={`color-mix(in srgb, white 10%, transparent)`}
+            <div
+                onClick={(e) => {
+                    this.props.setEnabled(false), e.stopPropagation();
+                }}
+                style={{ display: this.props.enabled ? "flex" : "none" }}
+                className={cl.ChipListEditor}
             >
-                <div className={cl.List}>
-                    {this.props.saveManager.Chips.map((chip) => (
-                        <div
-                            className={cl.LibraryItem}
-                            onClick={() =>
-                                this.setState({ currentSelect: chip.name })
+                <div className={cl.ChipList}>
+                    <div
+                        className={cl.List}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {this.props.saveManager.Chips.map((chip) => (
+                            <div
+                                className={cl.LibraryItem}
+                                onClick={() =>
+                                    this.setState({ currentSelect: chip.name })
+                                }
+                                style={{
+                                    backgroundColor:
+                                        chip.name == this.state.currentSelect
+                                            ? "rgba(84,174,37,0.25)"
+                                            : "rgba(255,255,255,0.25)",
+                                }}
+                            >
+                                {chip.name}
+                            </div>
+                        ))}
+                    </div>
+                    <div className={cl.ActionsField}>
+                        <button
+                            className={cl.Button}
+                            disabled={
+                                !this.state.currentSelect ||
+                                /^(AND|NOT|TRI-STATE BUFFER|BUS)$/.test(
+                                    this.state.currentSelect
+                                ) ||
+                                this.props.currentChip.name ==
+                                    this.state.currentSelect
                             }
-                            style={{
-                                backgroundColor:
-                                    chip.name == this.state.currentSelect
-                                        ? "rgba(84,174,37,0.25)"
-                                        : "rgba(255,255,255,0.25)",
+                            onClick={() => {
+                                if (this.state.currentSelect) {
+                                    this.props.loadChip(
+                                        this.state.currentSelect
+                                    );
+                                }
                             }}
                         >
-                            {chip.name}
-                        </div>
-                    ))}
-                </div>
-                <div className={cl.ActionsField}>
-                    <button
-                        className={cl.Button}
-                        disabled={
-                            !this.state.currentSelect ||
-                            /^(AND|NOT|TRI-STATE BUFFER|BUS)$/.test(
-                                this.state.currentSelect
-                            ) ||
-                            this.props.currentChip.name ==
-                                this.state.currentSelect
-                        }
-                        onClick={() => {
-                            if (this.state.currentSelect) {
-                                this.props.loadChip(this.state.currentSelect);
+                            Изменить
+                        </button>
+                        <button
+                            className={cl.Button}
+                            disabled={
+                                !this.state.currentSelect ||
+                                !this.props.saveManager.canAddedChipToCurrentEdit(
+                                    this.props.currentChip.name,
+                                    this.state.currentSelect
+                                )
                             }
-                        }}
-                    >
-                        Изменить
-                    </button>
-                    <button
-                        className={cl.Button}
-                        disabled={
-                            !this.state.currentSelect ||
-                            !this.props.saveManager.canAddedChipToCurrentEdit(
-                                this.props.currentChip.name,
-                                this.state.currentSelect
-                            )
-                        }
-                        onClick={() => {
-                            if (this.state.currentSelect) {
-                                this.props.setEnabled(false);
-                                this.props.addChip(
-                                    this.props.saveManager.loadChipByName(
-                                        this.state.currentSelect
-                                    )
+                            onClick={() => {
+                                if (this.state.currentSelect) {
+                                    this.props.setEnabled(false);
+                                    this.props.addChip(
+                                        this.props.saveManager.loadChipByName(
+                                            this.state.currentSelect
+                                        )
+                                    );
+                                }
+                            }}
+                        >
+                            Добавить
+                        </button>
+                        <button
+                            className={cl.Button}
+                            disabled={
+                                !this.state.currentSelect ||
+                                /^(AND|NOT|TRI-STATE BUFFER|BUS)$/.test(
+                                    this.state.currentSelect
+                                )
+                            }
+                            onClick={() => {
+                                this.props.saveManager.removeChip(
+                                    this.state.currentSelect || ""
                                 );
-                            }
-                        }}
-                    >
-                        Добавить
-                    </button>
-                    <button
-                        className={cl.Button}
-                        disabled={
-                            !this.state.currentSelect ||
-                            /^(AND|NOT|TRI-STATE BUFFER|BUS)$/.test(
-                                this.state.currentSelect
-                            )
-                        }
-                    >
-                        Удалить
-                    </button>
-                    <button
-                        className={cl.Button}
-                        disabled={!this.state.currentSelect}
-                    >
-                        Закрепить
-                    </button>
-                    <button className={cl.Button} onClick={this.props.newChip}>
-                        Новый чип
-                    </button>
+                                this.forceUpdate();
+                            }}
+                        >
+                            Удалить
+                        </button>
+                        <button
+                            className={cl.Button}
+                            onClick={this.props.newChip}
+                        >
+                            Новый чип
+                        </button>
+                    </div>
                 </div>
-            </Modal>
+                <EditCircleAdding
+                    enabled
+                    setEnabled={() => {}}
+                    saveManager={this.props.saveManager}
+                    circleID={this.state.circleID}
+                />
+            </div>
         );
     }
 }

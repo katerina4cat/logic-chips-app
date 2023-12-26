@@ -1,4 +1,5 @@
 import { Pos } from "../common/Pos";
+import { removeElement } from "../common/RemoveElement";
 import { AND, NOT, TRI_STATE_BUFFER, Chip } from "../Simulating/Chip";
 import { Pin } from "../Simulating/Pin";
 import { Wire } from "../Simulating/Wire";
@@ -22,8 +23,51 @@ export class SaveInfo {
     ) {
         this.Chips = Chips.length == 0 ? this.Chips : Chips;
         this.Wheels = Wheels;
+        for (let i = this.Wheels.length; i < 9; i++) this.Wheels.push([]);
         this.saveName = saveName;
     }
+
+    swapCircleElement = (
+        wheelId: number,
+        elementName: string,
+        forward: boolean
+    ) => {
+        const elementIndex = this.Wheels[wheelId].indexOf(elementName);
+        console.log(elementIndex);
+        console.log(
+            elementIndex - 1 < 0
+                ? this.Wheels[wheelId].length - 1
+                : elementIndex - 1
+        );
+        console.log(this.Wheels[wheelId]);
+        if (forward)
+            this.swapWheelElements(
+                wheelId,
+                elementIndex,
+                elementIndex - 1 < 0
+                    ? this.Wheels[wheelId].length - 1
+                    : elementIndex - 1
+            );
+        else
+            this.swapWheelElements(
+                wheelId,
+                elementIndex,
+                elementIndex + 1 >= this.Wheels[wheelId].length
+                    ? 0
+                    : elementIndex + 1
+            );
+        console.log(this.Wheels[wheelId]);
+    };
+
+    private swapWheelElements = (
+        wheelID: number,
+        firstInd: number,
+        secondInd: number
+    ) => {
+        const buff = this.Wheels[wheelID][firstInd];
+        this.Wheels[wheelID][firstInd] = this.Wheels[wheelID][secondInd];
+        this.Wheels[wheelID][secondInd] = buff;
+    };
 
     static loadSave(saveName: string) {
         const res = JSON.parse(
@@ -37,13 +81,25 @@ export class SaveInfo {
         localStorage.setItem(this.saveName, JSON.stringify(this));
     }
 
-    saveNewChip(
+    removeChip = (chipName: string) => {
+        const deletingChipInfo = this.Chips.find(
+            (chip) => chip.name == chipName
+        );
+        if (deletingChipInfo) {
+            removeElement(this.Chips, deletingChipInfo);
+            this.save();
+            return true;
+        }
+        return false;
+    };
+
+    saveNewChip = (
         chip: Chip,
         name: string,
         color: string,
         chipType: number = 1,
         rewrite: boolean = false
-    ) {
+    ) => {
         const savingChip = new ChipMinimalInfo(
             name,
             chipType,
@@ -98,7 +154,7 @@ export class SaveInfo {
             return true;
         }
         return false;
-    }
+    };
 
     canAddedChipToCurrentEdit = (
         currentChip: string,
