@@ -3,6 +3,7 @@ import { removeElement } from "../common/RemoveElement";
 import { Pin } from "./Pin";
 import { Pos } from "../common/Pos";
 import { createRef } from "react";
+import { ChipTypes } from "../Structs/ChipMinimalInfo";
 
 const radiusWire = 20;
 let wireIDs = 0;
@@ -19,8 +20,10 @@ export class Wire {
         this.source = source;
         this.target = target;
         this.points = [...points];
-        this.points.unshift(this.source.position);
-        this.points.push(this.target.position);
+        if (this.source.chip.chipType != ChipTypes.BUS)
+            this.points.unshift(this.source.position);
+        if (this.target.chip.chipType != ChipTypes.BUS)
+            this.points.push(this.target.position);
         this.target.addState(source.states);
         this.source.outWires.push(this);
         this.target.inWires.push(this);

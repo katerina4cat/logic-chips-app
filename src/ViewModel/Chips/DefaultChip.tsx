@@ -7,7 +7,7 @@ import { Pos } from "../../common/Pos";
 
 interface RequiredProps {
     chip: Chip | undefined;
-    interactPin: { current: (pin: Pin, ctrlKey: boolean) => void };
+    interactPin: { current: (pin: Pin, ctrlKey: boolean, point?: Pos) => void };
     showPinTitles?: boolean;
     isPreview?: boolean;
     clearSelection: () => void;

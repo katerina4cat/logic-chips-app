@@ -124,8 +124,16 @@ export class SaveInfo {
                 return new WireSaveInfo(
                     wire.id,
                     buffPoints,
-                    { chipID: wire.source.chip.id, pinID: wire.source.id },
-                    { chipID: wire.target.chip.id, pinID: wire.target.id }
+                    {
+                        chipID: wire.source.chip.id,
+                        chipType: wire.target.chip.chipType,
+                        pinID: wire.source.id,
+                    },
+                    {
+                        chipID: wire.target.chip.id,
+                        chipType: wire.target.chip.chipType,
+                        pinID: wire.target.id,
+                    }
                 );
             }),
             chip.subChips.map((chip) => ({

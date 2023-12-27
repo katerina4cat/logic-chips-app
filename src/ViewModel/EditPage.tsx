@@ -15,6 +15,10 @@ import { ChipList } from "./Modal/ChipList";
 import React from "react";
 import cl from "./EditPage.module.scss";
 import { AddingChipsBox } from "./Chips/AddingChipsBox";
+import { Bus } from "../Simulating/Bus";
+import { Pos } from "../common/Pos";
+import { ChipTypes } from "../Structs/ChipMinimalInfo";
+import { RBus } from "./Wires/RBus";
 
 interface RequiredProps {
     saveName: string;
@@ -24,6 +28,7 @@ interface States {
     Inputs: Pin[];
     Outputs: Pin[];
     SubChips: Chip[];
+    Buses: Bus[];
     Wires: Wire[];
     CurrentChip: Chip;
     AddingChip?: Chip;
@@ -40,7 +45,8 @@ export class EditPage extends Component<RequiredProps, States> {
     state: Readonly<States> = {
         Inputs: [],
         Outputs: [],
-        SubChips: [],
+        SubChips: [new Bus(new Pos(70, 25), new Pos(500, 500))],
+        Buses: [],
         Wires: [],
         CurrentChip: new Chip(undefined, 0),
         AddingChipCount: 1,
@@ -291,7 +297,9 @@ export class EditPage extends Component<RequiredProps, States> {
         this.state.SubChips.forEach((chip) => (chip.selected = false));
     };
 
-    interactPin = { current: (_pin: Pin, _ctrlKey: boolean) => {} }; // Переопределяется в VM->Wires->RWireIncomplete.tsx Необходим для протягивания провода
+    interactPin = {
+        current: (_pin: Pin, _ctrlKey: boolean, _point?: Pos) => {},
+    }; // Переопределяется в VM->Wires->RWireIncomplete.tsx Необходим для протягивания провода
     wirePointClick = {
         current: (_e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {},
     }; // Переопределяется в VM->Wires->RWireIncomplete.tsx
@@ -305,6 +313,11 @@ export class EditPage extends Component<RequiredProps, States> {
                         this.wirePointClick.current(e);
                     }}
                 >
+                    <RWireIncomplete
+                        addWire={this.addWire}
+                        interactPin={this.interactPin}
+                        WirePointClick={this.wirePointClick}
+                    />
                     <g
                         onClick={(e) => {
                             e.stopPropagation();
@@ -318,11 +331,15 @@ export class EditPage extends Component<RequiredProps, States> {
                             />
                         ))}
                     </g>
-                    <RWireIncomplete
-                        addWire={this.addWire}
-                        interactPin={this.interactPin}
-                        WirePointClick={this.wirePointClick}
-                    />
+                    <g>
+                        {(
+                            this.state.SubChips.filter(
+                                (chip) => chip.chipType == ChipTypes.BUS
+                            ) as Bus[]
+                        ).map((bus) => (
+                            <RBus Bus={bus} interactPin={this.interactPin} />
+                        ))}
+                    </g>
                 </svg>
                 <SidePinField
                     Pins={this.state.Inputs}
@@ -334,7 +351,9 @@ export class EditPage extends Component<RequiredProps, States> {
                     showPinTitle={this.state.showAllPinTitles}
                 />
                 <div className={cl.ChipField}>
-                    {this.state.SubChips.map((chip) => (
+                    {this.state.SubChips.filter(
+                        (chip) => chip.chipType == ChipTypes.Default
+                    ).map((chip) => (
                         <DefaultChip
                             key={chip.id}
                             chip={chip}

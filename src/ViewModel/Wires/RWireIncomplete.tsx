@@ -4,10 +4,11 @@ import { Wire } from "../../Simulating/Wire";
 import { Pin } from "../../Simulating/Pin";
 import { Pos } from "../../common/Pos";
 import { getColorWithState } from "../../common/Colors";
+import { ChipTypes } from "../../Structs/ChipMinimalInfo";
 
 interface RequiredProps {
     addWire: (wire: Wire) => void;
-    interactPin: { current: (pin: Pin, ctrlKey: boolean) => void };
+    interactPin: { current: (pin: Pin, ctrlKey: boolean, point?: Pos) => void };
     WirePointClick: {
         current: (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => void;
     };
@@ -28,10 +29,14 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
         ) => {
             if (this.firstPin) this.points.push(new Pos(e.pageX, e.pageY));
         };
-        props.interactPin.current = (pin: Pin, ctrlKey: boolean) => {
+        props.interactPin.current = (
+            pin: Pin,
+            ctrlKey: boolean,
+            point?: Pos
+        ) => {
             if (!this.firstPin) {
                 this.firstPin = pin;
-                this.points = [pin.position, new Pos()];
+                this.points = [point || pin.position, new Pos()];
                 if (this.graphicObject.current)
                     this.graphicObject.current.style.stroke = getColorWithState(
                         pin.totalState,
@@ -41,23 +46,96 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
                 window.addEventListener("keydown", this.handleKeyDown);
                 return;
             }
-            const firstIsSource =
+            let firstIsSource =
                 (this.firstPin.isInput && this.firstPin.chip.id === 0) ||
                 (!this.firstPin.isInput && this.firstPin.chip.id !== 0);
-            const pinIsSource =
+            let pinIsSource =
+                (pin.isInput && pin.chip.id === 0) ||
+                (!pin.isInput && pin.chip.id !== 0);
+            if (
+                this.firstPin.chip.chipType == ChipTypes.BUS &&
+                pin.chip.chipType == ChipTypes.BUS
+            ) {
+                alert("Пока нельзя бусу к бусе");
+                return;
+            }
+            if (this.firstPin.chip.chipType == ChipTypes.BUS) {
+                if (pinIsSource) {
+                    const buff = new Pin(
+                        this.firstPin.chip,
+                        true,
+                        undefined,
+                        undefined,
+                        undefined,
+                        false,
+                        point
+                    );
+                    this.firstPin.chip.input.push(buff);
+                    this.firstPin = buff;
+                } else {
+                    const buff = new Pin(
+                        this.firstPin.chip,
+                        false,
+                        undefined,
+                        undefined,
+                        undefined,
+                        true,
+                        point,
+                        true
+                    );
+                    this.firstPin.chip.output.push(buff);
+                    this.firstPin = buff;
+                }
+            }
+            if (pin.chip.chipType == ChipTypes.BUS) {
+                if (firstIsSource) {
+                    const buff = new Pin(
+                        pin.chip,
+                        true,
+                        undefined,
+                        undefined,
+                        undefined,
+                        false,
+                        point
+                    );
+                    pin.chip.input.push(buff);
+                    pin = buff;
+                } else {
+                    const buff = new Pin(
+                        pin.chip,
+                        false,
+                        undefined,
+                        undefined,
+                        undefined,
+                        true,
+                        point,
+                        true
+                    );
+                    pin.chip.output.push(buff);
+                    pin = buff;
+                }
+            }
+
+            firstIsSource =
+                (this.firstPin.isInput && this.firstPin.chip.id === 0) ||
+                (!this.firstPin.isInput && this.firstPin.chip.id !== 0);
+            pinIsSource =
                 (pin.isInput && pin.chip.id === 0) ||
                 (!pin.isInput && pin.chip.id !== 0);
             if (firstIsSource && !pinIsSource) {
-                this.points.pop();
-                this.points.shift();
+                if (this.firstPin.chip.chipType != ChipTypes.BUS) {
+                    this.points.shift();
+                }
+                if (pin.chip.chipType != ChipTypes.BUS) this.points.pop();
                 props.addWire(new Wire(this.firstPin, pin, [...this.points]));
                 if (!ctrlKey) this.clear();
                 return;
             }
             if (pinIsSource && !firstIsSource) {
                 this.points.reverse();
-                this.points.pop();
-                this.points.shift();
+                if (this.firstPin.chip.chipType != ChipTypes.BUS)
+                    this.points.pop();
+                if (pin.chip.chipType != ChipTypes.BUS) this.points.shift();
                 props.addWire(new Wire(pin, this.firstPin, [...this.points]));
                 this.clear();
                 return;

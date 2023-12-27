@@ -2,10 +2,13 @@ import { Component, ReactNode } from "react";
 import cl from "./RPin.module.scss";
 import { Pin } from "../../Simulating/Pin";
 import { getColorWithState } from "../../common/Colors";
+import { Pos } from "../../common/Pos";
 
 interface RequiredProps {
     Pin: Pin;
-    interactPin?: { current: (pin: Pin, ctrlKey: boolean) => void };
+    interactPin?: {
+        current: (pin: Pin, ctrlKey: boolean, point?: Pos) => void;
+    };
     drawTitle?: boolean;
     isPreview?: boolean;
 }

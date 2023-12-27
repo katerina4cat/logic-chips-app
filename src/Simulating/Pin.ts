@@ -29,7 +29,9 @@ export class Pin {
         id = Date.now(),
         name = "Pin",
         y = 0,
-        hasDefaultState = false
+        hasDefaultState = false,
+        position?: Pos,
+        defaultIsUndefined?: boolean
     ) {
         this.id = id;
         this.isInput = input;
@@ -39,10 +41,13 @@ export class Pin {
         this.outWires = [];
         this.inWires = [];
         this.position = new Pos(undefined, y);
+        if (position) this.position = position;
         this.graphicalObject = createRef();
         if (hasDefaultState) {
             this._states.push(new State(this));
-            this._states[0].value = State.States.LOW;
+            this._states[0].value = defaultIsUndefined
+                ? State.States.UNDEFINED
+                : State.States.LOW;
         }
     }
 

@@ -2,6 +2,12 @@ import { Pos } from "../common/Pos";
 import { PinSaveInfo } from "./PinInfo";
 import { WireSaveInfo } from "./WireSaveInfo";
 
+export enum ChipTypes {
+    "Default" = 1,
+    "BUS" = 2,
+    "SevenSegment" = 3,
+}
+
 export class ChipMinimalInfo {
     name: string;
     chipStyleType: number;
@@ -12,7 +18,7 @@ export class ChipMinimalInfo {
     SubChips: { name: string; id: number; position: Pos }[];
     constructor(
         name: string,
-        chipStyleType: number = 1,
+        chipStyleType: number = ChipTypes.Default,
         color: string = "#909090",
         inputPins: PinSaveInfo[] = [],
         outputPins: PinSaveInfo[] = [],

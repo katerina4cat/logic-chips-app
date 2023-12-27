@@ -2,16 +2,20 @@ import { Pin } from "./Pin";
 import { State } from "../common/State";
 import { Pos } from "../common/Pos";
 import { Wire } from "./Wire";
+import { Bus } from "./Bus";
+import { ChipTypes } from "../Structs/ChipMinimalInfo";
 
 export class Chip {
     id: number;
     name: string;
     subChips: Chip[];
+    buses: Bus[];
     wires: Wire[];
     input: Pin[];
     output: Pin[];
     color: string;
     isBase = false;
+    chipType = ChipTypes.Default;
     position: Pos;
     selected: boolean;
     constructor(
@@ -19,7 +23,8 @@ export class Chip {
         id = Date.now(),
         name = "",
         color: string = "#fff",
-        position = new Pos()
+        position = new Pos(),
+        buses: Bus[] = []
     ) {
         this.id = id;
         this.name = name;
@@ -30,6 +35,7 @@ export class Chip {
         this.output = [];
         this.position = position;
         this.selected = false;
+        this.buses = buses;
     }
     updateLogic() {}
 }
