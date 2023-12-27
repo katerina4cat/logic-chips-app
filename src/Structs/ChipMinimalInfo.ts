@@ -9,7 +9,7 @@ export class ChipMinimalInfo {
     inputPins: PinSaveInfo[];
     outputPins: PinSaveInfo[];
     Wires: WireSaveInfo[];
-    SubChips: { name: string; id: number; position: Pos }[];
+    SubChips: SubChipInfo[];
     constructor(
         name: string,
         chipStyleType: number = 1,
@@ -17,7 +17,7 @@ export class ChipMinimalInfo {
         inputPins: PinSaveInfo[] = [],
         outputPins: PinSaveInfo[] = [],
         Wires: WireSaveInfo[] = [],
-        SubChips: { name: string; id: number; position: Pos }[] = []
+        SubChips: SubChipInfo[] = []
     ) {
         this.name = name;
         this.chipStyleType = chipStyleType;
@@ -26,5 +26,23 @@ export class ChipMinimalInfo {
         this.outputPins = outputPins;
         this.Wires = Wires;
         this.SubChips = SubChips;
+    }
+}
+
+export class SubChipInfo {
+    name: string;
+    id: number;
+    position: Pos;
+    otherPosition: Pos[] = [];
+    constructor(
+        name: string,
+        id: number,
+        position: Pos,
+        otherPosition: Pos[] = []
+    ) {
+        this.name = name;
+        this.id = id;
+        this.position = position;
+        this.otherPosition = otherPosition;
     }
 }

@@ -2,6 +2,14 @@ import { Pin } from "./Pin";
 import { State } from "../common/State";
 import { Pos } from "../common/Pos";
 import { Wire } from "./Wire";
+import { createRef } from "react";
+import { getColorWithState } from "../common/Colors";
+
+export enum ChipStyles {
+    "Default" = 1,
+    "Bus" = 2,
+    "SevenSegment" = 3,
+}
 
 export class Chip {
     id: number;
@@ -13,13 +21,18 @@ export class Chip {
     color: string;
     isBase = false;
     position: Pos;
+    otherPosition: Pos[] = [];
     selected: boolean;
+    chipStyleType: number;
+
     constructor(
         subChips: Chip[] = [],
         id = Date.now(),
         name = "",
         color: string = "#fff",
-        position = new Pos()
+        position = new Pos(),
+        otherPosition: Pos[] = [],
+        chipStyleType: number = ChipStyles.Default
     ) {
         this.id = id;
         this.name = name;
@@ -30,8 +43,38 @@ export class Chip {
         this.output = [];
         this.position = position;
         this.selected = false;
+        this.otherPosition = otherPosition;
+        this.chipStyleType = chipStyleType;
     }
     updateLogic() {}
+}
+
+export class BUS extends Chip {
+    isBase = true;
+    ref = createRef<SVGPathElement>();
+    constructor(id = Date.now(), positions: Pos[]) {
+        super(
+            undefined,
+            id,
+            "BUS",
+            undefined,
+            undefined,
+            positions,
+            ChipStyles.Bus
+        );
+        this.input = [new Pin(this, true, 0, "In")];
+        this.output = [new Pin(this, false, 1, "Out")];
+        this.output[0].addState(new State(this.output[0], State.States.LOW));
+    }
+
+    updateLogic(): void {
+        this.output[0].states[0].value = this.input[0].totalState;
+        if (this.ref.current)
+            this.ref.current.style.stroke = getColorWithState(
+                this.input[0].totalState,
+                this.input[0].color
+            );
+    }
 }
 
 export class AND extends Chip {

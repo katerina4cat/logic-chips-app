@@ -3,7 +3,7 @@ import { removeElement } from "../common/RemoveElement";
 import { AND, NOT, TRI_STATE_BUFFER, Chip } from "../Simulating/Chip";
 import { Pin } from "../Simulating/Pin";
 import { Wire } from "../Simulating/Wire";
-import { ChipMinimalInfo } from "./ChipMinimalInfo";
+import { ChipMinimalInfo, SubChipInfo } from "./ChipMinimalInfo";
 import { PinSaveInfo } from "./PinInfo";
 import { WireSaveInfo } from "./WireSaveInfo";
 
@@ -128,11 +128,9 @@ export class SaveInfo {
                     { chipID: wire.target.chip.id, pinID: wire.target.id }
                 );
             }),
-            chip.subChips.map((chip) => ({
-                name: chip.name,
-                id: chip.id,
-                position: chip.position,
-            }))
+            chip.subChips.map(
+                (chip) => new SubChipInfo(chip.name, chip.id, chip.position)
+            )
         );
         if (this.Chips.find((chip) => chip.name == name)) {
             if (rewrite) {

@@ -7,7 +7,9 @@ import { getColorWithState } from "../../common/Colors";
 
 interface RequiredProps {
     addWire: (wire: Wire) => void;
-    interactPin: { current: (pin: Pin, ctrlKey: boolean) => void };
+    interactPin: {
+        current: (pin: Pin, ctrlKey: boolean, position?: Pos) => void;
+    };
     WirePointClick: {
         current: (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => void;
     };
@@ -28,10 +30,14 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
         ) => {
             if (this.firstPin) this.points.push(new Pos(e.pageX, e.pageY));
         };
-        props.interactPin.current = (pin: Pin, ctrlKey: boolean) => {
+        props.interactPin.current = (
+            pin: Pin,
+            ctrlKey: boolean,
+            position?: Pos
+        ) => {
             if (!this.firstPin) {
                 this.firstPin = pin;
-                this.points = [pin.position, new Pos()];
+                this.points = [position ? position : pin.position, new Pos()];
                 if (this.graphicObject.current)
                     this.graphicObject.current.style.stroke = getColorWithState(
                         pin.totalState,
@@ -47,20 +53,51 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
             const pinIsSource =
                 (pin.isInput && pin.chip.id === 0) ||
                 (!pin.isInput && pin.chip.id !== 0);
+            this.points.pop();
             if (firstIsSource && !pinIsSource) {
-                this.points.pop();
-                this.points.shift();
                 props.addWire(new Wire(this.firstPin, pin, [...this.points]));
                 if (!ctrlKey) this.clear();
                 return;
             }
             if (pinIsSource && !firstIsSource) {
                 this.points.reverse();
-                this.points.pop();
-                this.points.shift();
                 props.addWire(new Wire(pin, this.firstPin, [...this.points]));
                 this.clear();
                 return;
+            }
+            //Если пины одинаковые
+            if (pinIsSource == firstIsSource) {
+                if (
+                    pin.chip.name == "BUS" &&
+                    this.firstPin.chip.name == "BUS"
+                ) {
+                    props.addWire(
+                        new Wire(this.firstPin, pin, [...this.points])
+                    );
+                    if (!ctrlKey) this.clear();
+                } else if (
+                    pin.chip.name == "BUS" ||
+                    this.firstPin.chip.name == "BUS"
+                ) {
+                    if (this.firstPin.chip.name == "BUS") {
+                        this.points.pop();
+                        props.addWire(
+                            new Wire(this.firstPin.chip.output[0], pin, [
+                                ...this.points,
+                            ])
+                        );
+                        if (!ctrlKey) this.clear();
+                    } else {
+                        this.points.reverse();
+                        this.points.pop();
+                        props.addWire(
+                            new Wire(this.firstPin.chip.output[0], pin, [
+                                ...this.points,
+                            ])
+                        );
+                        if (!ctrlKey) this.clear();
+                    }
+                }
             }
             console.log("2 ПИНА ЛИБО ОБА СУРСЫ, ЛИБО ОБА ТАРГЕТЫ");
             /**

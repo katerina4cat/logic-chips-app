@@ -19,8 +19,10 @@ export class Wire {
         this.source = source;
         this.target = target;
         this.points = [...points];
-        this.points.unshift(this.source.position);
-        this.points.push(this.target.position);
+        if (this.source.chip.name != "BUS")
+            this.points[0] = this.source.position;
+        if (this.target.chip.name != "BUS")
+            this.points[points.length - 1] = this.target.position;
         this.target.addState(source.states);
         this.source.outWires.push(this);
         this.target.inWires.push(this);
