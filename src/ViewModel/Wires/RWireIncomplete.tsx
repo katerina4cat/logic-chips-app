@@ -80,12 +80,12 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
                         undefined,
                         undefined,
                         true,
-                        point,
-                        true
+                        point
                     );
                     this.firstPin.chip.output.push(buff);
                     this.firstPin = buff;
                 }
+                this.firstPin.chip.updateLogic();
             }
             if (pin.chip.chipType == ChipTypes.BUS) {
                 if (firstIsSource) {
@@ -108,12 +108,12 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
                         undefined,
                         undefined,
                         true,
-                        point,
-                        true
+                        point
                     );
                     pin.chip.output.push(buff);
                     pin = buff;
                 }
+                pin.chip.updateLogic();
             }
 
             firstIsSource =

@@ -30,8 +30,7 @@ export class Pin {
         name = "Pin",
         y = 0,
         hasDefaultState = false,
-        position?: Pos,
-        defaultIsUndefined?: boolean
+        position?: Pos
     ) {
         this.id = id;
         this.isInput = input;
@@ -45,14 +44,12 @@ export class Pin {
         this.graphicalObject = createRef();
         if (hasDefaultState) {
             this._states.push(new State(this));
-            this._states[0].value = defaultIsUndefined
-                ? State.States.UNDEFINED
-                : State.States.LOW;
+            this._states[0].value = State.States.LOW;
         }
     }
 
     /**
-     * Получает результирующий результат от связанных состояний
+     * Получает результирующее состояние от связанных состояний
      * @returns
      */
     private getResultState() {
