@@ -32,6 +32,7 @@ interface States {
     Wires: Wire[];
     CurrentChip: Chip;
     AddingChip?: Chip;
+    AddingBus: boolean;
     AddingChipCount: number;
     showChipPinTitles: boolean;
     showAllPinTitles: boolean;
@@ -49,6 +50,7 @@ export class EditPage extends Component<RequiredProps, States> {
         Buses: [],
         Wires: [],
         CurrentChip: new Chip(undefined, 0),
+        AddingBus: false,
         AddingChipCount: 1,
         showChipPinTitles:
             (localStorage.getItem("showingPinTitles") || "true") == "true",
@@ -158,6 +160,7 @@ export class EditPage extends Component<RequiredProps, States> {
             this.setState({
                 showCircleAdding: new Array(9).fill(false),
                 AddingChip: undefined,
+                AddingBus: false,
                 showLibrary: false,
                 AddingChipCount: 1,
             });
@@ -273,12 +276,21 @@ export class EditPage extends Component<RequiredProps, States> {
                 Outputs: removeElement(prev.Outputs, pin),
             }));
     };
-    setAddingChip = (chip: Chip) => {
-        this.setState({
-            AddingChip: chip,
-            AddingChipCount: 1,
-            showCircleAdding: new Array(9).fill(false),
-        });
+    setAddingChip = (chipName: string) => {
+        if (chipName != "BUS")
+            this.setState({
+                AddingChip: this.saveManager.loadChipByName(chipName),
+                AddingBus: false,
+                AddingChipCount: 1,
+                showCircleAdding: new Array(9).fill(false),
+            });
+        else
+            this.setState({
+                AddingBus: true,
+                AddingChip: undefined,
+                AddingChipCount: 1,
+                showCircleAdding: new Array(9).fill(false),
+            });
     };
 
     addChips = (chips: Chip[]) => {

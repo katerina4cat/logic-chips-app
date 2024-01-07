@@ -10,7 +10,7 @@ interface RequiredProps {
     currentChip: Chip;
     setEnabled: (e: boolean) => void;
     loadChip: (chipName: string) => void;
-    addChip: (chip: Chip) => void;
+    addChip: (chipName: string) => void;
     newChip: () => void;
 }
 
@@ -123,9 +123,7 @@ export class ChipList extends Component<RequiredProps, States> {
                                 if (this.state.currentSelect) {
                                     this.props.setEnabled(false);
                                     this.props.addChip(
-                                        this.props.saveManager.loadChipByName(
-                                            this.state.currentSelect
-                                        )
+                                        this.state.currentSelect
                                     );
                                 }
                             }}

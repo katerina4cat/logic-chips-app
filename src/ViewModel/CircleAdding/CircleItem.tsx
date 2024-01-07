@@ -1,6 +1,5 @@
 import { Component, ReactNode, createRef } from "react";
 import cl from "./CircleItem.module.scss";
-import { Chip } from "../../Simulating/Chip";
 import { SaveInfo } from "../../Structs/SaveInfo";
 import { Pos } from "../../common/Pos";
 
@@ -10,7 +9,7 @@ interface RequiredProps {
     element: string;
     elementInd: number;
     circleID: number;
-    addNewChip: (chip: Chip) => void;
+    addNewChip: (chipName: string) => void;
     updateCircle: () => void;
     saveManager: SaveInfo;
     contextMenu: (chipName: string, positionCursor: Pos) => void;
@@ -153,11 +152,7 @@ export class CircleItem extends Component<RequiredProps, States> {
                             ? undefined
                             : (e) => {
                                   e.stopPropagation();
-                                  this.props.addNewChip(
-                                      this.props.saveManager.loadChipByName(
-                                          this.props.element
-                                      )
-                                  );
+                                  this.props.addNewChip(this.props.element);
                               }
                     }
                     onContextMenu={(e) => {

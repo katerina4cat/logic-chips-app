@@ -3,15 +3,16 @@ import { removeElement } from "../common/RemoveElement";
 import { AND, NOT, TRI_STATE_BUFFER, Chip } from "../Simulating/Chip";
 import { Pin } from "../Simulating/Pin";
 import { Wire } from "../Simulating/Wire";
-import { ChipMinimalInfo } from "./ChipMinimalInfo";
+import { ChipMinimalInfo, ChipTypes } from "./ChipMinimalInfo";
 import { PinSaveInfo } from "./PinInfo";
 import { WireSaveInfo } from "./WireSaveInfo";
 
 export class SaveInfo {
     Chips: ChipMinimalInfo[] = [
-        new ChipMinimalInfo("AND", 1, "#267ab2"),
-        new ChipMinimalInfo("NOT", 1, "#8c1f1a"),
-        new ChipMinimalInfo("TRI-STATE BUFFER", 1, "#262626"),
+        new ChipMinimalInfo("AND", ChipTypes.Default, "#267ab2"),
+        new ChipMinimalInfo("NOT", ChipTypes.Default, "#8c1f1a"),
+        new ChipMinimalInfo("TRI-STATE BUFFER", ChipTypes.Default, "#262626"),
+        new ChipMinimalInfo("BUS", ChipTypes.BUS, "#262626"),
     ];
     Wheels: string[][];
     saveName: string;
@@ -21,7 +22,12 @@ export class SaveInfo {
         Wheels: string[][],
         saveName: string
     ) {
-        this.Chips = Chips.length == 0 ? this.Chips : Chips;
+        this.Chips = this.Chips.filter(
+            (chip) =>
+                Chips.find((loadedChips) => loadedChips.name == chip.name) ===
+                undefined
+        );
+        this.Chips.push(...Chips);
         this.Wheels = Wheels;
         for (let i = this.Wheels.length; i < 9; i++) this.Wheels.push([]);
         this.saveName = saveName;

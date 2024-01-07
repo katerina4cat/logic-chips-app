@@ -1,14 +1,13 @@
 import { Component, ReactNode } from "react";
 import cl from "./CircleAdding.module.scss";
 import { Pos } from "../../common/Pos";
-import { Chip } from "../../Simulating/Chip";
 import { SaveInfo } from "../../Structs/SaveInfo";
 import { CircleItem } from "./CircleItem";
 
 interface RequiredProps {
     enabled?: boolean;
     setEnabled: (e: boolean) => void;
-    addNewChip: (chip: Chip) => void;
+    addNewChip: (chipName: string) => void;
     saveManager: SaveInfo;
     circleID: number;
 }
