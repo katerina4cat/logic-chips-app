@@ -41,16 +41,15 @@ export class RBusIncomplete extends Component<RequiredProps, States> {
         });
     };
     handleMouseDown = () => {
-        if (this.props.enabled)
-            this.setState((prev) => {
-                if (prev.to) {
-                    this.props.addNewBus(prev.from, prev.to);
-                    return { to: undefined };
-                } else
-                    return {
-                        to: prev.from,
-                    };
-            });
+        if (this.props.enabled) {
+            if (this.state.to) {
+                this.props.addNewBus(this.state.from, this.state.to);
+                this.setState({ to: undefined });
+            } else
+                this.setState((prev) => ({
+                    to: prev.from,
+                }));
+        }
     };
 
     componentDidUpdate(prevProps: Readonly<RequiredProps>): void {
@@ -91,7 +90,11 @@ export class RBusIncomplete extends Component<RequiredProps, States> {
                         Colors["red"]
                     )}
                     style={{ cursor: "default", strokeWidth: 4 }}
-                    d={`M${this.state.from.x},${this.state.from.y}L${this.state.to?.x},${this.state.to?.y}`}
+                    d={
+                        this.state.to
+                            ? `M${this.state.from.x},${this.state.from.y}L${this.state.to.x},${this.state.to.y}`
+                            : ""
+                    }
                 />
             </g>
         );

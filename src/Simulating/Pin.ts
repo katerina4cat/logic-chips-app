@@ -23,6 +23,7 @@ export class Pin {
     chip: Chip;
     outWires: Wire[];
     inWires: Wire[];
+    canUpdatePropagate: boolean;
     constructor(
         chip: Chip,
         input: boolean,
@@ -30,7 +31,8 @@ export class Pin {
         name = "Pin",
         y = 0,
         hasDefaultState = false,
-        position?: Pos
+        position?: Pos,
+        canUpdatePropagate = true
     ) {
         this.id = id;
         this.isInput = input;
@@ -46,6 +48,7 @@ export class Pin {
             this._states.push(new State(this));
             this._states[0].value = State.States.LOW;
         }
+        this.canUpdatePropagate = canUpdatePropagate;
     }
 
     /**
@@ -76,17 +79,17 @@ export class Pin {
         if (this.graphicalObject.current)
             this.graphicalObject.current.style.backgroundColor =
                 getColorWithState(this.totalState, this.color);
-
-        this.outWires.forEach((wire) => {
-            if (wire.target != this) {
-                wire.target.refreshState();
-                if (wire.target.chip.isBase) wire.target.chip.updateLogic();
-            }
-        });
+        if (this.canUpdatePropagate)
+            this.outWires.forEach((wire) => {
+                if (wire.target != this) {
+                    wire.target.refreshState();
+                    if (wire.target.chip.isBase) wire.target.chip.updateLogic();
+                }
+                wire.updateColor();
+            });
         if (this.updateObject) {
             this.updateObject();
         }
-        this.outWires.forEach((wire) => wire.updateColor());
     };
 
     /**

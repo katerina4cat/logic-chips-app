@@ -14,12 +14,20 @@ export class Wire {
     points: Pos[];
     graphicObject: React.RefObject<SVGPathElement>;
     id: number;
+    error = false;
     constructor(source: Pin, target: Pin, points: Pos[]) {
-        this.id = wireIDs;
-        wireIDs++;
         this.source = source;
         this.target = target;
+        this.id = wireIDs;
+        wireIDs++;
         this.points = [...points];
+        this.graphicObject = createRef();
+        if (this.testRecurse(source.chip.id)) {
+            alert("Ошибка! Возможная бесконечная рекурсия при симуляции!");
+            this.error = true;
+            return;
+        }
+
         if (this.source.chip.chipType != ChipTypes.BUS)
             this.points.unshift(this.source.position);
         if (this.target.chip.chipType != ChipTypes.BUS)
@@ -28,7 +36,19 @@ export class Wire {
         this.source.outWires.push(this);
         this.target.inWires.push(this);
         this.source.refreshState();
-        this.graphicObject = createRef();
+    }
+
+    /**
+     * Проверяет есть ли бесконечная рекурсия при подключении провода.
+     * Т.е. не обновляет ли провод чип, от которого зависит исходный.
+     */
+    testRecurse(sourceChipID: number) {
+        if (this.target.chip.id == 0) return false;
+        if (this.target.chip.id == sourceChipID) return true;
+        for (const pin of this.target.chip.output)
+            for (const wire of pin.outWires)
+                if (wire.testRecurse(sourceChipID)) return true;
+        return false;
     }
 
     /**

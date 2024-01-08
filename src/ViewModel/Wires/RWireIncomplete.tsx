@@ -5,6 +5,7 @@ import { Pin } from "../../Simulating/Pin";
 import { Pos } from "../../common/Pos";
 import { getColorWithState } from "../../common/Colors";
 import { ChipTypes } from "../../Structs/ChipMinimalInfo";
+import { Bus } from "../../Simulating/Bus";
 
 interface RequiredProps {
     addWire: (wire: Wire) => void;
@@ -19,16 +20,19 @@ interface States {}
 export class RWireIncomplete extends Component<RequiredProps, States> {
     radiusWire: number = 20;
     points: Pos[] = [];
+    firstPoint: Pos = new Pos();
     firstPin?: Pin;
     graphicObject = createRef<SVGPathElement>();
     constructor(props: RequiredProps) {
         super(props);
         this.state = {};
+
         props.WirePointClick.current = (
             e: React.MouseEvent<SVGSVGElement, MouseEvent>
         ) => {
             if (this.firstPin) this.points.push(new Pos(e.pageX, e.pageY));
         };
+
         props.interactPin.current = (
             pin: Pin,
             ctrlKey: boolean,
@@ -36,6 +40,7 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
         ) => {
             if (!this.firstPin) {
                 this.firstPin = pin;
+                if (point) this.firstPoint = point;
                 this.points = [point || pin.position, new Pos()];
                 if (this.graphicObject.current)
                     this.graphicObject.current.style.stroke = getColorWithState(
@@ -56,10 +61,36 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
                 this.firstPin.chip.chipType == ChipTypes.BUS &&
                 pin.chip.chipType == ChipTypes.BUS
             ) {
-                alert("Пока нельзя бусу к бусе");
-                return;
-            }
-            if (this.firstPin.chip.chipType == ChipTypes.BUS) {
+                const buffSource = new Pin(
+                    this.firstPin.chip,
+                    false,
+                    undefined,
+                    undefined,
+                    undefined,
+                    true,
+                    point,
+                    false
+                );
+                this.firstPin.chip.output.push(buffSource);
+                this.firstPin = buffSource;
+
+                const buff = new Pin(
+                    pin.chip,
+                    true,
+                    undefined,
+                    undefined,
+                    undefined,
+                    false,
+                    point,
+                    false
+                );
+                pin.chip.input.push(buff);
+                pin = buff;
+                (pin.chip as Bus).addBusConnection(this.firstPin.chip as Bus);
+                this.firstPin.chip.updateLogic();
+                // alert("Пока нельзя бусу к бусе");
+                // return;
+            } else if (this.firstPin.chip.chipType == ChipTypes.BUS) {
                 if (pinIsSource) {
                     const buff = new Pin(
                         this.firstPin.chip,
@@ -86,8 +117,7 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
                     this.firstPin = buff;
                 }
                 this.firstPin.chip.updateLogic();
-            }
-            if (pin.chip.chipType == ChipTypes.BUS) {
+            } else if (pin.chip.chipType == ChipTypes.BUS) {
                 if (firstIsSource) {
                     const buff = new Pin(
                         pin.chip,

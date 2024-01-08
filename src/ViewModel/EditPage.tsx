@@ -258,7 +258,8 @@ export class EditPage extends Component<RequiredProps, States> {
         });
     };
     addWire = (wire: Wire) => {
-        this.setState((prev) => ({ Wires: [...prev.Wires, wire] }));
+        if (!wire.error)
+            this.setState((prev) => ({ Wires: [...prev.Wires, wire] }));
     };
     addPin = (pin: Pin) => {
         if (pin.isInput)
