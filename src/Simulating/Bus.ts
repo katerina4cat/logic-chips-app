@@ -15,7 +15,6 @@ export class Bus extends Chip {
     phantomPin: Pin;
     from: Pos;
     to: Pos;
-    targetBus: Bus[] = [];
     depentBus: Bus[] = [];
 
     constructor(from: Pos, to: Pos, id = Date.now()) {
@@ -28,23 +27,23 @@ export class Bus extends Chip {
     /**
      * Тут ошибка с поиском всех зависимых
      */
-    getAllDepentBuses(addedBus: Bus[]): Bus[] {
-        // const res: Bus[] = [
-        //     ...this.depentBus.filter(
-        //         (bus) => !addedBus.find((buss) => buss.id == bus.id)
-        //     ),
-        //     ...this.targetBus.filter(
-        //         (bus) => !addedBus.find((buss) => buss.id == bus.id)
-        //     ),
-        // ];
-        // res.forEach((dep) => addedBus.push(...dep.getAllDepentBuses(addedBus)));
+    getAllDepentBuses(addedBus: { current: Bus[] }): { current: Bus[] } {
+        const res: Bus[] = [
+            ...this.depentBus.filter(
+                (bus) => !addedBus.current.some((buss) => buss.id == bus.id)
+            ),
+        ];
+        addedBus.current.push(...res);
+        res.forEach((dep) => {
+            dep.getAllDepentBuses(addedBus);
+        });
         return addedBus;
     }
 
     override updateLogic(): void {
-        const depentBuses = this.getAllDepentBuses([this]);
+        const depentBuses = this.getAllDepentBuses({ current: [this] });
         let res: State.States = State.States.UNDEFINED;
-        depentBuses.forEach((bus) =>
+        depentBuses.current.forEach((bus) =>
             bus.input.forEach((inPin) => {
                 if (!inPin.canUpdatePropagate) return;
                 if (
@@ -60,7 +59,7 @@ export class Bus extends Chip {
                 }
             })
         );
-        depentBuses.forEach((bus) => {
+        depentBuses.current.forEach((bus) => {
             if (bus.ref.current)
                 bus.ref.current.style.stroke = getColorWithState(
                     res,
@@ -79,15 +78,17 @@ export class Bus extends Chip {
      * В таргет бусе добавляется ссылка на зависимую текущую бусу.
      */
     addBusConnection = (connectedBus: Bus) => {
-        this.targetBus.push(connectedBus);
         connectedBus.depentBus.push(this);
+        this.depentBus.push(connectedBus);
     };
 
     /**
      * Удаляет соеденения с шиной
      */
     remBusConnection(connectedBus: Bus) {
-        removeElement(this.targetBus, connectedBus);
         removeElement(connectedBus.depentBus, this);
+        removeElement(this.depentBus, connectedBus);
+        connectedBus.updateLogic();
+        this.updateLogic();
     }
 }

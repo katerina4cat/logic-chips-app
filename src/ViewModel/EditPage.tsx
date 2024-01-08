@@ -47,7 +47,7 @@ export class EditPage extends Component<RequiredProps, States> {
     state: Readonly<States> = {
         Inputs: [],
         Outputs: [],
-        SubChips: [new Bus(new Pos(70, 25), new Pos(500, 500))],
+        SubChips: [],
         Buses: [],
         Wires: [],
         CurrentChip: new Chip(undefined, 0),
@@ -249,7 +249,6 @@ export class EditPage extends Component<RequiredProps, States> {
     }
     removeWire = (wire: Wire) => {
         wire.deletingWire();
-
         this.setState((prev) => {
             removeElement(prev.Wires, wire);
             return {
@@ -314,6 +313,19 @@ export class EditPage extends Component<RequiredProps, States> {
         });
     };
 
+    remBus = (bus: Bus) => {
+        bus.depentBus.forEach((dep) => removeElement(dep.depentBus, bus));
+        bus.input.forEach((pin) => {
+            pin.inWires.forEach((wire) => this.removeWire(wire));
+            pin.outWires.forEach((wire) => this.removeWire(wire));
+        });
+        bus.output.forEach((pin) => {
+            pin.inWires.forEach((wire) => this.removeWire(wire));
+            pin.outWires.forEach((wire) => this.removeWire(wire));
+        });
+        removeElement(this.state.SubChips, bus);
+    };
+
     clearAdding = () => {
         this.setState({ AddingChip: undefined, AddingChipCount: 1 });
     };
@@ -366,7 +378,11 @@ export class EditPage extends Component<RequiredProps, States> {
                                 (chip) => chip.chipType == ChipTypes.BUS
                             ) as Bus[]
                         ).map((bus) => (
-                            <RBus Bus={bus} interactPin={this.interactPin} />
+                            <RBus
+                                Bus={bus}
+                                removeBus={this.remBus}
+                                interactPin={this.interactPin}
+                            />
                         ))}
                     </g>
                 </svg>

@@ -4,6 +4,7 @@ import { Pin } from "./Pin";
 import { Pos } from "../common/Pos";
 import { createRef } from "react";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
+import { Bus } from "./Bus";
 
 const radiusWire = 20;
 let wireIDs = 0;
@@ -66,9 +67,27 @@ export class Wire {
      * Удаляет у связь у связанного пина и удаляет из внутренних списков проводов текущий провод.
      */
     deletingWire() {
-        this.target.removeState(this.source.states);
-        removeElement(this.target.inWires, this);
-        removeElement(this.source.outWires, this);
+        if (
+            this.source.chip.chipType == ChipTypes.BUS &&
+            this.target.chip.chipType == ChipTypes.BUS
+        ) {
+            removeElement((this.source.chip as Bus).output, this.source);
+            removeElement((this.target.chip as Bus).output, this.target);
+            (this.source.chip as Bus).remBusConnection(this.target.chip as Bus);
+            return;
+        }
+
+        if (this.source.chip.chipType == ChipTypes.BUS) {
+            removeElement((this.source.chip as Bus).output, this.source);
+        } else removeElement(this.source.outWires, this);
+
+        if (this.target.chip.chipType == ChipTypes.BUS) {
+            removeElement((this.target.chip as Bus).input, this.target);
+            (this.target.chip as Bus).updateLogic();
+        } else {
+            removeElement(this.target.inWires, this);
+            this.target.removeState(this.source.states);
+        }
     }
 
     /**

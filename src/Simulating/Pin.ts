@@ -79,14 +79,14 @@ export class Pin {
         if (this.graphicalObject.current)
             this.graphicalObject.current.style.backgroundColor =
                 getColorWithState(this.totalState, this.color);
-        if (this.canUpdatePropagate)
-            this.outWires.forEach((wire) => {
-                if (wire.target != this) {
-                    wire.target.refreshState();
+        this.outWires.forEach((wire) => {
+            if (wire.target != this) {
+                wire.target.refreshState();
+                if (this.canUpdatePropagate)
                     if (wire.target.chip.isBase) wire.target.chip.updateLogic();
-                }
-                wire.updateColor();
-            });
+            }
+            wire.updateColor();
+        });
         if (this.updateObject) {
             this.updateObject();
         }

@@ -84,7 +84,7 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
                     point,
                     false
                 );
-                pin.chip.input.push(buff);
+                pin.chip.output.push(buff);
                 pin = buff;
                 (this.firstPin.chip as Bus).addBusConnection(pin.chip as Bus);
                 this.firstPin.chip.updateLogic();
