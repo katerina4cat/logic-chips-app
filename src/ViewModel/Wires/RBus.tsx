@@ -5,7 +5,7 @@ import { State } from "../../common/State";
 import { getColorWithState } from "../../common/Colors";
 import { Pin } from "../../Simulating/Pin";
 import { Pos } from "../../common/Pos";
-import { BusEndPosWidth } from "../../common/Settings";
+import { BusEndPosWidth, busID } from "../../common/Settings";
 
 interface RequiredProps {
     Bus: Bus;
@@ -39,6 +39,7 @@ export class RBus extends Component<RequiredProps, States> {
                 />
                 <path
                     className={cl.RBus}
+                    id={`bus_${this.props.Bus.id}`}
                     stroke={getColorWithState(
                         this.props.Bus.output[0]?.totalState ||
                             State.States.UNDEFINED,
@@ -55,6 +56,17 @@ export class RBus extends Component<RequiredProps, States> {
                     ref={this.props.Bus.ref}
                     d={`M${this.props.Bus.from.x},${this.props.Bus.from.y}L${this.props.Bus.to.x},${this.props.Bus.to.y}`}
                 />
+                {busID ? (
+                    <text>
+                        <textPath
+                            href={`#bus_${this.props.Bus.id}`}
+                            startOffset={"50%"}
+                            stroke="white"
+                        >
+                            {this.props.Bus.id}
+                        </textPath>
+                    </text>
+                ) : undefined}
             </g>
         );
     }

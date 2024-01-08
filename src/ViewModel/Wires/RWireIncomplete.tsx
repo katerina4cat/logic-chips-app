@@ -76,21 +76,23 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
 
                 const buff = new Pin(
                     pin.chip,
-                    true,
-                    undefined,
-                    undefined,
-                    undefined,
                     false,
+                    undefined,
+                    undefined,
+                    undefined,
+                    true,
                     point,
                     false
                 );
                 pin.chip.input.push(buff);
                 pin = buff;
-                (pin.chip as Bus).addBusConnection(this.firstPin.chip as Bus);
+                (this.firstPin.chip as Bus).addBusConnection(pin.chip as Bus);
                 this.firstPin.chip.updateLogic();
-                // alert("Пока нельзя бусу к бусе");
-                // return;
-            } else if (this.firstPin.chip.chipType == ChipTypes.BUS) {
+                props.addWire(new Wire(this.firstPin, pin, [...this.points]));
+                this.clear();
+                return;
+            }
+            if (this.firstPin.chip.chipType == ChipTypes.BUS) {
                 if (pinIsSource) {
                     const buff = new Pin(
                         this.firstPin.chip,
@@ -117,7 +119,8 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
                     this.firstPin = buff;
                 }
                 this.firstPin.chip.updateLogic();
-            } else if (pin.chip.chipType == ChipTypes.BUS) {
+            }
+            if (pin.chip.chipType == ChipTypes.BUS) {
                 if (firstIsSource) {
                     const buff = new Pin(
                         pin.chip,
