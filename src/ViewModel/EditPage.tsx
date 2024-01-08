@@ -19,6 +19,7 @@ import { Bus } from "../Simulating/Bus";
 import { Pos } from "../common/Pos";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
 import { RBus } from "./Wires/RBus";
+import { RBusIncomplete } from "./Wires/RBusIncomplete";
 
 interface RequiredProps {
     saveName: string;
@@ -301,6 +302,17 @@ export class EditPage extends Component<RequiredProps, States> {
         });
     };
 
+    addBus = (from: Pos, to: Pos) => {
+        this.setState((prev) => {
+            return {
+                AddingBus: false,
+                AddingChipCount: 1,
+                AddingChip: undefined,
+                SubChips: [...prev.SubChips, new Bus(from, to)],
+            };
+        });
+    };
+
     clearAdding = () => {
         this.setState({ AddingChip: undefined, AddingChipCount: 1 });
     };
@@ -329,6 +341,10 @@ export class EditPage extends Component<RequiredProps, States> {
                         addWire={this.addWire}
                         interactPin={this.interactPin}
                         WirePointClick={this.wirePointClick}
+                    />
+                    <RBusIncomplete
+                        enabled={this.state.AddingBus}
+                        addNewBus={this.addBus}
                     />
                     <g
                         onClick={(e) => {
