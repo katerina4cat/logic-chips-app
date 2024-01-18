@@ -52,43 +52,23 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
                 return;
             }
             let firstIsSource =
-                (this.firstPin.isInput && this.firstPin.chip.id === 0) ||
-                (!this.firstPin.isInput && this.firstPin.chip.id !== 0);
+                (this.firstPin.isInput && this.firstPin.chip.id == 0) ||
+                (!this.firstPin.isInput && this.firstPin.chip.id != 0);
             let pinIsSource =
-                (pin.isInput && pin.chip.id === 0) ||
-                (!pin.isInput && pin.chip.id !== 0);
+                (pin.isInput && pin.chip.id == 0) ||
+                (!pin.isInput && pin.chip.id != 0);
             if (
                 this.firstPin.chip.chipType == ChipTypes.BUS &&
                 pin.chip.chipType == ChipTypes.BUS
             ) {
-                const buffSource = new Pin(
-                    this.firstPin.chip,
-                    false,
-                    undefined,
-                    undefined,
-                    undefined,
-                    true,
-                    point,
-                    false
+                this.points.unshift(this.firstPoint);
+                this.points.push(point ? point : new Pos());
+                props.addWire(
+                    (this.firstPin.chip as Bus).createWireToBus(
+                        pin.chip as Bus,
+                        this.points
+                    )
                 );
-                this.firstPin.chip.output.push(buffSource);
-                this.firstPin = buffSource;
-
-                const buff = new Pin(
-                    pin.chip,
-                    false,
-                    undefined,
-                    undefined,
-                    undefined,
-                    true,
-                    point,
-                    false
-                );
-                pin.chip.output.push(buff);
-                pin = buff;
-                (this.firstPin.chip as Bus).addBusConnection(pin.chip as Bus);
-                this.firstPin.chip.updateLogic();
-                props.addWire(new Wire(this.firstPin, pin, [...this.points]));
                 this.clear();
                 return;
             }
@@ -150,11 +130,11 @@ export class RWireIncomplete extends Component<RequiredProps, States> {
             }
 
             firstIsSource =
-                (this.firstPin.isInput && this.firstPin.chip.id === 0) ||
-                (!this.firstPin.isInput && this.firstPin.chip.id !== 0);
+                (this.firstPin.isInput && this.firstPin.chip.id == 0) ||
+                (!this.firstPin.isInput && this.firstPin.chip.id != 0);
             pinIsSource =
-                (pin.isInput && pin.chip.id === 0) ||
-                (!pin.isInput && pin.chip.id !== 0);
+                (pin.isInput && pin.chip.id == 0) ||
+                (!pin.isInput && pin.chip.id != 0);
             if (firstIsSource && !pinIsSource) {
                 if (this.firstPin.chip.chipType != ChipTypes.BUS) {
                     this.points.shift();

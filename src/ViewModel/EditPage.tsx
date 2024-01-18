@@ -20,6 +20,7 @@ import { Pos } from "../common/Pos";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
 import { RBus } from "./Wires/RBus";
 import { RBusIncomplete } from "./Wires/RBusIncomplete";
+import { manyBusSpace } from "../common/Settings";
 
 interface RequiredProps {
     saveName: string;
@@ -303,14 +304,20 @@ export class EditPage extends Component<RequiredProps, States> {
     };
 
     addBus = (from: Pos, to: Pos) => {
-        this.setState((prev) => {
-            return {
-                AddingBus: false,
-                AddingChipCount: 1,
-                AddingChip: undefined,
-                SubChips: [...prev.SubChips, new Bus(from, to)],
-            };
-        });
+        this.setState((prev) => ({
+            AddingBus: false,
+            AddingChipCount: 1,
+            AddingChip: undefined,
+            SubChips: [
+                ...prev.SubChips,
+                ...new Array(prev.AddingChipCount).fill(0).map((_, i) => {
+                    return new Bus(
+                        new Pos(from.x + manyBusSpace * i, from.y),
+                        new Pos(to.x + manyBusSpace * i, to.y)
+                    );
+                }),
+            ],
+        }));
     };
 
     remBus = (bus: Bus) => {
@@ -355,10 +362,13 @@ export class EditPage extends Component<RequiredProps, States> {
                         interactPin={this.interactPin}
                         WirePointClick={this.wirePointClick}
                     />
+
                     <RBusIncomplete
                         enabled={this.state.AddingBus}
                         addNewBus={this.addBus}
+                        addingCount={this.state.AddingChipCount}
                     />
+
                     <g
                         onClick={(e) => {
                             e.stopPropagation();
@@ -382,6 +392,7 @@ export class EditPage extends Component<RequiredProps, States> {
                                 Bus={bus}
                                 removeBus={this.remBus}
                                 interactPin={this.interactPin}
+                                key={bus.id}
                             />
                         ))}
                     </g>

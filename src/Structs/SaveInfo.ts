@@ -1,9 +1,10 @@
 import { Pos } from "../common/Pos";
 import { removeElement } from "../common/RemoveElement";
+import { Bus } from "../Simulating/Bus";
 import { AND, NOT, TRI_STATE_BUFFER, Chip } from "../Simulating/Chip";
 import { Pin } from "../Simulating/Pin";
 import { Wire } from "../Simulating/Wire";
-import { ChipMinimalInfo, ChipTypes } from "./ChipMinimalInfo";
+import { BusMinimalInfo, ChipMinimalInfo, ChipTypes } from "./ChipMinimalInfo";
 import { PinSaveInfo } from "./PinInfo";
 import { WireSaveInfo } from "./WireSaveInfo";
 
@@ -110,7 +111,7 @@ export class SaveInfo {
                         pin.name,
                         pin.chip.id,
                         pin.color.title,
-                        pin.position.y
+                        pin.position
                     )
             ),
             chip.output.map(
@@ -120,13 +121,15 @@ export class SaveInfo {
                         pin.name,
                         pin.chip.id,
                         pin.color.title,
-                        pin.position.y
+                        pin.position
                     )
             ),
             chip.wires.map((wire) => {
                 const buffPoints = [...wire.points];
-                buffPoints.shift();
-                buffPoints.pop();
+                if (wire.source.chip.chipType != ChipTypes.BUS)
+                    buffPoints.shift();
+                if (wire.target.chip.chipType != ChipTypes.BUS)
+                    buffPoints.pop();
                 return new WireSaveInfo(
                     wire.id,
                     buffPoints,
@@ -142,17 +145,36 @@ export class SaveInfo {
                     }
                 );
             }),
-            chip.subChips.map((chip) => ({
-                name: chip.name,
-                id: chip.id,
-                position: chip.position,
-            }))
+            chip.subChips
+                .filter(
+                    (chip) =>
+                        chip.chipType == ChipTypes.Default ||
+                        chip.chipType == ChipTypes.SevenSegment
+                )
+                .map((chip) => ({
+                    name: chip.name,
+                    id: chip.id,
+                    position: chip.position,
+                })),
+            chip.subChips
+                .filter((chip) => chip.chipType == ChipTypes.BUS)
+                .map(
+                    (chip) =>
+                        new BusMinimalInfo(
+                            chip.name,
+                            chip.color,
+                            (chip as Bus).from,
+                            (chip as Bus).to,
+                            chip.id
+                        )
+                )
         );
         if (this.Chips.find((chip) => chip.name == name)) {
             if (rewrite) {
                 this.Chips = this.Chips.map((chip) =>
                     chip.name == name ? savingChip : chip
                 );
+                this.save();
                 alert("Чип сохранён!");
             }
         } else {
@@ -208,6 +230,12 @@ export class SaveInfo {
                         subChip.id
                     )
                 );
+                SubChips.push(
+                    ...chipInfo.Buses?.map((bus) => {
+                        const buff = new Bus(bus.from, bus.to, bus.id);
+                        return buff;
+                    })
+                );
                 const res = new Chip(
                     SubChips,
                     chipID,
@@ -222,47 +250,87 @@ export class SaveInfo {
                             true,
                             pin.id,
                             pin.name,
-                            pin.positionY,
+                            pin.position.y,
                             chipID == 0
                         )
                     );
                 });
                 chipInfo.outputPins.forEach((pin) => {
                     res.output.push(
-                        new Pin(res, false, pin.id, pin.name, pin.positionY)
+                        new Pin(res, false, pin.id, pin.name, pin.position.y)
                     );
                 });
                 chipInfo.Wires.forEach((wire) => {
-                    const source =
+                    const sourceChip = res.subChips.find(
+                        (chip) => chip.id == wire.sourceID.chipID
+                    );
+                    const targetChip = res.subChips.find(
+                        (chip) => chip.id == wire.targetID.chipID
+                    );
+
+                    let source =
                         wire.sourceID.chipID == 0
                             ? res.input.find(
                                   (pin) => pin.id == wire.sourceID.pinID
                               )
-                            : res.subChips
-                                  .find(
-                                      (chip) => chip.id == wire.sourceID.chipID
-                                  )
-                                  ?.output.find(
-                                      (pin) => pin.id == wire.sourceID.pinID
-                                  );
-                    const target =
+                            : sourceChip?.output.find(
+                                  (pin) => pin.id == wire.sourceID.pinID
+                              );
+                    let target =
                         wire.targetID.chipID == 0
                             ? res.output.find(
                                   (pin) => pin.id == wire.targetID.pinID
                               )
-                            : res.subChips
-                                  .find(
-                                      (chip) => chip.id == wire.targetID.chipID
-                                  )
-                                  ?.input.find(
-                                      (pin) => pin.id == wire.targetID.pinID
-                                  );
+                            : targetChip?.input.find(
+                                  (pin) => pin.id == wire.targetID.pinID
+                              );
+                    //Соеденение двух бусов
+                    if (
+                        sourceChip?.chipType == ChipTypes.BUS &&
+                        targetChip?.chipType == ChipTypes.BUS
+                    ) {
+                        res.wires.push(
+                            (sourceChip as Bus).createWireToBus(
+                                targetChip as Bus,
+                                wire.points
+                            )
+                        );
+                        return;
+                    }
+                    //Подготовка пина для соеденение от бусы к чипу
+                    if (source && targetChip?.chipType == ChipTypes.BUS) {
+                        target = new Pin(
+                            targetChip,
+                            true,
+                            undefined,
+                            undefined,
+                            undefined,
+                            false,
+                            wire.points[wire.points.length - 1]
+                        );
+                        targetChip.input.push(target);
+                    }
+                    //Подготовка пина для соеденение от чипа к бусе
+                    if (target && sourceChip?.chipType == ChipTypes.BUS) {
+                        source = new Pin(
+                            sourceChip,
+                            false,
+                            undefined,
+                            undefined,
+                            undefined,
+                            true,
+                            wire.points[0]
+                        );
+                        sourceChip.output.push(target);
+                    }
                     if (!source || !target) {
                         alert(
                             `Не удалось добавить провод в чипе ${chipInfo.name} wireID: ${wire.id}
-От: ${wire.sourceID.chipID}-${wire.sourceID.pinID}
-До: ${wire.targetID.chipID}-${wire.targetID.pinID}`
+От: chip${wire.sourceID.chipID}-pin${wire.sourceID.pinID}
+До: chip${wire.targetID.chipID}-pin${wire.targetID.pinID}
+`
                         );
+                        console.log(source, target);
                     } else
                         res.wires.push(new Wire(source, target, wire.points));
                 });

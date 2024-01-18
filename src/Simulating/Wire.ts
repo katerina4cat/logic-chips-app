@@ -33,6 +33,11 @@ export class Wire {
             this.points.unshift(this.source.position);
         if (this.target.chip.chipType != ChipTypes.BUS)
             this.points.push(this.target.position);
+        if (
+            this.source.chip.chipType == ChipTypes.BUS &&
+            this.target.chip.chipType == ChipTypes.BUS
+        )
+            (this.source.chip as Bus).addBusConnection(this.target.chip as Bus);
         this.target.addState(source.states);
         this.source.outWires.push(this);
         this.target.inWires.push(this);

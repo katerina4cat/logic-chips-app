@@ -5,6 +5,8 @@ import { Wire } from "./Wire";
 import { Bus } from "./Bus";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
 
+let lastChipID = Date.now();
+
 export class Chip {
     id: number;
     name: string;
@@ -20,13 +22,14 @@ export class Chip {
     selected: boolean;
     constructor(
         subChips: Chip[] = [],
-        id = Date.now(),
+        id?: number,
         name = "",
         color: string = "#fff",
         position = new Pos(),
         buses: Bus[] = []
     ) {
-        this.id = id;
+        this.id = id != undefined ? id : lastChipID;
+        lastChipID++;
         this.name = name;
         this.color = color;
         this.subChips = subChips;

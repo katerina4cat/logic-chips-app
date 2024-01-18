@@ -3,11 +3,12 @@ import cl from "./RBus.module.scss";
 import { Pos } from "../../common/Pos";
 import { Colors, getColorWithState } from "../../common/Colors";
 import { State } from "../../common/State";
-import { BusEndPosWidth } from "../../common/Settings";
+import { BusEndPosWidth, manyBusSpace } from "../../common/Settings";
 
 interface RequiredProps {
     enabled: boolean;
     addNewBus: (from: Pos, to: Pos) => void;
+    addingCount: number;
 }
 
 interface States {
@@ -36,14 +37,30 @@ export class RBusIncomplete extends Component<RequiredProps, States> {
     handleMouseMove = (e: MouseEvent) => {
         this.setState((prev) => {
             return prev.to == undefined
-                ? { from: new Pos(e.pageX, e.pageY), to: undefined }
-                : { from: prev.from, to: new Pos(e.pageX, e.pageY) };
+                ? {
+                      from: new Pos(e.pageX, e.pageY),
+                      to: undefined,
+                  }
+                : {
+                      from: prev.from,
+                      to: new Pos(e.pageX, e.pageY),
+                  };
         });
     };
     handleMouseDown = () => {
         if (this.props.enabled) {
             if (this.state.to) {
-                this.props.addNewBus(this.state.from, this.state.to);
+                for (let i = 0; i < this.props.addingCount; i++)
+                    this.props.addNewBus(
+                        new Pos(
+                            this.state.from.x + manyBusSpace * i,
+                            this.state.from.y
+                        ),
+                        new Pos(
+                            this.state.to.x + manyBusSpace * i,
+                            this.state.to.y
+                        )
+                    );
                 this.setState({ to: undefined });
             } else
                 this.setState((prev) => ({
@@ -60,42 +77,58 @@ export class RBusIncomplete extends Component<RequiredProps, States> {
     render(): ReactNode {
         return (
             <g style={{ display: this.props.enabled ? "block" : "none" }}>
-                <rect
-                    x={this.state.from.x - BusEndPosWidth / 2}
-                    y={this.state.from.y - BusEndPosWidth / 2}
-                    width={BusEndPosWidth}
-                    height={BusEndPosWidth}
-                    fill={getColorWithState(
-                        State.States.UNDEFINED,
-                        Colors["red"]
-                    )}
-                    className={cl.BusEndPos}
-                />
-                {this.state.to ? (
-                    <rect
-                        x={this.state.to.x - BusEndPosWidth / 2}
-                        y={this.state.to.y - BusEndPosWidth / 2}
-                        width={BusEndPosWidth}
-                        height={BusEndPosWidth}
-                        fill={getColorWithState(
-                            State.States.UNDEFINED,
-                            Colors["red"]
-                        )}
-                        className={cl.BusEndPos}
-                    />
-                ) : undefined}
-                <path
-                    stroke={getColorWithState(
-                        State.States.UNDEFINED,
-                        Colors["red"]
-                    )}
-                    style={{ cursor: "default", strokeWidth: 4 }}
-                    d={
-                        this.state.to
-                            ? `M${this.state.from.x},${this.state.from.y}L${this.state.to.x},${this.state.to.y}`
-                            : ""
-                    }
-                />
+                {new Array(this.props.addingCount).fill(1).map((_, i) => (
+                    <g>
+                        <rect
+                            x={
+                                this.state.from.x +
+                                i * manyBusSpace -
+                                BusEndPosWidth / 2
+                            }
+                            y={this.state.from.y - BusEndPosWidth / 2}
+                            width={BusEndPosWidth}
+                            height={BusEndPosWidth}
+                            fill={getColorWithState(
+                                State.States.UNDEFINED,
+                                Colors["red"]
+                            )}
+                            className={cl.BusEndPos}
+                        />
+                        {this.state.to ? (
+                            <rect
+                                x={
+                                    this.state.to.x +
+                                    i * manyBusSpace -
+                                    BusEndPosWidth / 2
+                                }
+                                y={this.state.to.y - BusEndPosWidth / 2}
+                                width={BusEndPosWidth}
+                                height={BusEndPosWidth}
+                                fill={getColorWithState(
+                                    State.States.UNDEFINED,
+                                    Colors["red"]
+                                )}
+                                className={cl.BusEndPos}
+                            />
+                        ) : undefined}
+                        <path
+                            stroke={getColorWithState(
+                                State.States.UNDEFINED,
+                                Colors["red"]
+                            )}
+                            style={{ cursor: "default", strokeWidth: 4 }}
+                            d={
+                                this.state.to
+                                    ? `M${
+                                          this.state.from.x + i * manyBusSpace
+                                      },${this.state.from.y}L${
+                                          this.state.to.x + i * manyBusSpace
+                                      },${this.state.to.y}`
+                                    : ""
+                            }
+                        />
+                    </g>
+                ))}
             </g>
         );
     }
