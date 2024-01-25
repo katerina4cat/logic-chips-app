@@ -1,9 +1,15 @@
 export class Pos {
     x: number;
     y: number;
-    constructor(x = 0, y = 0) {
-        this.x = x;
-        this.y = y;
+    constructor(x: number | Pos = 0, y = 0) {
+        console.log();
+        if (x.toString() == "[object Object]") {
+            this.x = (x as Pos).x;
+            this.y = (x as Pos).y;
+        } else {
+            this.x = x as number;
+            this.y = y;
+        }
     }
     add(value: Pos) {
         this.x += value.x;

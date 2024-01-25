@@ -226,13 +226,17 @@ export class SaveInfo {
                 const SubChips = chipInfo.SubChips.map((subChip) =>
                     this.loadChipByName(
                         subChip.name,
-                        subChip.position,
+                        new Pos(subChip.position),
                         subChip.id
                     )
                 );
                 SubChips.push(
                     ...chipInfo.Buses?.map((bus) => {
-                        const buff = new Bus(bus.from, bus.to, bus.id);
+                        const buff = new Bus(
+                            new Pos(bus.from),
+                            new Pos(bus.to),
+                            bus.id
+                        );
                         return buff;
                     })
                 );
@@ -292,7 +296,7 @@ export class SaveInfo {
                         res.wires.push(
                             (sourceChip as Bus).createWireToBus(
                                 targetChip as Bus,
-                                wire.points
+                                wire.points.map((point) => new Pos(point))
                             )
                         );
                         return;
@@ -332,7 +336,13 @@ export class SaveInfo {
                         );
                         console.log(source, target);
                     } else
-                        res.wires.push(new Wire(source, target, wire.points));
+                        res.wires.push(
+                            new Wire(
+                                source,
+                                target,
+                                wire.points.map((point) => new Pos(point))
+                            )
+                        );
                 });
                 return res;
         }

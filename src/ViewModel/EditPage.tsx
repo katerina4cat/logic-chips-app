@@ -20,7 +20,7 @@ import { Pos } from "../common/Pos";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
 import { RBus } from "./Wires/RBus";
 import { RBusIncomplete } from "./Wires/RBusIncomplete";
-import { manyBusSpace } from "../common/Settings";
+import { hotkeys, manyBusSpace } from "../common/Settings";
 
 interface RequiredProps {
     saveName: string;
@@ -66,6 +66,7 @@ export class EditPage extends Component<RequiredProps, States> {
     constructor(props: RequiredProps) {
         super(props);
         this.saveManager = SaveInfo.loadSave(props.saveName);
+        this.initHotKeys();
     }
 
     componentDidUpdate(): void {
@@ -84,33 +85,7 @@ export class EditPage extends Component<RequiredProps, States> {
     };
 
     handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key == "Tab") {
-            e.preventDefault();
-            this.setState((prev) => {
-                localStorage.setItem(
-                    "showingAllPinTitles",
-                    prev.showAllPinTitles ? "false" : "true"
-                );
-                localStorage.setItem(
-                    "showingPinTitles",
-                    prev.showAllPinTitles ? "false" : "true"
-                );
-                return {
-                    showAllPinTitles: !prev.showAllPinTitles,
-                    showChipPinTitles: !prev.showAllPinTitles,
-                };
-            });
-        }
-        if (e.key == "Q" || e.key == "q" || e.key == "Й" || e.key == "й") {
-            e.preventDefault();
-            this.setState((prev) => {
-                localStorage.setItem(
-                    "showingPinTitles",
-                    prev.showChipPinTitles ? "false" : "true"
-                );
-                return { showChipPinTitles: !prev.showChipPinTitles };
-            });
-        }
+        // Колесо добавления
         for (let i = 0; i < 9; i++)
             if (e.key == (i + 1).toString() && e.altKey) {
                 this.setState((prev) => {
@@ -122,99 +97,15 @@ export class EditPage extends Component<RequiredProps, States> {
                         enabledModal: false,
                     };
                 });
+                e.preventDefault();
+                return;
             }
-        if (
-            (e.key == "a" || e.key == "A" || e.key == "ф" || e.key == "Ф") &&
-            e.ctrlKey
-        ) {
-            this.setState((prev) => ({
-                showLibrary: !prev.showLibrary,
-                showCircleAdding: new Array(9).fill(false),
-                enabledModal: false,
-            }));
-        }
-        if (
-            (e.key == "d" || e.key == "D" || e.key == "в" || e.key == "В") &&
-            e.ctrlKey
-        ) {
-            this.setState({
-                showLibrary: false,
-                showCircleAdding: new Array(9).fill(false),
-                enabledModal: false,
-            });
-            this.newChip();
-            e.preventDefault();
-        }
-        if (e.key == "ArrowUp" || e.key == "ArrowRight") {
-            this.setState((prev) => ({
-                AddingChipCount: prev.AddingChipCount + 1,
-            }));
-        }
-        if (e.key == "ArrowDown" || e.key == "ArrowLeft") {
-            this.setState((prev) => ({
-                AddingChipCount:
-                    prev.AddingChipCount - 1 > 0
-                        ? prev.AddingChipCount - 1
-                        : prev.AddingChipCount,
-            }));
-        }
-        if (e.key == "Escape") {
-            this.setState({
-                showCircleAdding: new Array(9).fill(false),
-                AddingChip: undefined,
-                AddingBus: false,
-                showLibrary: false,
-                AddingChipCount: 1,
-            });
-        }
-        if (
-            (e.key == "s" || e.key == "S" || e.key == "ы" || e.key == "Ы") &&
-            e.ctrlKey
-        ) {
-            if (
-                this.saveManager.Chips.find(
-                    (chip) => chip.name == this.state.CurrentChip.name
-                )
-            )
-                this.saveManager.saveNewChip(
-                    this.state.CurrentChip,
-                    this.state.CurrentChip.name,
-                    this.state.CurrentChip.color,
-                    undefined,
-                    true
-                );
-            else
-                this.setState({
-                    enabledModal: true,
-                    modalContent: (
-                        <SaveChip
-                            saveManager={this.saveManager}
-                            currentChip={this.state.CurrentChip}
-                            setEnabled={this.setModal}
-                        />
-                    ),
-                });
-            e.preventDefault();
-        }
-        if (e.key == "Backspace") {
-            this.setState((prev) => {
-                const chipsToRemove = prev.SubChips.filter(
-                    (chip) => chip.selected
-                );
-                for (let chipRemoving of chipsToRemove) {
-                    chipRemoving.input.forEach((pin) =>
-                        pin.removeAllWire(prev.Wires)
-                    );
-                    chipRemoving.output.forEach((pin) =>
-                        pin.removeAllWire(prev.Wires)
-                    );
-                    removeElement(prev.SubChips, chipRemoving);
-                }
-                return {
-                    SubChips: prev.SubChips,
-                    Wires: prev.Wires,
-                };
-            });
+        for (const hotKeyItem of Object.values(hotkeys)) {
+            if (hotKeyItem.testKey(e)) {
+                e.preventDefault();
+                hotKeyItem.event();
+                return;
+            }
         }
     };
 
@@ -242,12 +133,48 @@ export class EditPage extends Component<RequiredProps, States> {
         });
     };
 
+    lastSizeWindow = new Pos();
+
+    onResize = (e: UIEvent) => {
+        const newSizeWindow = new Pos(
+            (e.currentTarget as Window).innerWidth,
+            (e.currentTarget as Window).innerHeight
+        );
+        const delta = new Pos(
+            (newSizeWindow.x - this.lastSizeWindow.x) / 2,
+            (newSizeWindow.y - this.lastSizeWindow.y) / 2
+        );
+        this.state.SubChips.forEach((chip) => {
+            if (chip instanceof Bus) {
+                chip.to.add(delta);
+                chip.from.add(delta);
+                chip.input.forEach((pin) => pin.position.add(delta));
+                chip.output.forEach((pin) => pin.position.add(delta));
+            } else {
+                chip.position.add(delta);
+            }
+        });
+        this.state.Inputs.forEach((pin) => (pin.position.y += delta.y));
+        this.state.Outputs.forEach((pin) => (pin.position.y += delta.y));
+        this.state.Wires.forEach((wire) =>
+            wire.points.forEach((point) => point.add(delta))
+        );
+
+        this.lastSizeWindow = newSizeWindow;
+        this.forceUpdate();
+    };
+
     componentDidMount(): void {
+        this.lastSizeWindow = new Pos(window.innerWidth, window.innerHeight);
         window.addEventListener("keydown", this.handleKeyDown);
+        window.addEventListener("resize", this.onResize);
     }
+
     componentWillUnmount(): void {
         window.removeEventListener("keydown", this.handleKeyDown);
+        window.removeEventListener("resize", this.onResize);
     }
+
     removeWire = (wire: Wire) => {
         wire.deletingWire();
         this.setState((prev) => {
@@ -257,15 +184,18 @@ export class EditPage extends Component<RequiredProps, States> {
             };
         });
     };
+
     addWire = (wire: Wire) => {
         if (!wire.error)
             this.setState((prev) => ({ Wires: [...prev.Wires, wire] }));
     };
+
     addPin = (pin: Pin) => {
         if (pin.isInput)
             this.setState((prev) => ({ Inputs: [...prev.Inputs, pin] }));
         else this.setState((prev) => ({ Outputs: [...prev.Outputs, pin] }));
     };
+
     removePin = (pin: Pin) => {
         while (pin.inWires.length != 0) this.removeWire(pin.inWires[0]);
         while (pin.outWires.length != 0) this.removeWire(pin.outWires[0]);
@@ -278,6 +208,7 @@ export class EditPage extends Component<RequiredProps, States> {
                 Outputs: removeElement(prev.Outputs, pin),
             }));
     };
+
     setAddingChip = (chipName: string) => {
         if (chipName != "BUS")
             this.setState({
@@ -439,22 +370,26 @@ export class EditPage extends Component<RequiredProps, States> {
                     deletePin={this.removePin}
                     showPinTitle={this.state.showAllPinTitles}
                 />
-                {this.state.showCircleAdding.map((enabledI, i) => (
-                    <CircleAdding
-                        key={i}
-                        circleID={i}
-                        enabled={enabledI}
-                        addNewChip={this.setAddingChip}
-                        setEnabled={(e: boolean) => {
-                            this.setState(() => {
-                                const newCircleState = new Array(9).fill(false);
-                                newCircleState[i] = e;
-                                return { showCircleAdding: newCircleState };
-                            });
-                        }}
-                        saveManager={this.saveManager}
-                    />
-                ))}
+                <div>
+                    {this.state.showCircleAdding.map((enabledI, i) => (
+                        <CircleAdding
+                            key={i}
+                            circleID={i}
+                            enabled={enabledI}
+                            addNewChip={this.setAddingChip}
+                            setEnabled={(e: boolean) => {
+                                this.setState(() => {
+                                    const newCircleState = new Array(9).fill(
+                                        false
+                                    );
+                                    newCircleState[i] = e;
+                                    return { showCircleAdding: newCircleState };
+                                });
+                            }}
+                            saveManager={this.saveManager}
+                        />
+                    ))}
+                </div>
                 <ChipList
                     enabled={this.state.showLibrary}
                     currentChip={this.state.CurrentChip}
@@ -473,5 +408,116 @@ export class EditPage extends Component<RequiredProps, States> {
                 </Modal>
             </div>
         );
+    }
+
+    initHotKeys() {
+        hotkeys.hideAllPin.event = () => {
+            this.setState((prev) => {
+                localStorage.setItem(
+                    "showingAllPinTitles",
+                    prev.showAllPinTitles ? "false" : "true"
+                );
+                localStorage.setItem(
+                    "showingPinTitles",
+                    prev.showAllPinTitles ? "false" : "true"
+                );
+                return {
+                    showAllPinTitles: !prev.showAllPinTitles,
+                    showChipPinTitles: !prev.showAllPinTitles,
+                };
+            });
+        };
+        hotkeys.hideChipPins.event = () => {
+            this.setState((prev) => {
+                localStorage.setItem(
+                    "showingPinTitles",
+                    prev.showChipPinTitles ? "false" : "true"
+                );
+                return { showChipPinTitles: !prev.showChipPinTitles };
+            });
+        };
+        hotkeys.library.event = () => {
+            console.log(this.state.showLibrary);
+            this.setState((prev) => ({
+                showLibrary: !prev.showLibrary,
+                showCircleAdding: new Array(9).fill(false),
+                enabledModal: false,
+            }));
+        };
+        hotkeys.save.event = () => {
+            if (
+                this.saveManager.Chips.find(
+                    (chip) => chip.name == this.state.CurrentChip.name
+                )
+            )
+                this.saveManager.saveNewChip(
+                    this.state.CurrentChip,
+                    this.state.CurrentChip.name,
+                    this.state.CurrentChip.color,
+                    undefined,
+                    true
+                );
+            else
+                this.setState({
+                    enabledModal: true,
+                    modalContent: (
+                        <SaveChip
+                            saveManager={this.saveManager}
+                            currentChip={this.state.CurrentChip}
+                            setEnabled={this.setModal}
+                        />
+                    ),
+                });
+        };
+        hotkeys.newChip.event = () => {
+            this.setState({
+                showLibrary: false,
+                showCircleAdding: new Array(9).fill(false),
+                enabledModal: false,
+            });
+            this.newChip();
+        };
+        hotkeys.addCount.event = () => {
+            this.setState((prev) => ({
+                AddingChipCount: prev.AddingChipCount + 1,
+            }));
+        };
+        hotkeys.reduceCount.event = () => {
+            this.setState((prev) => ({
+                AddingChipCount:
+                    prev.AddingChipCount - 1 > 0
+                        ? prev.AddingChipCount - 1
+                        : prev.AddingChipCount,
+            }));
+        };
+        hotkeys.cancelAction.event = () => {
+            this.setState({
+                showCircleAdding: new Array(9).fill(false),
+                AddingChip: undefined,
+                AddingBus: false,
+                showLibrary: false,
+                AddingChipCount: 1,
+            });
+        };
+        hotkeys.remove.event = () => {
+            this.setState((prev) => {
+                const chipsToRemove = prev.SubChips.filter(
+                    (chip) => chip.selected
+                );
+                for (let chipRemoving of chipsToRemove) {
+                    chipRemoving.input.forEach((pin) =>
+                        pin.removeAllWire(prev.Wires)
+                    );
+                    chipRemoving.output.forEach((pin) =>
+                        pin.removeAllWire(prev.Wires)
+                    );
+                    removeElement(prev.SubChips, chipRemoving);
+                }
+                return {
+                    SubChips: prev.SubChips,
+                    Wires: prev.Wires,
+                };
+            });
+        };
     }
 }
