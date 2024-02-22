@@ -12,6 +12,7 @@ export class ChipMinimalInfo {
     name: string;
     chipStyleType: number;
     color: string;
+    screenSize: Pos;
     inputPins: PinSaveInfo[];
     outputPins: PinSaveInfo[];
     Wires: WireSaveInfo[];
@@ -25,7 +26,8 @@ export class ChipMinimalInfo {
         outputPins: PinSaveInfo[] = [],
         Wires: WireSaveInfo[] = [],
         SubChips: { name: string; id: number; position: Pos }[] = [],
-        Buses: BusMinimalInfo[] = []
+        Buses: BusMinimalInfo[] = [],
+        screenSize: Pos = new Pos()
     ) {
         this.name = name;
         this.chipStyleType = chipStyleType;
@@ -35,6 +37,7 @@ export class ChipMinimalInfo {
         this.Wires = Wires;
         this.SubChips = SubChips;
         this.Buses = Buses;
+        this.screenSize = screenSize;
     }
 }
 

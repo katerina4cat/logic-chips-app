@@ -154,11 +154,21 @@ export class EditPage extends Component<RequiredProps, States> {
                 chip.position.add(delta);
             }
         });
-        this.state.Inputs.forEach((pin) => (pin.position.y += delta.y));
-        this.state.Outputs.forEach((pin) => (pin.position.y += delta.y));
-        this.state.Wires.forEach((wire) =>
-            wire.points.forEach((point) => point.add(delta))
-        );
+        this.state.Wires.forEach((wire) => wire.addDeltaToPoints(delta));
+        this.state.Inputs.forEach((pin) => {
+            if (pin.graphicalObject.current)
+                pin.graphicalObject.current.style.top = String(
+                    pin.position.y + delta.y
+                );
+            if (pin.updatePos) pin.updatePos();
+        });
+        this.state.Outputs.forEach((pin) => {
+            if (pin.graphicalObject.current)
+                pin.graphicalObject.current.style.top = String(
+                    pin.position.y + delta.y
+                );
+            if (pin.updatePos) pin.updatePos();
+        });
 
         this.lastSizeWindow = newSizeWindow;
         this.forceUpdate();

@@ -167,7 +167,8 @@ export class SaveInfo {
                             (chip as Bus).to,
                             chip.id
                         )
-                )
+                ),
+            new Pos(window.innerWidth, window.innerHeight)
         );
         if (this.Chips.find((chip) => chip.name == name)) {
             if (rewrite) {
@@ -223,6 +224,10 @@ export class SaveInfo {
                     );
                     return new Chip();
                 }
+                const delta = new Pos(
+                    (window.innerWidth - chipInfo.screenSize.x) / 2,
+                    (window.innerHeight - chipInfo.screenSize.y) / 2
+                );
                 const SubChips = chipInfo.SubChips.map((subChip) =>
                     this.loadChipByName(
                         subChip.name,
@@ -233,8 +238,8 @@ export class SaveInfo {
                 SubChips.push(
                     ...chipInfo.Buses?.map((bus) => {
                         const buff = new Bus(
-                            new Pos(bus.from),
-                            new Pos(bus.to),
+                            new Pos(bus.from).add(delta),
+                            new Pos(bus.to).add(delta),
                             bus.id
                         );
                         return buff;
@@ -245,7 +250,7 @@ export class SaveInfo {
                     chipID,
                     chipName,
                     chipInfo.color,
-                    position
+                    position.add(delta)
                 );
                 chipInfo.inputPins.forEach((pin) => {
                     res.input.push(
@@ -254,14 +259,20 @@ export class SaveInfo {
                             true,
                             pin.id,
                             pin.name,
-                            pin.position.y,
+                            pin.position.y + delta.y,
                             chipID == 0
                         )
                     );
                 });
                 chipInfo.outputPins.forEach((pin) => {
                     res.output.push(
-                        new Pin(res, false, pin.id, pin.name, pin.position.y)
+                        new Pin(
+                            res,
+                            false,
+                            pin.id,
+                            pin.name,
+                            pin.position.y + delta.y
+                        )
                     );
                 });
                 chipInfo.Wires.forEach((wire) => {
@@ -296,7 +307,7 @@ export class SaveInfo {
                         res.wires.push(
                             (sourceChip as Bus).createWireToBus(
                                 targetChip as Bus,
-                                wire.points.map((point) => new Pos(point))
+                                wire.points
                             )
                         );
                         return;
@@ -340,8 +351,8 @@ export class SaveInfo {
                             new Wire(
                                 source,
                                 target,
-                                wire.points.map((point) => new Pos(point))
-                            )
+                                wire.points
+                            ).addDeltaToPoints(delta)
                         );
                 });
                 return res;
