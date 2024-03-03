@@ -21,7 +21,7 @@ export class Modal extends Component<
     render(): ReactNode {
         return (
             <div
-                className={cl.Modal}
+                className={`${cl.Modal}`}
                 style={{ display: this.props.enabled ? "flex" : "none" }}
                 onClick={(e) => {
                     e.stopPropagation();
@@ -33,7 +33,9 @@ export class Modal extends Component<
                     onClick={(e) => {
                         e.stopPropagation();
                     }}
-                    className={`${cl.ModalWindow} ${this.props.className}`}
+                    className={`${cl.ModalWindow} ${
+                        this.props.className ? this.props.className : ""
+                    }`}
                     style={
                         this.props.modalBG
                             ? { backgroundColor: this.props.modalBG }

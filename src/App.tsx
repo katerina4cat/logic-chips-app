@@ -1,15 +1,15 @@
-import { EditPage } from "./ViewModel/EditPage";
+/* global google */
+import { Component, ReactNode } from "react";
+import { SignUp } from "./Authorization/SignUp";
 
 export const debug = true;
-
-import { Component, ReactNode } from "react";
-
 interface RequiredProps {}
 
-interface States {}
-
+interface States {
+    signIn: boolean;
+}
 export class App extends Component<RequiredProps, States> {
-    state: Readonly<States> = {};
+    state: Readonly<States> = { signIn: false };
     constructor(props: RequiredProps) {
         super(props);
     }
@@ -17,7 +17,8 @@ export class App extends Component<RequiredProps, States> {
     render(): ReactNode {
         return (
             <>
-                <EditPage saveName="newSave" />
+                <SignUp />
+                {/* <EditPage saveName="newSave" /> */}
             </>
         );
     }
