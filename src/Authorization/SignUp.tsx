@@ -1,8 +1,8 @@
 import { Component, ReactNode } from "react";
 import { Modal } from "../ViewModel/Modal/Modal";
 import cl from "./SignUp.module.scss";
-import axios from "axios";
 import { GoogleSignUp } from "./GoogleSignUp";
+import { loginByEmail, registerByEmail } from "../Managers/ApiManager";
 
 interface RequiredProps {}
 
@@ -20,27 +20,6 @@ export class SignUp extends Component<RequiredProps, States> {
     constructor(props: RequiredProps) {
         super(props);
     }
-
-    login = async () => {
-        const res = await axios.post("/api/users/login/email", {
-            email: this.state.login,
-            password: this.state.password,
-        });
-        if (res.status == 201) {
-            localStorage.setItem("accessToken", res.data.accessToken);
-        }
-    };
-
-    register = async () => {
-        const res = await axios.post("/api/users/register", {
-            email: this.state.login,
-            nick: this.state.login,
-            password: this.state.password,
-        });
-        if (res.status == 201) {
-            localStorage.setItem("accessToken", res.data.accessToken);
-        }
-    };
 
     render(): ReactNode {
         return (
@@ -70,8 +49,26 @@ export class SignUp extends Component<RequiredProps, States> {
                             width: "40%",
                         }}
                     >
-                        <button onClick={this.login}>Войти</button>
-                        <button onClick={this.register}>Регистрация</button>
+                        <button
+                            onClick={() =>
+                                loginByEmail(
+                                    this.state.login,
+                                    this.state.password
+                                )
+                            }
+                        >
+                            Войти
+                        </button>
+                        <button
+                            onClick={() =>
+                                registerByEmail(
+                                    this.state.login,
+                                    this.state.password
+                                )
+                            }
+                        >
+                            Регистрация
+                        </button>
                     </div>
                     <GoogleSignUp />
                 </Modal>

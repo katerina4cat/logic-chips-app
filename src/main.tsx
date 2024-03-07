@@ -3,9 +3,6 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import axios from "axios";
-
-axios.defaults.baseURL = "https://katerina4cat.ru";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
