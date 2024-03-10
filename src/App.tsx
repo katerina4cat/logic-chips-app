@@ -4,37 +4,18 @@ import { SignUp } from "./Authorization/SignUp";
 import UserManager from "./Managers/UserManager";
 import { EditPage } from "./ViewModel/EditPage";
 import { userInfo } from "./Managers/ApiManager";
+import React from "react";
+import { ViewModel, view } from "@yoskutik/react-vvm";
+import { observable } from "mobx";
 
 export const debug = true;
-interface RequiredProps {}
 
-interface States {
-    signIn: boolean;
+export class AppViewModel extends ViewModel {
+    @observable signIn = false;
 }
-export class App extends Component<RequiredProps, States> {
-    state: Readonly<States> = { signIn: false };
-    constructor(props: RequiredProps) {
-        super(props);
-        UserManager.listeners.push(this.callbackLogined);
-        userInfo();
-    }
 
-    callbackLogined = () => {
-        if (this.state.signIn != UserManager.signedIn)
-            this.setState({ signIn: UserManager.signedIn });
-    };
-
-    render(): ReactNode {
-        return (
-            <>
-                {this.state.signIn ? (
-                    <EditPage saveName="newSave" />
-                ) : (
-                    <SignUp />
-                )}
-            </>
-        );
-    }
-}
+const App = view(AppViewModel)(({ viewModel }) => (
+    <>{viewModel.signIn ? <EditPage saveName="newSave" /> : <SignUp />}</>
+));
 
 export default App;
