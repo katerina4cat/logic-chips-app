@@ -42,7 +42,7 @@ export const ViewPin = view(PinViewModel)<RequiredProps>(({ viewModel }) => {
             ref={viewModel.ref}
             style={{
                 backgroundColor: getColorWithState(
-                    viewModel.pin.totalState,
+                    viewModel.pin.totalState.value,
                     viewModel.pin.color
                 ),
             }}

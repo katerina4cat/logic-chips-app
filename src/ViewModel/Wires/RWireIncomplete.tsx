@@ -125,7 +125,7 @@ export const RWireIncomplete = view(WireIncompleteViewModel)(
                 stroke={
                     viewModel.firstPin
                         ? getColorWithState(
-                              viewModel.firstPin.totalState,
+                              viewModel.firstPin.totalState.value,
                               viewModel.firstPin.color
                           )
                         : undefined

@@ -34,7 +34,7 @@ export const RWire = view(WireViewModel)<RequiredProps>(({ viewModel }) => {
                 document.removeEventListener("keydown", viewModel.handleKeydown)
             }
             stroke={getColorWithState(
-                viewModel.wire.source.totalState,
+                viewModel.wire.source.totalState.value,
                 viewModel.wire.source.color
             )}
             d={viewModel.wire.drawWire}

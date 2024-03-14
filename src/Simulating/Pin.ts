@@ -16,14 +16,16 @@ export class Pin {
     @observable chip: Chip;
     isInput: boolean;
     canUpdatePropagate: boolean;
-    @observable private _states: State.States[];
+    @observable private _states: State[];
     @computed get totalState() {
-        let res = State.States.UNDEFINED;
+        let res = new State(State.States.UNDEFINED);
         for (const state of this.states) {
-            if (state == State.States.FLOATING) return State.States.FLOATING;
-            else if (state != State.States.UNDEFINED) {
-                if (res == State.States.UNDEFINED) res = state;
-                else return State.States.FLOATING;
+            if (state.value == State.States.FLOATING)
+                return new State(State.States.FLOATING);
+            else if (state.value != State.States.UNDEFINED) {
+                if (res.value == State.States.UNDEFINED)
+                    res.value = state.value;
+                else return new State(State.States.FLOATING);
             }
         }
         return res;
@@ -51,7 +53,7 @@ export class Pin {
         this.canUpdatePropagate = canUpdatePropagate;
         if (deltaPos) this.deltaPos = deltaPos;
         if (hasDefaultState) {
-            this._states.push(State.States.LOW);
+            this._states.push(new State(State.States.LOW));
         }
     }
 
@@ -60,7 +62,7 @@ export class Pin {
      * @param state Состояние связанного пина
      * @returns
      */
-    @action addState(state: State.States | State.States[]) {
+    @action addState(state: State | State[]) {
         if (Array.isArray(state)) this.states.push(...state);
         else this.states.push(state);
     }
@@ -70,7 +72,7 @@ export class Pin {
      * @param state Состояние удаляемой связи
      * @returns
      */
-    @action removeState(state: State.States | State.States[]) {
+    @action removeState(state: State | State[]) {
         if (Array.isArray(state)) {
             state.forEach((oneState) => this.removeState(oneState));
             return;

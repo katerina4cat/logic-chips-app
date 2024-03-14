@@ -47,7 +47,7 @@ export class RBus extends Component<RequiredProps, States> {
                     className={cl.RBus}
                     id={`bus_${this.props.Bus.id}`}
                     stroke={getColorWithState(
-                        this.props.Bus.output[0]?.totalState ||
+                        this.props.Bus.output[0]?.totalState.value ||
                             State.States.UNDEFINED,
                         this.props.Bus.Wcolor
                     )}
