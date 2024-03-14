@@ -1,112 +1,105 @@
-import { Component, ReactNode, createRef } from "react";
+import { useRef } from "react";
 import { Pos } from "../../common/Pos";
 import { Chip } from "../../Simulating/Chip";
 import { Pin } from "../../Simulating/Pin";
 import { DefaultChip } from "./DefaultChip";
-import { SaveInfo } from "../../Structs/SaveInfo";
+import { ViewModel, view } from "@yoskutik/react-vvm";
+import { EditPageViewModel } from "../EditPage";
+import { action, makeObservable, observable } from "mobx";
 
-interface RequiredProps {
-    AddingChip?: Chip;
-    AddingChipCount: number;
-    saveManager: SaveInfo;
-    addChips: (chips: Chip[]) => void;
-    clearAdding: () => void;
-}
-
-interface States {
-    CursorPosition: Pos;
-}
-
-export class AddingChipsBox extends Component<RequiredProps, States> {
-    state: Readonly<States> = { CursorPosition: new Pos() };
-    constructor(props: RequiredProps) {
-        super(props);
+class AddingChipViewModel extends ViewModel<EditPageViewModel> {
+    @observable cursorPosition: Pos = new Pos();
+    addingChipBoxRef = useRef<HTMLDivElement>(null);
+    constructor() {
+        super();
+        makeObservable(this);
     }
 
-    componentDidMount(): void {
+    protected onViewMounted(): void {
         window.addEventListener("mousemove", this.handleMouseMove);
     }
-    componentWillUnmount(): void {
+    protected onViewUnmounted(): void {
         window.removeEventListener("mousemove", this.handleMouseMove);
     }
-    handleMouseMove = (e: MouseEvent) => {
-        this.setState((prev) => {
-            prev.CursorPosition.x = e.pageX;
-            prev.CursorPosition.y = e.pageY;
-            return { CursorPosition: prev.CursorPosition };
-        });
+    @action handleMouseMove = (e: MouseEvent) => {
+        this.cursorPosition.x = e.pageX;
+        this.cursorPosition.y = e.pageY;
     };
-
-    addingChipBoxRef = createRef<HTMLDivElement>();
-
-    handleClickToPlaceChip = () => {
-        if (!this.props.AddingChip || !this.addingChipBoxRef.current) return;
+    @action handleClickToPlaceChip = () => {
+        if (!this.parent.addingChip) return;
         try {
             const curretTime = Date.now();
-            if (this.addingChipBoxRef.current?.children.length > 0)
-                this.props.addChips(
-                    Array.from(this.addingChipBoxRef.current?.children || [])
-                        .map((child, i) => {
-                            const box = child?.getBoundingClientRect();
-                            return this.props.AddingChip
-                                ? this.props.saveManager.loadChipByName(
-                                      this.props.AddingChip.name,
-                                      new Pos(box?.x, box?.y),
-                                      curretTime + i
-                                  )
-                                : undefined;
-                        })
-                        .filter(Boolean) as Chip[]
-                );
+            if (this.addingChipBoxRef.current)
+                if (this.addingChipBoxRef.current.children.length > 0)
+                    this.parent.addChips(
+                        Array.from(
+                            this.addingChipBoxRef.current?.children || []
+                        )
+                            .map((child, i) => {
+                                const box = child?.getBoundingClientRect();
+                                return this.parent.addingChip
+                                    ? this.parent.saveManager.loadChipByName(
+                                          this.parent.addingChip.name,
+                                          new Pos(box?.x, box?.y),
+                                          curretTime + i
+                                      )
+                                    : undefined;
+                            })
+                            .filter(Boolean) as Chip[]
+                    );
         } catch (err: any) {
             console.log(err);
         }
         setTimeout(() => {
-            this.props.clearAdding();
+            this.parent.clearAdding();
         }, 1);
     };
+}
 
-    render(): ReactNode {
-        return (
-            <>
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        position: "absolute",
-                        left: this.state.CursorPosition.x - 25,
-                        top: this.state.CursorPosition.y - 25,
-                    }}
-                    ref={this.addingChipBoxRef}
-                >
-                    {new Array(this.props.AddingChipCount).fill(1).map((_e) => (
+export const AddingChipsBox = view(AddingChipViewModel)((props) => {
+    if (props.viewModel.parent.addingChip === undefined) return <></>;
+    return (
+        <>
+            <div
+                style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    position: "absolute",
+                    left: props.viewModel.cursorPosition.x - 25,
+                    top: props.viewModel.cursorPosition.y - 25,
+                }}
+                ref={props.viewModel.addingChipBoxRef}
+            >
+                {new Array(props.viewModel.parent.addingCount)
+                    .fill(1)
+                    .map((_e) => (
                         <DefaultChip
                             isPreview
-                            chip={this.props.AddingChip}
+                            chip={props.viewModel.parent.addingChip as Chip}
                             interactPin={{
                                 current: function (_pin: Pin): void {},
                             }}
-                            clearSelection={() => {}}
                         />
                     ))}
-                </div>
-                <div
-                    style={{
-                        width: "100%",
-                        height: "100%",
-                        display: this.props.AddingChip ? "block" : "none",
-                        position: "fixed",
-                        left: 0,
-                        top: 0,
-                    }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    onMouseUp={(e) => {
-                        e.stopPropagation();
-                        this.handleClickToPlaceChip();
-                    }}
-                ></div>
-            </>
-        );
-    }
-}
+            </div>
+            <div
+                style={{
+                    width: "100%",
+                    height: "100%",
+                    display: props.viewModel.parent.addingChip
+                        ? "block"
+                        : "none",
+                    position: "fixed",
+                    left: 0,
+                    top: 0,
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                onMouseUp={(e) => {
+                    e.stopPropagation();
+                    props.viewModel.handleClickToPlaceChip();
+                }}
+            ></div>
+        </>
+    );
+});

@@ -5,12 +5,13 @@ import { Pos } from "../common/Pos";
 import { Wire } from "./Wire";
 import { State } from "../common/State";
 import React, { createRef } from "react";
+import { observable } from "mobx";
 
 export class Pin {
     id: number;
-    name: string;
-    position: Pos;
-    color: Color = Colors.red;
+    @observable name: string;
+    @observable position: Pos;
+    @observable color: Color = Colors.red;
     isInput: boolean;
     private _states: State[];
     totalState: State.States = State.States.UNDEFINED;

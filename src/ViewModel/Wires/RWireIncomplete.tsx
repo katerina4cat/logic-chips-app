@@ -5,7 +5,7 @@ import { Pin } from "../../Simulating/Pin";
 import { Pos } from "../../common/Pos";
 import { getColorWithState } from "../../common/Colors";
 import { ChipTypes } from "../../Structs/ChipMinimalInfo";
-import { Bus } from "../../Simulating/Bus";
+import { Bus } from "../../Simulating/BaseChips/Bus";
 
 interface RequiredProps {
     addWire: (wire: Wire) => void;

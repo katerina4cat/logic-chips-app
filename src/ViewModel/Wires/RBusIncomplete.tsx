@@ -4,6 +4,7 @@ import { Pos } from "../../common/Pos";
 import { Colors, getColorWithState } from "../../common/Colors";
 import { State } from "../../common/State";
 import { BusEndPosWidth, manyBusSpace } from "../../common/Settings";
+import React from "react";
 
 interface RequiredProps {
     enabled: boolean;

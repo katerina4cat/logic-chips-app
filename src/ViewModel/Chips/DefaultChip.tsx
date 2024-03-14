@@ -1,152 +1,152 @@
-import { Component, ReactNode } from "react";
 import cl from "./DefaultChip.module.scss";
 import { Chip } from "../../Simulating/Chip";
 import { RPin } from "../Pins/RPin";
 import { Pin } from "../../Simulating/Pin";
 import { Pos } from "../../common/Pos";
+import { ViewModel, view } from "@yoskutik/react-vvm";
+import { action, makeObservable, observable } from "mobx";
+import { EditPageViewModel } from "../EditPage";
 
 interface RequiredProps {
-    chip: Chip | undefined;
+    chip: Chip;
     interactPin: { current: (pin: Pin, ctrlKey: boolean, point?: Pos) => void };
     showPinTitles?: boolean;
     isPreview?: boolean;
-    clearSelection: () => void;
 }
 
-interface States {
-    position: Pos;
-    CursorPosition: Pos;
+class DefaultChipViewModel extends ViewModel<EditPageViewModel, RequiredProps> {
+    @observable chip: Chip;
+    // @observable delta: Pos = new Pos();
+
+    startPosition: Pos = new Pos();
+    mouseDownTime: number = 0;
+
+    constructor() {
+        super();
+        this.chip = this.viewProps.chip;
+        makeObservable(this);
+        window.addEventListener("resize", this.onResize);
+    }
+
+    @action onResize = (e: UIEvent) => {
+        console.log(e);
+    };
+
+    // @action mouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    //     this.startPosition = new Pos(e.pageX, e.pageY);
+    //     if (e.ctrlKey) {
+    //         this.chip.selected = !this.chip.selected;
+    //         if (this.chip.selected)
+    //             window.addEventListener("mousedown", this.startGrabbing);
+    //         else window.removeEventListener("mousedown", this.startGrabbing);
+    //     } else {
+    //         this.mouseDownTime = Date.now();
+    //         this.delta = new Pos(
+    //             this.chip.position.x - e.pageX,
+    //             this.chip.position.y - e.pageY
+    //         );
+    //         if (!this.chip.selected) this.viewProps.clearSelection();
+    //         this.chip.selected = true;
+    //         window.addEventListener("mouseup", this.stopGrabbing);
+    //         window.addEventListener("mousemove", this.processGrabbing);
+    //     }
+    // };
+
+    // startGrabbing = (e: MouseEvent) => {
+    //     if (e.ctrlKey) return;
+
+    //     if (!this.chip.selected) {
+    //         window.removeEventListener("mousedown", this.startGrabbing);
+    //         return;
+    //     }
+    //     this.mouseDownTime = Date.now();
+    //     this.delta = new Pos(
+    //         this.chip.position.x - e.pageX,
+    //         this.chip.position.y - e.pageY
+    //     );
+    //     window.addEventListener("mouseup", this.stopGrabbing);
+    //     window.addEventListener("mousemove", this.processGrabbing);
+    // };
+
+    // @action processGrabbing = (e: MouseEvent) => {
+    //     if (Date.now() - this.mouseDownTime < 75) return;
+    //     this.chip.position = new Pos(e.pageX, e.pageY).add(this.delta);
+    //     this.chip.input.forEach((pin) => {
+    //         if (pin.updatePos) pin.updatePos();
+    //     });
+    //     this.chip.output.forEach((pin) => {
+    //         if (pin.updatePos) pin.updatePos();
+    //     });
+    // };
+
+    // @action stopGrabbing = (e: MouseEvent) => {
+    //     window.removeEventListener("mouseup", this.stopGrabbing);
+    //     window.removeEventListener("mousemove", this.processGrabbing);
+    //     if (Date.now() - this.mouseDownTime < 75) {
+    //         this.viewProps.clearSelection();
+    //         this.chip.selected = true;
+    //     }
+    // };
 }
 
-export class DefaultChip extends Component<RequiredProps, States> {
-    constructor(props: RequiredProps) {
-        super(props);
-        this.state = {
-            position: props.chip?.position || new Pos(),
-            CursorPosition: new Pos(),
-        };
-    }
-    componentDidMount(): void {
-        window.addEventListener("mousemove", this.handleMouseMove);
-    }
-    componentWillUnmount(): void {
-        window.removeEventListener("mousemove", this.handleMouseMove);
-    }
-
-    grabbing = false;
-    delta = new Pos();
-    handleKeyUp = (e: KeyboardEvent) => {
-        if (e.key == "Control") {
-            window.removeEventListener("keyup", this.handleKeyUp);
-            this.grabbing = true;
-            this.delta = new Pos(
-                this.state.position.x - this.state.CursorPosition.x,
-                this.state.position.y - this.state.CursorPosition.y
-            );
-            window.addEventListener("mouseup", this.stopGrabbing);
-            window.addEventListener("mousemove", this.processGrabbing);
-        }
-    };
-
-    handleMouseMove = (e: MouseEvent) => {
-        this.setState((prev) => {
-            prev.CursorPosition.x = e.pageX;
-            prev.CursorPosition.y = e.pageY;
-            return { CursorPosition: prev.CursorPosition };
-        });
-    };
-    lastStartTouch = new Pos();
-    startGrabbing = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        this.lastStartTouch.x = e.pageX;
-        this.lastStartTouch.y = e.pageY;
-        if (e.ctrlKey) {
-            window.addEventListener("keyup", this.handleKeyUp);
-            if (this.props.chip) this.props.chip.selected = true;
-        } else {
-            this.props.clearSelection();
-            if (this.props.chip) this.props.chip.selected = true;
-            this.grabbing = true;
-            this.delta = new Pos(
-                this.state.position.x - e.pageX,
-                this.state.position.y - e.pageY
-            );
-            window.addEventListener("mouseup", this.stopGrabbing);
-            window.addEventListener("mousemove", this.processGrabbing);
-        }
-    };
-    processGrabbing = (e: MouseEvent) => {
-        if (!this.props.chip) return;
-        const newPosition = new Pos(e.pageX, e.pageY).add(this.delta);
-        this.setState({ position: newPosition });
-        this.props.chip.position = newPosition;
-        this.props.chip.input.forEach((pin) => {
-            if (pin.updatePos) pin.updatePos();
-        });
-        this.props.chip.output.forEach((pin) => {
-            if (pin.updatePos) pin.updatePos();
-        });
-    };
-    stopGrabbing = (e: MouseEvent) => {
-        window.removeEventListener("mouseup", this.stopGrabbing);
-        window.removeEventListener("mousemove", this.processGrabbing);
-        const deltaLastTouch = new Pos(
-            e.pageX - this.lastStartTouch.x,
-            e.pageY - this.lastStartTouch.y
-        );
-        if (
-            !(
-                deltaLastTouch.x < 5 &&
-                deltaLastTouch.x > -5 &&
-                deltaLastTouch.y < 5 &&
-                deltaLastTouch.y > -5
-            )
-        )
-            this.props.clearSelection();
-    };
-
-    render(): ReactNode {
-        if (!this.props.chip) return <></>;
+export const DefaultChip = view(DefaultChipViewModel)<RequiredProps>(
+    (props) => {
+        if (props.viewModel.chip == undefined) return <></>;
         return (
             <div
                 style={{
-                    backgroundColor: this.props.chip.color,
-                    position: this.props.isPreview ? "relative" : "absolute",
-                    cursor: this.props.isPreview ? "default" : "pointer",
-                    left: this.props.chip.position.x,
-                    top: this.props.chip.position.y,
-                    boxShadow: this.props.chip.selected
-                        ? `0px 0px 3px 3px color-mix(in srgb, white 20%, ${this.props.chip.color})`
+                    backgroundColor: props.viewModel.chip.color,
+                    position: props.isPreview ? "relative" : "absolute",
+                    cursor: props.isPreview ? "default" : "pointer",
+                    left:
+                        props.viewModel.chip.position.x +
+                        (props.viewModel.chip.selected
+                            ? props.viewModel.parent.deltaMove.x
+                            : 0),
+                    top:
+                        props.viewModel.chip.position.y +
+                        (props.viewModel.chip.selected
+                            ? props.viewModel.parent.deltaMove.y
+                            : 0),
+                    boxShadow: props.viewModel.chip.selected
+                        ? `0px 0px 3px 3px color-mix(in srgb, white 20%, ${props.viewModel.chip.color})`
                         : "none",
                 }}
                 className={cl.DefaultChip}
                 onMouseDown={
-                    this.props.isPreview ? undefined : this.startGrabbing
+                    props.isPreview
+                        ? undefined
+                        : (e) =>
+                              props.viewModel.parent.clickedToChip(
+                                  e,
+                                  props.viewModel.chip
+                              )
                 }
             >
                 <div className={cl.PinList}>
-                    {this.props.chip.input.map((pin) => (
+                    {props.viewModel.chip.input.map((pin) => (
                         <RPin
                             key={pin.id}
                             Pin={pin}
-                            interactPin={this.props.interactPin}
-                            drawTitle={this.props.showPinTitles}
-                            isPreview={this.props.isPreview}
+                            interactPin={props.interactPin}
+                            drawTitle={props.showPinTitles}
+                            isPreview={props.isPreview}
                         />
                     ))}
                 </div>
-                <div className={cl.ChipName}>{this.props.chip.name}</div>
+                <div className={cl.ChipName}>{props.viewModel.chip.name}</div>
                 <div className={cl.PinList}>
-                    {this.props.chip.output.map((pin) => (
+                    {props.viewModel.chip.output.map((pin) => (
                         <RPin
                             key={pin.id}
                             Pin={pin}
-                            interactPin={this.props.interactPin}
-                            drawTitle={this.props.showPinTitles}
-                            isPreview={this.props.isPreview}
+                            interactPin={props.interactPin}
+                            drawTitle={props.showPinTitles}
+                            isPreview={props.isPreview}
                         />
                     ))}
                 </div>
             </div>
         );
     }
-}
+);

@@ -1,8 +1,10 @@
+import { makeObservable, observable } from "mobx";
+
 export class Pos {
-    x: number;
-    y: number;
+    @observable x: number;
+    @observable y: number;
     constructor(x: number | Pos = 0, y = 0) {
-        console.log();
+        makeObservable(this);
         if (x.toString() == "[object Object]") {
             this.x = (x as Pos).x;
             this.y = (x as Pos).y;

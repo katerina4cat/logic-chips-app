@@ -1,12 +1,12 @@
 import { createRef } from "react";
-import { State } from "../common/State";
-import { Chip } from "./Chip";
-import { Color, Colors, getColorWithState } from "../common/Colors";
-import { ChipTypes } from "../Structs/ChipMinimalInfo";
-import { Pos } from "../common/Pos";
-import { Pin } from "./Pin";
-import { removeElement } from "../common/RemoveElement";
-import { Wire } from "./Wire";
+import { State } from "../../common/State";
+import { Chip } from "../Chip";
+import { Color, Colors, getColorWithState } from "../../common/Colors";
+import { ChipTypes } from "../../Structs/ChipMinimalInfo";
+import { Pos } from "../../common/Pos";
+import { Pin } from "../Pin";
+import { removeElement } from "../../common/RemoveElement";
+import { Wire } from "../Wire";
 
 export class Bus extends Chip {
     ref = createRef<SVGPathElement>();

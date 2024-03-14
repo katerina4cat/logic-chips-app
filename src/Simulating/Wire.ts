@@ -4,7 +4,8 @@ import { Pin } from "./Pin";
 import { Pos } from "../common/Pos";
 import { createRef } from "react";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
-import { Bus } from "./Bus";
+import { Bus } from "./BaseChips/Bus";
+import { makeObservable, observable } from "mobx";
 
 const radiusWire = 20;
 let wireIDs = 0;
@@ -12,11 +13,12 @@ let wireIDs = 0;
 export class Wire {
     source: Pin;
     target: Pin;
-    points: Pos[];
+    @observable points: Pos[];
     graphicObject: React.RefObject<SVGPathElement>;
     id: number;
     error = false;
     constructor(source: Pin, target: Pin, points: Pos[]) {
+        makeObservable(this);
         this.source = source;
         this.target = target;
         this.id = wireIDs;

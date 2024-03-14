@@ -11,11 +11,14 @@ import { observable } from "mobx";
 export const debug = true;
 
 export class AppViewModel extends ViewModel {
-    @observable signIn = false;
+    @observable signIn = true;
 }
 
 const App = view(AppViewModel)(({ viewModel }) => (
     <>{viewModel.signIn ? <EditPage saveName="newSave" /> : <SignUp />}</>
+    // <>
+    //     <Test />
+    // </>
 ));
 
 export default App;

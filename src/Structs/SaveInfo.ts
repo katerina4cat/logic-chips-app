@@ -1,12 +1,15 @@
 import { Pos } from "../common/Pos";
 import { removeElement } from "../common/RemoveElement";
-import { Bus } from "../Simulating/Bus";
-import { AND, NOT, TRI_STATE_BUFFER, Chip } from "../Simulating/Chip";
+import { Bus } from "../Simulating/BaseChips/Bus";
+import { Chip } from "../Simulating/Chip";
+import { TRI_STATE_BUFFER } from "../Simulating/BaseChips/TRI_STATE_BUFFER";
 import { Pin } from "../Simulating/Pin";
 import { Wire } from "../Simulating/Wire";
 import { BusMinimalInfo, ChipMinimalInfo, ChipTypes } from "./ChipMinimalInfo";
 import { PinSaveInfo } from "./PinInfo";
 import { WireSaveInfo } from "./WireSaveInfo";
+import { AND } from "../Simulating/BaseChips/AND";
+import { NOT } from "../Simulating/BaseChips/NOT";
 
 export class SaveInfo {
     Chips: ChipMinimalInfo[] = [

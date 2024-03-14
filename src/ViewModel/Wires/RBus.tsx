@@ -1,6 +1,6 @@
 import { Component, ReactNode } from "react";
 import cl from "./RBus.module.scss";
-import { Bus } from "../../Simulating/Bus";
+import { Bus } from "../../Simulating/BaseChips/Bus";
 import { State } from "../../common/State";
 import { getColorWithState } from "../../common/Colors";
 import { Pin } from "../../Simulating/Pin";
