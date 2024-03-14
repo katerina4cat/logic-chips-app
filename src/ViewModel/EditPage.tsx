@@ -122,7 +122,10 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         const wires = this.currentChip.wires.filter(
             (wire) => wire.source == pin || wire.target == pin
         );
-        for (const wire of wires) removeElement(this.currentChip.wires, wire);
+        for (const wire of wires) {
+            wire.deletingWire();
+            removeElement(this.currentChip.wires, wire);
+        }
         if (pin.isInput) removeElement(this.currentChip.input, pin);
         else removeElement(this.currentChip.output, pin);
     };
@@ -131,8 +134,11 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         bus.depentBus.forEach((dep) => removeElement(dep.depentBus, bus));
         removeElement(this.currentChip.buses, bus);
     };
-    @action selectChip = (chip: Chip) => {
+    @action clearSelection = () => {
         this.currentChip.subChips.forEach((schip) => (schip.selected = false));
+    };
+    @action selectChip = (chip: Chip) => {
+        this.clearSelection();
         chip.selected = true;
     };
 
@@ -142,6 +148,10 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         e: React.MouseEvent<HTMLDivElement, MouseEvent>,
         chip: Chip
     ) => {
+        if (e.altKey) {
+            this.setAddingChip(chip.name);
+            return;
+        }
         this.startClickTime = Date.now();
         this.startClickPos = new Pos(e.pageX, e.pageY);
         this.lastClickedChip = chip;
@@ -267,7 +277,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
                     true
                 );
             else {
-                this.enabledModal = true;
+                this.setModal(true);
             }
         };
         hotkeys.newChip.event = () => {
@@ -292,20 +302,21 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
             this.showLibrary = false;
             this.addingCount = 1;
         };
-        hotkeys.remove.event = () => {
-            const chipsToRemove = this.currentChip.subChips.filter(
-                (chip) => chip.selected
-            );
-            for (let chipRemoving of chipsToRemove) {
-                chipRemoving.input.forEach((pin) => this.removePin(pin));
-                chipRemoving.output.forEach((pin) => this.removePin(pin));
-                removeElement(this.currentChip.subChips, chipRemoving);
-            }
-        };
+        hotkeys.remove.event = this.removingSelectedChip;
     }
+    @action removingSelectedChip = () => {
+        const chipsToRemove = this.currentChip.subChips.filter(
+            (chip) => chip.selected
+        );
+        for (let chipRemoving of chipsToRemove) {
+            chipRemoving.input.forEach((pin) => this.removePin(pin));
+            chipRemoving.output.forEach((pin) => this.removePin(pin));
+            removeElement(this.currentChip.subChips, chipRemoving);
+        }
+    };
 }
 
-export const EditPage = view(EditPageViewModel)((props) => {
+export const EditPage = view(EditPageViewModel)<RequiredProps>((props) => {
     const { viewModel } = props;
     return (
         <div className={cl.EditPage}>
@@ -313,6 +324,7 @@ export const EditPage = view(EditPageViewModel)((props) => {
                 className={cl.EditView}
                 onClick={(e) => {
                     viewModel.wireIncompleteViewModel?.wirePointClick(e);
+                    viewModel.clearSelection();
                 }}
             >
                 <RWireIncomplete />

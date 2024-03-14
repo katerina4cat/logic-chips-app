@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import { Pos } from "../../common/Pos";
 import { Chip } from "../../Simulating/Chip";
-import { Pin } from "../../Simulating/Pin";
 import { DefaultChip } from "./DefaultChip";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { EditPageViewModel } from "../EditPage";
@@ -74,13 +73,11 @@ export const AddingChipsBox = view(AddingChipViewModel)((props) => {
             >
                 {new Array(props.viewModel.parent.addingCount)
                     .fill(1)
-                    .map((_e) => (
+                    .map((_e, i) => (
                         <DefaultChip
+                            key={i}
                             isPreview
                             chip={props.viewModel.parent.addingChip as Chip}
-                            interactPin={{
-                                current: function (_pin: Pin): void {},
-                            }}
                         />
                     ))}
             </div>
@@ -95,11 +92,13 @@ export const AddingChipsBox = view(AddingChipViewModel)((props) => {
                     left: 0,
                     top: 0,
                 }}
-                onMouseDown={(e) => e.stopPropagation()}
+                onMouseDown={(e) => {
+                    e.stopPropagation();
+                    props.viewModel.handleClickToPlaceChip();
+                }}
                 onClick={(e) => e.stopPropagation()}
                 onMouseUp={(e) => {
                     e.stopPropagation();
-                    props.viewModel.handleClickToPlaceChip();
                 }}
             ></div>
         </>

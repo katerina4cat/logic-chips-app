@@ -2,7 +2,7 @@ import cl from "./RPin.module.scss";
 import { Pin } from "../../Simulating/Pin";
 import { getColorWithState } from "../../common/Colors";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { makeObservable, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 import { useRef } from "react";
 import { Pos } from "../../common/Pos";
 
@@ -15,12 +15,13 @@ interface RequiredProps {
 
 export class PinViewModel extends ViewModel<undefined, RequiredProps> {
     @observable pin: Pin = this.viewProps.Pin;
-    ref = useRef<SVGCircleElement>(null);
+    ref?: React.RefObject<SVGCircleElement>;
     constructor() {
         super();
         makeObservable(this);
     }
-    protected onViewMounted(): void {
+    @action protected onViewMounted(): void {
+        if (!this.ref) return;
         const rect = this.ref.current?.getBoundingClientRect();
         if (rect) {
             if (this.pin.chip.id === 0) {
@@ -36,6 +37,7 @@ export class PinViewModel extends ViewModel<undefined, RequiredProps> {
 }
 
 export const ViewPin = view(PinViewModel)<RequiredProps>(({ viewModel }) => {
+    viewModel.ref = useRef<SVGCircleElement>(null);
     return (
         <circle
             className={cl.RPin}

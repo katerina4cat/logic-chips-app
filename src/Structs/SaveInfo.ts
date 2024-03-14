@@ -354,7 +354,7 @@ export class SaveInfo {
                             new Wire(
                                 source,
                                 target,
-                                wire.points
+                                wire.points.map((p) => new Pos(p))
                             ).addDeltaToPoints(delta)
                         );
                 });

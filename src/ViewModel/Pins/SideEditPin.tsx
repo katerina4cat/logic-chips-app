@@ -27,8 +27,8 @@ export class SidePinViewModel extends ViewModel<
         makeObservable(this);
     }
     @action changeState = () => {
-        this.pin.states[0] =
-            this.pin.states[0] == State.States.LOW
+        this.pin.states[0].value =
+            this.pin.states[0].value == State.States.LOW
                 ? State.States.HIGH
                 : State.States.LOW;
     };

@@ -1,9 +1,11 @@
 import { Color, Colors } from "../common/Colors";
-import { removeElement } from "../common/RemoveElement";
+import { removeElementByID } from "../common/RemoveElement";
 import { Chip } from "./Chip";
 import { Pos } from "../common/Pos";
 import { State } from "../common/State";
 import { action, computed, makeObservable, observable } from "mobx";
+
+export type PinState = { id: number; value: State.States };
 
 export class Pin {
     id: number;
@@ -16,10 +18,10 @@ export class Pin {
     @observable chip: Chip;
     isInput: boolean;
     canUpdatePropagate: boolean;
-    @observable private _states: State.States[];
+    @observable states: PinState[] = [];
     @computed get totalState() {
         let res = State.States.UNDEFINED;
-        for (const state of this.states) {
+        for (const state of this.states.map((x) => x.value)) {
             if (state == State.States.FLOATING) return State.States.FLOATING;
             else if (state != State.States.UNDEFINED) {
                 if (res == State.States.UNDEFINED) res = state;
@@ -27,9 +29,6 @@ export class Pin {
             }
         }
         return res;
-    }
-    get states() {
-        return this._states;
     }
     constructor(
         chip: Chip,
@@ -45,13 +44,13 @@ export class Pin {
         this.id = id;
         this.isInput = input;
         this.name = name;
-        this._states = [];
+        this.states = [];
         this.chip = chip;
         this.deltaPos = new Pos(undefined, y);
         this.canUpdatePropagate = canUpdatePropagate;
         if (deltaPos) this.deltaPos = deltaPos;
         if (hasDefaultState) {
-            this._states.push(State.States.LOW);
+            this.states.push({ id: this.id, value: State.States.LOW });
         }
     }
 
@@ -60,7 +59,7 @@ export class Pin {
      * @param state Состояние связанного пина
      * @returns
      */
-    @action addState(state: State.States | State.States[]) {
+    @action addState(state: PinState | PinState[]) {
         if (Array.isArray(state)) this.states.push(...state);
         else this.states.push(state);
     }
@@ -70,12 +69,21 @@ export class Pin {
      * @param state Состояние удаляемой связи
      * @returns
      */
-    @action removeState(state: State.States | State.States[]) {
+    @action removeState(state: PinState | PinState[]) {
         if (Array.isArray(state)) {
             state.forEach((oneState) => this.removeState(oneState));
             return;
         }
-        removeElement(this.states, state);
-        // if (this.chip.isBase) this.chip.updateLogic();
+        removeElementByID(this.states, state);
+    }
+
+    /**
+     * Обновляет состояние связанного пина в списоке
+     * @param state Состояние связанного пина
+     * @returns
+     */
+    @action refreshState(state: PinState) {
+        const founded = this.states.filter((sta) => sta.id == state.id)[0];
+        if (founded) founded.value = state.value;
     }
 }

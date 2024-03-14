@@ -3,7 +3,7 @@ import { Pin } from "./Pin";
 import { Pos } from "../common/Pos";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
 import { Bus } from "./BaseChips/Bus";
-import { action, computed, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable, reaction } from "mobx";
 
 const radiusWire = 20;
 let wireIDs = 0;
@@ -36,7 +36,15 @@ export class Wire {
             this.target.chip.chipType == ChipTypes.BUS
         )
             (this.source.chip as Bus).addBusConnection(this.target.chip as Bus);
-        this.target.addState(source.totalState);
+        this.target.addState({ id: source.id, value: source.totalState });
+        target.chip.updatedOutputs();
+        reaction(
+            () => this.source.totalState,
+            (newState) => {
+                target.refreshState({ id: source.id, value: newState });
+                target.chip.updatedOutputs();
+            }
+        );
     }
 
     /**
@@ -70,7 +78,10 @@ export class Wire {
         if (this.target.chip.chipType == ChipTypes.BUS) {
             removeElement((this.target.chip as Bus).input, this.target);
         } else {
-            this.target.removeState(this.source.totalState);
+            this.target.removeState({
+                id: this.source.id,
+                value: this.source.totalState,
+            });
         }
     }
 

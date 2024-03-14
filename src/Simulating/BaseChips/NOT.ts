@@ -9,16 +9,21 @@ export class NOT extends Chip {
         super(undefined, id, "NOT", "#8c1f1a", position, undefined);
         this.input.push(new Pin(this, true, 0, "A"));
         this.output.push(new Pin(this, false, 1, "R"));
-        this.output[0].addState(State.States.HIGH);
+        this.output[0].addState({
+            id: this.output[0].id,
+            value: State.States.HIGH,
+        });
     }
 
-    override get updatedOutputs() {
+    override updatedOutputs() {
         const A = this.input[0].totalState;
         let res = State.States.UNDEFINED;
         if (A == State.States.FLOATING) res = State.States.FLOATING;
         else if (A == State.States.UNDEFINED) res = State.States.HIGH;
         else res = A == State.States.LOW ? State.States.HIGH : State.States.LOW;
-        this.output[0].states[0] = res;
-        return this.output;
+        this.output[0].refreshState({
+            id: this.output[0].id,
+            value: res,
+        });
     }
 }

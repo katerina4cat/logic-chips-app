@@ -3,8 +3,9 @@ import { Chip } from "../../Simulating/Chip";
 import { ViewPin } from "../Pins/RPin";
 import { Pos } from "../../common/Pos";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { makeObservable, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../EditPage";
+import { State } from "../../common/State";
 
 interface RequiredProps {
     chip: Chip;
@@ -22,12 +23,17 @@ class DefaultChipViewModel extends ViewModel<EditPageViewModel, RequiredProps> {
         this.chip = this.viewProps.chip;
         makeObservable(this);
     }
+
+    @action protected onViewMounted(): void {
+        this.chip.input.forEach((pin) =>
+            pin.addState({ id: -1234, value: State.States.UNDEFINED })
+        );
+    }
 }
 
 export const DefaultChip = view(DefaultChipViewModel)<RequiredProps>(
     ({ viewModel }) => {
         if (viewModel.chip == undefined) return <></>;
-        console.log(viewModel.chip.input);
         return (
             <div
                 style={{
@@ -68,7 +74,7 @@ export const DefaultChip = view(DefaultChipViewModel)<RequiredProps>(
                 </div>
                 <div className={cl.ChipName}>{viewModel.chip.name}</div>
                 <div className={cl.PinList}>
-                    {viewModel.chip.updatedOutputs.map((pin) => (
+                    {viewModel.chip.output.map((pin) => (
                         <ViewPin
                             key={pin.id}
                             Pin={pin}
