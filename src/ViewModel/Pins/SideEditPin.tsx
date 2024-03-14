@@ -1,137 +1,114 @@
-import { Component, ReactNode } from "react";
 import cl from "./SideEditPin.module.scss";
-import { Colors, getColorWithState } from "../../common/Colors";
+import { getColorWithState } from "../../common/Colors";
 import { Pin } from "../../Simulating/Pin";
 import { State } from "../../common/State";
-import { RPin } from "./RPin";
+import { ViewPin } from "./RPin";
 import OutsideClickHandler from "react-outside-click-handler";
+import { ViewModel, view } from "@yoskutik/react-vvm";
+import { action, makeObservable, observable } from "mobx";
+import { SidePinFieldViewModel } from "../SidePinField";
 
 interface RequiredProps {
     Pin: Pin;
-    showPinTitle?: boolean;
-    disabled?: boolean;
-    interactPin?: { current: (pin: Pin, ctrlKey: boolean) => void };
     style?: React.CSSProperties;
-    position?: number;
     isPreview?: boolean;
-    deletePin?: (pin: Pin) => void;
 }
 
-interface States {
-    State: State.States;
-    PositionY: number;
-    ColorType: string;
-    Name: string;
-    deletingOpen: boolean;
-}
-
-export class SideEditPin extends Component<RequiredProps, States> {
-    constructor(props: RequiredProps) {
-        super(props);
-        this.state = {
-            State: props.Pin.totalState,
-            PositionY: props.Pin.position.y,
-            ColorType:
-                Object.keys(Colors).find(
-                    (key) => Colors[key] === props.Pin.color
-                ) || "green",
-            Name: props.Pin.name,
-            deletingOpen: false,
-        };
-        props.Pin.updateObject = () => {
-            this.setState({ State: this.props.Pin.totalState });
-        };
+export class SidePinViewModel extends ViewModel<
+    SidePinFieldViewModel,
+    RequiredProps
+> {
+    @observable pin: Pin = this.viewProps.Pin;
+    @observable deletingOpen = false;
+    private grabbing = false;
+    private delta = 0;
+    constructor() {
+        super();
+        makeObservable(this);
     }
-
-    componentDidMount(): void {
-        if (this.props.Pin.isInput && this.props.Pin.states[0])
-            this.props.Pin.states[0].value = State.States.LOW;
-    }
-
-    grabbing = false;
-    delta = 0;
+    @action changeState = () => {
+        this.pin.states[0] =
+            this.pin.states[0] == State.States.LOW
+                ? State.States.HIGH
+                : State.States.LOW;
+    };
+    @action openDeleting = (value: boolean) => (this.deletingOpen = value);
     startGrabbing = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         this.grabbing = true;
-        this.delta = this.state.PositionY - e.pageY;
+        this.delta = this.pin.position.y - e.pageY;
         window.addEventListener("mouseup", this.stopGrabbing);
         window.addEventListener("mousemove", this.processGrabbing);
     };
-    processGrabbing = (e: MouseEvent) => {
-        this.setState({ PositionY: e.pageY + this.delta });
-        this.props.Pin.position.y = this.state.PositionY;
-        if (this.props.Pin.updatePos) this.props.Pin.updatePos();
+    @action processGrabbing = (e: MouseEvent) => {
+        if (this.grabbing) this.pin.deltaPos.y = e.pageY + this.delta;
     };
     stopGrabbing = () => {
+        this.grabbing = false;
         window.removeEventListener("mouseup", this.stopGrabbing);
         window.removeEventListener("mousemove", this.processGrabbing);
     };
+}
 
-    changeState = () => {
-        this.setState((prev) => {
-            this.props.Pin.states[0].value =
-                prev.State == State.States.LOW
-                    ? State.States.HIGH
-                    : State.States.LOW;
-            return { State: this.props.Pin.states[0].value };
-        });
-    };
-
-    render(): ReactNode {
+export const SideEditPin = view(SidePinViewModel)<RequiredProps>(
+    ({ viewModel }) => {
         return (
             <div
                 className={cl.SideEditPin}
                 style={{
                     ...{
-                        left: this.props.Pin.isInput ? "0.75em" : "",
-                        right: this.props.Pin.isInput ? "" : "0.75em",
-                        top: this.props.position || this.state.PositionY,
-                        flexDirection: this.props.Pin.isInput
+                        left: viewModel.pin.isInput ? "0.75em" : "",
+                        right: viewModel.pin.isInput ? "" : "0.75em",
+                        top: viewModel.pin.position.y,
+                        flexDirection: viewModel.pin.isInput
                             ? "row"
                             : "row-reverse",
                     },
-                    ...this.props.style,
+                    ...viewModel.viewProps.style,
                 }}
             >
                 <div
                     className={cl.MoveBar}
                     onMouseDown={
-                        this.props.isPreview ? undefined : this.startGrabbing
+                        viewModel.viewProps.isPreview
+                            ? undefined
+                            : viewModel.startGrabbing
                     }
                     onContextMenu={(e) => {
                         e.preventDefault();
-                        this.setState({ deletingOpen: true });
+                        viewModel.openDeleting(true);
                     }}
                 >
                     <OutsideClickHandler
                         onOutsideClick={() => {
-                            if (this.state.deletingOpen)
-                                this.setState({ deletingOpen: false });
+                            if (viewModel.deletingOpen)
+                                viewModel.openDeleting(true);
                         }}
                     >
                         <div
                             className={cl.DeletingConfirm}
                             style={{
-                                display: this.state.deletingOpen
+                                display: viewModel.deletingOpen
                                     ? "block"
                                     : "none",
-                                marginLeft: this.props.Pin.isInput
+                                marginLeft: viewModel.pin.isInput
                                     ? "3em"
                                     : "unset",
-                                marginRight: this.props.Pin.isInput
+                                marginRight: viewModel.pin.isInput
                                     ? "unset"
                                     : "3em",
-                                transform: this.props.Pin.isInput
+                                transform: viewModel.pin.isInput
                                     ? "unset"
                                     : "translateX(-125%)",
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
                         >
-                            Пин: {this.props.Pin.name}
+                            Пин: {viewModel.pin.name}
                             <br />
                             <button
                                 onClick={() => {
-                                    if (this.props.deletePin)
-                                        this.props.deletePin(this.props.Pin);
+                                    viewModel.parent.parent.removePin(
+                                        viewModel.pin
+                                    );
                                 }}
                             >
                                 Удалить
@@ -143,35 +120,43 @@ export class SideEditPin extends Component<RequiredProps, States> {
                     className={cl.SwitchButton}
                     style={{
                         backgroundColor: getColorWithState(
-                            this.props.Pin.totalState,
-                            Colors[this.state.ColorType]
+                            viewModel.pin.totalState,
+                            viewModel.pin.color
                         ),
-                        marginLeft: this.props.Pin.isInput ? "0.6em" : "",
-                        marginRight: this.props.Pin.isInput ? "" : "0.6em",
-                        cursor: this.props.disabled ? "default" : "pointer",
-                        pointerEvents: this.props.disabled ? "none" : "auto",
+                        marginLeft: viewModel.pin.isInput ? "0.6em" : "",
+                        marginRight: viewModel.pin.isInput ? "" : "0.6em",
+                        cursor: viewModel.viewProps.isPreview
+                            ? "default"
+                            : "pointer",
+                        pointerEvents: viewModel.viewProps.isPreview
+                            ? "none"
+                            : "auto",
                     }}
-                    onClick={this.changeState}
+                    onClick={viewModel.changeState}
                 />
                 <div className={cl.DecorativeWire} />
-                <RPin
-                    Pin={this.props.Pin}
-                    interactPin={this.props.interactPin}
+                <ViewPin
+                    Pin={viewModel.pin}
+                    interactPin={
+                        viewModel.parent.parent.wireIncompleteViewModel
+                            ?.clickToPin
+                    }
                 />
-                {this.props.isPreview ? undefined : (
+                {viewModel.viewProps.isPreview ? undefined : (
                     <input
                         className={cl.sidePinTitle}
                         onChange={(e) => {
-                            this.props.Pin.name = e.target.value;
-                            this.setState({ Name: e.target.value });
+                            viewModel.pin.name = e.target.value;
                         }}
-                        value={this.state.Name}
+                        value={viewModel.pin.name}
                         style={{
-                            display: this.props.showPinTitle ? "block" : "none",
+                            display: viewModel.parent.parent.showAllPinTitles
+                                ? "block"
+                                : "none",
                         }}
                     />
                 )}
             </div>
         );
     }
-}
+);

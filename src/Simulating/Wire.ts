@@ -1,20 +1,17 @@
-import { getColorWithState } from "../common/Colors";
 import { removeElement } from "../common/RemoveElement";
 import { Pin } from "./Pin";
 import { Pos } from "../common/Pos";
-import { createRef } from "react";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
 import { Bus } from "./BaseChips/Bus";
-import { makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 
 const radiusWire = 20;
 let wireIDs = 0;
 
 export class Wire {
-    source: Pin;
-    target: Pin;
+    @observable source: Pin;
+    @observable target: Pin;
     @observable points: Pos[];
-    graphicObject: React.RefObject<SVGPathElement>;
     id: number;
     error = false;
     constructor(source: Pin, target: Pin, points: Pos[]) {
@@ -24,7 +21,6 @@ export class Wire {
         this.id = wireIDs;
         wireIDs++;
         this.points = [...points];
-        this.graphicObject = createRef();
         if (this.testRecurse(source.chip.id)) {
             alert("Ошибка! Возможная бесконечная рекурсия при симуляции!");
             this.error = true;
@@ -40,10 +36,7 @@ export class Wire {
             this.target.chip.chipType == ChipTypes.BUS
         )
             (this.source.chip as Bus).addBusConnection(this.target.chip as Bus);
-        this.target.addState(source.states);
-        this.source.outWires.push(this);
-        this.target.inWires.push(this);
-        this.source.refreshState();
+        this.target.addState(source.totalState);
     }
 
     /**
@@ -53,27 +46,13 @@ export class Wire {
     testRecurse(sourceChipID: number) {
         if (this.target.chip.id == 0) return false;
         if (this.target.chip.id == sourceChipID) return true;
-        for (const pin of this.target.chip.output)
-            for (const wire of pin.outWires)
-                if (wire.testRecurse(sourceChipID)) return true;
         return false;
-    }
-
-    /**
-     * Обновляет цвет провода, исходя из состояния исходящего пина.
-     */
-    updateColor() {
-        if (this.graphicObject && this.graphicObject.current)
-            this.graphicObject.current.style.stroke = getColorWithState(
-                this.source.totalState,
-                this.source.color
-            );
     }
 
     /**
      * Удаляет у связь у связанного пина и удаляет из внутренних списков проводов текущий провод.
      */
-    deletingWire() {
+    @action deletingWire() {
         if (
             this.source.chip.chipType == ChipTypes.BUS &&
             this.target.chip.chipType == ChipTypes.BUS
@@ -86,39 +65,35 @@ export class Wire {
 
         if (this.source.chip.chipType == ChipTypes.BUS) {
             removeElement((this.source.chip as Bus).output, this.source);
-        } else removeElement(this.source.outWires, this);
+        }
 
         if (this.target.chip.chipType == ChipTypes.BUS) {
             removeElement((this.target.chip as Bus).input, this.target);
-            (this.target.chip as Bus).updateLogic();
         } else {
-            removeElement(this.target.inWires, this);
-            this.target.removeState(this.source.states);
+            this.target.removeState(this.source.totalState);
         }
     }
 
-    /**
-     * Добавляет ко всем точкам провода дельту для смещения их координат
-     */
-    addDeltaToPoints(delta: Pos) {
-        this.points.forEach((point, i) => point.add(delta));
-        this.drawWire();
+    @action addDeltaToPoints = (delta: Pos) => {
+        this.points.forEach((point) => point.add(delta));
         return this;
-    }
-
+    };
     /**
      * Устанавливает точки провода с расчётом закругления
      * TODO:
      * Нужно оптимизировать периросовка должна реализовываться по первой и последней точки провода
      * @returns
      */
-    drawWire() {
-        let path = `M${this.points[0].x},${this.points[0].y}`;
-
+    @computed get drawWire() {
+        let path = `M${this.source.position.x},${this.source.position.y}`;
         for (let i = 1; i < this.points.length - 1; i++) {
-            const previousPoint = this.points[i - 1];
+            const previousPoint =
+                i - 1 === 0 ? this.source.position : this.points[i - 1];
             const currentPoint = this.points[i];
-            const nextPoint = this.points[i + 1];
+            const nextPoint =
+                i + 1 === this.points.length - 1
+                    ? this.target.position
+                    : this.points[i + 1];
 
             const lcpx = currentPoint.x - previousPoint.x;
             const lcpy = currentPoint.y - previousPoint.y;
@@ -145,10 +120,7 @@ export class Wire {
             }
             path += ` L${qx},${qy}Q${currentPoint.x},${currentPoint.y},${ex},${ey}`;
         }
-        path += `L${this.points[this.points.length - 1].x},${
-            this.points[this.points.length - 1].y
-        }`;
-        this.graphicObject?.current?.setAttribute("d", path);
+        path += `L${this.target.position.x},${this.target.position.y}`;
         return path;
     }
 }

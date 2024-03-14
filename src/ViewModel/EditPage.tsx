@@ -1,9 +1,11 @@
-import { ReactNode } from "react";
 import { Pin } from "../Simulating/Pin";
 import { Chip } from "../Simulating/Chip";
 import { RWire } from "./Wires/RWire";
 import { removeElement } from "../common/RemoveElement";
-import { RWireIncomplete } from "./Wires/RWireIncomplete";
+import {
+    RWireIncomplete,
+    WireIncompleteViewModel,
+} from "./Wires/RWireIncomplete";
 import { SidePinField } from "./SidePinField";
 import { DefaultChip } from "./Chips/DefaultChip";
 import { CircleAdding } from "./CircleAdding/CircleAdding";
@@ -29,7 +31,7 @@ interface RequiredProps {
 }
 
 export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
-    @observable currentChip: Chip = new Chip();
+    @observable currentChip: Chip = new Chip(undefined, 0);
     @observable addingChip?: Chip;
     @observable addingBus: boolean = false;
     @observable addingCount: number = 1;
@@ -46,8 +48,11 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
     saveManager: SaveInfo;
     startClickTime = 0;
     startClickPos = new Pos();
-    @observable deltaMove = new Pos();
+    deltaMove = new Pos();
+    chipMoved = new Pos();
     lastSizeWindow = new Pos();
+
+    wireIncompleteViewModel?: WireIncompleteViewModel;
 
     constructor() {
         super();
@@ -114,22 +119,16 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
     };
 
     @action removePin = (pin: Pin) => {
-        while (pin.inWires.length != 0) this.removeWire(pin.inWires[0]);
-        while (pin.outWires.length != 0) this.removeWire(pin.outWires[0]);
+        const wires = this.currentChip.wires.filter(
+            (wire) => wire.source == pin || wire.target == pin
+        );
+        for (const wire of wires) removeElement(this.currentChip.wires, wire);
         if (pin.isInput) removeElement(this.currentChip.input, pin);
         else removeElement(this.currentChip.output, pin);
     };
 
     @action removeBus = (bus: Bus) => {
         bus.depentBus.forEach((dep) => removeElement(dep.depentBus, bus));
-        bus.input.forEach((pin) => {
-            pin.inWires.forEach((wire) => this.removeWire(wire));
-            pin.outWires.forEach((wire) => this.removeWire(wire));
-        });
-        bus.output.forEach((pin) => {
-            pin.inWires.forEach((wire) => this.removeWire(wire));
-            pin.outWires.forEach((wire) => this.removeWire(wire));
-        });
         removeElement(this.currentChip.buses, bus);
     };
     @action selectChip = (chip: Chip) => {
@@ -154,15 +153,15 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         window.removeEventListener("mouseup", this.stopClickToChip);
         window.removeEventListener("mousemove", this.chipMove);
         if (this.lastClickedChip) {
-            if (Date.now() - this.startClickTime < 175) {
+            if (Date.now() - this.startClickTime < 100) {
                 if (e.ctrlKey) this.selectingChip(this.lastClickedChip);
                 else this.selectChip(this.lastClickedChip);
-            } else {
                 this.currentChip.subChips
                     .filter((chip) => chip.selected)
-                    .forEach((chip) => chip.position.add(this.deltaMove));
+                    .forEach((chip) => chip.position.rem(this.deltaMove));
             }
         }
+        this.chipMoved = new Pos();
         this.deltaMove = new Pos();
         this.lastClickedChip = undefined;
     };
@@ -171,6 +170,12 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
             e.pageX - this.startClickPos.x,
             e.pageY - this.startClickPos.y
         );
+        this.currentChip.subChips
+            .filter((chip) => chip.selected)
+            .forEach((chip) =>
+                chip.position.add(this.deltaMove.removing(this.chipMoved))
+            );
+        this.chipMoved = this.deltaMove.copy();
     };
     @action selectingChip = (chip: Chip) => (chip.selected = !chip.selected);
     @action clearAdding = () => {
@@ -197,21 +202,6 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
                 chip.position.add(delta);
             }
         });
-        this.currentChip.wires.forEach((wire) => wire.addDeltaToPoints(delta));
-        this.currentChip.input.forEach((pin) => {
-            if (pin.graphicalObject.current)
-                pin.graphicalObject.current.style.top = String(
-                    pin.position.y + delta.y
-                );
-            if (pin.updatePos) pin.updatePos();
-        });
-        this.currentChip.output.forEach((pin) => {
-            if (pin.graphicalObject.current)
-                pin.graphicalObject.current.style.top = String(
-                    pin.position.y + delta.y
-                );
-            if (pin.updatePos) pin.updatePos();
-        });
 
         this.lastSizeWindow = newSizeWindow;
     };
@@ -224,12 +214,6 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         window.removeEventListener("keydown", this.handleKeyDown);
         window.removeEventListener("resize", this.onResize);
     }
-    interactPin = {
-        current: (_pin: Pin, _ctrlKey: boolean, _point?: Pos) => {},
-    }; // Переопределяется в VM->Wires->RWireIncomplete.tsx Необходим для протягивания провода
-    wirePointClick = {
-        current: (_e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {},
-    }; // Переопределяется в VM->Wires->RWireIncomplete.tsx
 
     @action setAddingChip = (chipName: string) => {
         if (chipName != "BUS") {
@@ -313,12 +297,8 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
                 (chip) => chip.selected
             );
             for (let chipRemoving of chipsToRemove) {
-                chipRemoving.input.forEach((pin) =>
-                    pin.removeAllWire(this.currentChip.wires)
-                );
-                chipRemoving.output.forEach((pin) =>
-                    pin.removeAllWire(this.currentChip.wires)
-                );
+                chipRemoving.input.forEach((pin) => this.removePin(pin));
+                chipRemoving.output.forEach((pin) => this.removePin(pin));
                 removeElement(this.currentChip.subChips, chipRemoving);
             }
         };
@@ -332,14 +312,10 @@ export const EditPage = view(EditPageViewModel)((props) => {
             <svg
                 className={cl.EditView}
                 onClick={(e) => {
-                    viewModel.wirePointClick.current(e);
+                    viewModel.wireIncompleteViewModel?.wirePointClick(e);
                 }}
             >
-                <RWireIncomplete
-                    addWire={viewModel.addWire}
-                    interactPin={viewModel.interactPin}
-                    WirePointClick={viewModel.wirePointClick}
-                />
+                <RWireIncomplete />
 
                 <RBusIncomplete
                     enabled={viewModel.addingBus}
@@ -353,11 +329,7 @@ export const EditPage = view(EditPageViewModel)((props) => {
                     }}
                 >
                     {viewModel.currentChip.wires.map((wire) => (
-                        <RWire
-                            wire={wire}
-                            deleteWire={viewModel.removeWire}
-                            key={wire.id}
-                        />
+                        <RWire wire={wire} key={wire.id} />
                     ))}
                 </g>
                 <g>
@@ -366,48 +338,18 @@ export const EditPage = view(EditPageViewModel)((props) => {
                             (chip) => chip.chipType == ChipTypes.BUS
                         ) as Bus[]
                     ).map((bus) => (
-                        <RBus
-                            Bus={bus}
-                            removeBus={viewModel.removeBus}
-                            interactPin={viewModel.interactPin}
-                            key={bus.id}
-                        />
+                        <RBus Bus={bus} key={bus.id} />
                     ))}
                 </g>
             </svg>
-            <SidePinField
-                Pins={viewModel.currentChip.input}
-                interactPin={viewModel.interactPin}
-                currentChip={viewModel.currentChip}
-                isInput
-                addNewPin={viewModel.addPin}
-                deletePin={viewModel.removePin}
-                showPinTitle={viewModel.showAllPinTitles}
-            />
+            <SidePinField Pins={viewModel.currentChip.input} isInput />
             <div className={cl.ChipField}>
                 {viewModel.currentChip.subChips.map((chip) => (
-                    <DefaultChip
-                        key={chip.id}
-                        chip={chip}
-                        interactPin={viewModel.interactPin}
-                        showPinTitles={
-                            viewModel.showAllPinTitles
-                                ? viewModel.showChipPinTitles
-                                : false
-                        }
-                    />
+                    <DefaultChip key={chip.id} chip={chip} />
                 ))}
                 <AddingChipsBox />
             </div>
-            <SidePinField
-                Pins={viewModel.currentChip.output}
-                interactPin={viewModel.interactPin}
-                currentChip={viewModel.currentChip}
-                disabled
-                addNewPin={viewModel.addPin}
-                deletePin={viewModel.removePin}
-                showPinTitle={viewModel.showAllPinTitles}
-            />
+            <SidePinField Pins={viewModel.currentChip.output} />
             <div>
                 {viewModel.showCircleAdding.map((enabledI, i) => (
                     <CircleAdding

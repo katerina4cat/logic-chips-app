@@ -25,49 +25,49 @@ export class Bus extends Chip {
         this.phantomPin = new Pin(this, true);
     }
 
-    getAllDepentBuses(addedBus: { current: Bus[] }): { current: Bus[] } {
-        const res: Bus[] = this.depentBus.filter(
-            (bus) => !addedBus.current.find((buss) => buss.id == bus.id)
-        );
-        addedBus.current.push(...res);
-        res.forEach((dep) => {
-            dep.getAllDepentBuses(addedBus);
-        });
-        return addedBus;
-    }
+    // getAllDepentBuses(addedBus: { current: Bus[] }): { current: Bus[] } {
+    //     const res: Bus[] = this.depentBus.filter(
+    //         (bus) => !addedBus.current.find((buss) => buss.id == bus.id)
+    //     );
+    //     addedBus.current.push(...res);
+    //     res.forEach((dep) => {
+    //         dep.getAllDepentBuses(addedBus);
+    //     });
+    //     return addedBus;
+    // }
 
-    override updateLogic(): void {
-        const depentBuses = this.getAllDepentBuses({ current: [this] });
-        let res: State.States = State.States.UNDEFINED;
-        depentBuses.current.forEach((bus) =>
-            bus.input.forEach((inPin) => {
-                if (inPin.canUpdatePropagate == false) return;
-                if (
-                    inPin.totalState == State.States.FLOATING ||
-                    res == State.States.FLOATING
-                ) {
-                    res = State.States.FLOATING;
-                    return;
-                }
-                if (inPin.totalState != State.States.UNDEFINED) {
-                    if (res == State.States.UNDEFINED) res = inPin.totalState;
-                    else res = State.States.FLOATING;
-                }
-            })
-        );
-        depentBuses.current.forEach((bus) => {
-            if (bus.ref.current)
-                bus.ref.current.style.stroke = getColorWithState(
-                    res,
-                    bus.Wcolor
-                );
-            console.log(bus.output);
-            bus.output.forEach((pin) => (pin.states[0].value = res));
-        });
-        if (this.ref.current)
-            this.ref.current.style.stroke = getColorWithState(res, this.Wcolor);
-        this.output.forEach((pin) => (pin.states[0].value = res));
-    }
+    // override updateLogic(): void {
+    //     const depentBuses = this.getAllDepentBuses({ current: [this] });
+    //     let res: State.States = State.States.UNDEFINED;
+    //     depentBuses.current.forEach((bus) =>
+    //         bus.input.forEach((inPin) => {
+    //             if (inPin.canUpdatePropagate == false) return;
+    //             if (
+    //                 inPin.totalState == State.States.FLOATING ||
+    //                 res == State.States.FLOATING
+    //             ) {
+    //                 res = State.States.FLOATING;
+    //                 return;
+    //             }
+    //             if (inPin.totalState != State.States.UNDEFINED) {
+    //                 if (res == State.States.UNDEFINED) res = inPin.totalState;
+    //                 else res = State.States.FLOATING;
+    //             }
+    //         })
+    //     );
+    //     depentBuses.current.forEach((bus) => {
+    //         if (bus.ref.current)
+    //             bus.ref.current.style.stroke = getColorWithState(
+    //                 res,
+    //                 bus.Wcolor
+    //             );
+    //         console.log(bus.output);
+    //         bus.output.forEach((pin) => (pin.states[0].value = res));
+    //     });
+    //     if (this.ref.current)
+    //         this.ref.current.style.stroke = getColorWithState(res, this.Wcolor);
+    //     this.output.forEach((pin) => (pin.states[0].value = res));
+    // }
 
     /**
      * Создаёт и возвращает провод между двумя шинами и настраивать их
@@ -98,7 +98,7 @@ export class Bus extends Chip {
         targetBus.output.push(buff);
 
         (buffSource.chip as Bus).addBusConnection(buff.chip as Bus);
-        buffSource.chip.updateLogic();
+        // buffSource.chip.updateLogic();
         return new Wire(buffSource, buff, WirePoints);
     }
 
@@ -119,7 +119,7 @@ export class Bus extends Chip {
     remBusConnection(connectedBus: Bus) {
         removeElement(connectedBus.depentBus, this);
         removeElement(this.depentBus, connectedBus);
-        connectedBus.updateLogic();
-        this.updateLogic();
+        // connectedBus.updateLogic();
+        // this.updateLogic();
     }
 }

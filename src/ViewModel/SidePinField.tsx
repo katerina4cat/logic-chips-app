@@ -1,104 +1,91 @@
-import { Component, ReactNode } from "react";
 import cl from "./SidePinField.module.scss";
 import { Pin } from "../Simulating/Pin";
 import { SideEditPin } from "./Pins/SideEditPin";
-import { Chip } from "../Simulating/Chip";
+import { ViewModel, view } from "@yoskutik/react-vvm";
+import { EditPageViewModel } from "./EditPage";
+import { action, makeObservable, observable } from "mobx";
 
 interface RequiredProps {
     Pins: Pin[];
-    interactPin: { current: (pin: Pin, ctrlKey: boolean) => void };
-    currentChip: Chip;
-    showPinTitle?: boolean;
     isInput?: boolean;
-    disabled?: boolean;
-    addNewPin: (pin: Pin) => void;
-    deletePin: (pin: Pin) => void;
 }
 
-interface States {
-    hiden: boolean;
-    positionY: number;
-}
-
-export class SidePinField extends Component<RequiredProps, States> {
-    state: Readonly<States> = {
-        hiden: true,
-        positionY: 0,
-    };
-    constructor(props: RequiredProps) {
-        super(props);
-    }
-    previewPin = new Pin(
-        this.props.currentChip,
-        !!this.props.isInput,
+export class SidePinFieldViewModel extends ViewModel<
+    EditPageViewModel,
+    RequiredProps
+> {
+    @observable hiden = true;
+    @observable previewPin = new Pin(
+        this.parent.currentChip,
+        !!this.viewProps.isInput,
         -1,
         "",
         0
     );
+    constructor() {
+        super();
+        makeObservable(this);
+    }
 
-    componentWillUnmount(): void {
+    protected onViewUnmounted(): void {
         document.removeEventListener("mousemove", this.handleMouseMove);
     }
 
-    handleMouseMove = (e: MouseEvent) => {
-        this.setState({ positionY: e.pageY });
+    @action setHiden = (value: boolean) => (this.hiden = value);
+    @action handleMouseMove = (e: MouseEvent) => {
+        this.previewPin.position.y = e.pageY;
     };
 
-    handleClickAddPin = () => {
-        this.props.addNewPin(
+    @action handleClickAddPin = () => {
+        this.parent.addPin(
             new Pin(
-                this.props.currentChip,
-                !!this.props.isInput,
+                this.parent.currentChip,
+                !!this.viewProps.isInput,
                 Date.now(),
                 "Pin",
-                this.state.positionY,
-                this.props.isInput
+                this.previewPin.position.y,
+                this.viewProps.isInput
             )
         );
     };
+}
 
-    render(): ReactNode {
+export const SidePinField = view(SidePinFieldViewModel)<RequiredProps>(
+    ({ viewModel }) => {
         return (
             <div className={cl.SidePinField}>
                 <div
                     className={cl.SideAddingField}
-                    style={{ marginLeft: this.props.isInput ? "0" : "auto" }}
+                    style={{
+                        marginLeft: viewModel.viewProps.isInput ? "0" : "auto",
+                    }}
                     onMouseOver={() => {
                         document.addEventListener(
                             "mousemove",
-                            this.handleMouseMove
+                            viewModel.handleMouseMove
                         );
-                        this.setState({ hiden: false });
+                        viewModel.setHiden(false);
                     }}
                     onMouseOut={() => {
                         document.removeEventListener(
                             "mousemove",
-                            this.handleMouseMove
+                            viewModel.handleMouseMove
                         );
-                        this.setState({ hiden: true });
+                        viewModel.setHiden(true);
                     }}
-                    onClick={this.handleClickAddPin}
+                    onClick={viewModel.handleClickAddPin}
                 />
-                {this.props.Pins.map((pin) => (
-                    <SideEditPin
-                        key={pin.id}
-                        Pin={pin}
-                        interactPin={this.props.interactPin}
-                        disabled={this.props.disabled}
-                        deletePin={this.props.deletePin}
-                        showPinTitle={this.props.showPinTitle}
-                    />
+                {viewModel.viewProps.Pins.map((pin) => (
+                    <SideEditPin key={pin.id} Pin={pin} />
                 ))}
                 <SideEditPin
                     style={{
-                        display: this.state.hiden ? "none" : "flex",
+                        display: viewModel.hiden ? "none" : "flex",
                     }}
-                    Pin={this.previewPin}
-                    position={this.state.positionY}
-                    disabled
+                    Pin={viewModel.previewPin}
                     isPreview
                 />
             </div>
         );
     }
-}
+);

@@ -37,13 +37,15 @@ class AddingChipViewModel extends ViewModel<EditPageViewModel> {
                         )
                             .map((child, i) => {
                                 const box = child?.getBoundingClientRect();
-                                return this.parent.addingChip
+                                const res = this.parent.addingChip
                                     ? this.parent.saveManager.loadChipByName(
                                           this.parent.addingChip.name,
                                           new Pos(box?.x, box?.y),
                                           curretTime + i
                                       )
                                     : undefined;
+                                // TODO sets positions to pins
+                                return res;
                             })
                             .filter(Boolean) as Chip[]
                     );

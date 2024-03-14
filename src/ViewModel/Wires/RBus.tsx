@@ -3,14 +3,11 @@ import cl from "./RBus.module.scss";
 import { Bus } from "../../Simulating/BaseChips/Bus";
 import { State } from "../../common/State";
 import { getColorWithState } from "../../common/Colors";
-import { Pin } from "../../Simulating/Pin";
 import { Pos } from "../../common/Pos";
 import { BusEndPosWidth, busID } from "../../common/Settings";
 
 interface RequiredProps {
     Bus: Bus;
-    interactPin: { current: (pin: Pin, ctrlKey: boolean, point?: Pos) => void };
-    removeBus: (bus: Bus) => void;
 }
 
 interface States {}
@@ -26,7 +23,7 @@ export class RBus extends Component<RequiredProps, States> {
     }
 
     handleKeydown = (e: KeyboardEvent) => {
-        if (e.key == "Backspace") this.props.removeBus(this.props.Bus);
+        // if (e.key == "Backspace") this.props.removeBus(this.props.Bus);
     };
 
     render(): ReactNode {
@@ -56,11 +53,11 @@ export class RBus extends Component<RequiredProps, States> {
                     )}
                     onClick={(e) => {
                         e.stopPropagation();
-                        this.props.interactPin.current(
-                            this.props.Bus.phantomPin,
-                            e.ctrlKey,
-                            new Pos(e.pageX, e.pageY)
-                        );
+                        // this.props.interactPin.current(
+                        //     this.props.Bus.phantomPin,
+                        //     e.ctrlKey,
+                        //     new Pos(e.pageX, e.pageY)
+                        // );
                     }}
                     onMouseOver={() =>
                         document.addEventListener("keydown", this.handleKeydown)

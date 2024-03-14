@@ -9,11 +9,12 @@ export class AND extends Chip {
         super(undefined, id, "AND", "#267ab2", position, undefined);
         this.input = [new Pin(this, true, 0, "A"), new Pin(this, true, 1, "B")];
         this.output.push(new Pin(this, false, 2, "R"));
-        this.output[0].addState(new State(this.output[0], State.States.LOW));
+        this.output[0].addState(State.States.LOW);
     }
 
-    override updateLogic(): void {
+    override get updatedOutputs() {
         const A = this.input[0].totalState;
+        console.log(A);
         const B = this.input[1].totalState;
         let res = State.States.UNDEFINED;
         if (A == State.States.FLOATING || B == State.States.FLOATING)
@@ -25,6 +26,7 @@ export class AND extends Chip {
                 A == State.States.HIGH && A == B
                     ? State.States.HIGH
                     : State.States.LOW;
-        this.output[0].states[0].value = res;
+        this.output[0].states[0] = res;
+        return this.output;
     }
 }

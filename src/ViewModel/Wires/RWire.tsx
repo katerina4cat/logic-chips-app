@@ -1,45 +1,43 @@
-import { Component, ReactNode } from "react";
 import cl from "./RWire.module.scss";
 import { Wire } from "../../Simulating/Wire";
+import { ViewModel, view } from "@yoskutik/react-vvm";
+import { action, makeObservable, observable } from "mobx";
+import { EditPageViewModel } from "../EditPage";
+import { getColorWithState } from "../../common/Colors";
 
 interface RequiredProps {
     wire: Wire;
-    deleteWire: (wire: Wire) => void;
 }
 
-interface States {}
-
-export class RWire extends Component<RequiredProps, States> {
-    state: Readonly<States> = {};
-    constructor(props: RequiredProps) {
-        super(props);
+class WireViewModel extends ViewModel<EditPageViewModel, RequiredProps> {
+    @observable wire = this.viewProps.wire;
+    constructor() {
+        super();
+        makeObservable(this);
     }
-
-    componentDidMount(): void {
-        this.props.wire.drawWire();
-        this.props.wire.updateColor();
-    }
-
-    componentWillUnmount(): void {
+    @action handleKeydown = (e: KeyboardEvent) => {
+        if (e.key == "Backspace") this.parent.removeWire(this.wire);
+    };
+    protected onViewUnmounted(): void {
         document.removeEventListener("keydown", this.handleKeydown);
     }
-
-    handleKeydown = (e: KeyboardEvent) => {
-        if (e.key == "Backspace") this.props.deleteWire(this.props.wire);
-    };
-
-    render(): ReactNode {
-        return (
-            <path
-                className={cl.RWire}
-                ref={this.props.wire.graphicObject}
-                onMouseOver={() =>
-                    document.addEventListener("keydown", this.handleKeydown)
-                }
-                onMouseOut={() =>
-                    document.removeEventListener("keydown", this.handleKeydown)
-                }
-            ></path>
-        );
-    }
 }
+
+export const RWire = view(WireViewModel)<RequiredProps>(({ viewModel }) => {
+    return (
+        <path
+            className={cl.RWire}
+            onMouseOver={() =>
+                document.addEventListener("keydown", viewModel.handleKeydown)
+            }
+            onMouseOut={() =>
+                document.removeEventListener("keydown", viewModel.handleKeydown)
+            }
+            stroke={getColorWithState(
+                viewModel.wire.source.totalState,
+                viewModel.wire.source.color
+            )}
+            d={viewModel.wire.drawWire}
+        ></path>
+    );
+});

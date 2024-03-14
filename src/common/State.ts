@@ -1,18 +1,10 @@
-import { Pin } from "../Simulating/Pin";
+import { makeObservable, observable } from "mobx";
 
 export class State {
-    private _value: State.States = State.States.UNDEFINED;
-    listener: Pin;
-    constructor(listener: Pin, defaultState?: State.States) {
-        this.listener = listener;
+    @observable value: State.States = State.States.UNDEFINED;
+    constructor(defaultState?: State.States) {
         if (defaultState != undefined) this.value = defaultState;
-    }
-    set value(value: State.States) {
-        this._value = value;
-        this.listener.refreshState();
-    }
-    get value() {
-        return this._value;
+        makeObservable(this);
     }
 }
 

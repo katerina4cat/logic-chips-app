@@ -1,6 +1,8 @@
-import { makeObservable, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 
 export class Pos {
+    copy = () => new Pos(this.x, this.y);
+
     @observable x: number;
     @observable y: number;
     constructor(x: number | Pos = 0, y = 0) {
@@ -13,11 +15,24 @@ export class Pos {
             this.y = y;
         }
     }
-    add(value: Pos) {
+
+    @action add(value: Pos) {
         this.x += value.x;
         this.y += value.y;
         return this;
     }
+    @action rem(value: Pos) {
+        this.x -= value.x;
+        this.y -= value.y;
+        return this;
+    }
+    adding(value: Pos) {
+        return new Pos(this.x + value.x, this.y + value.y);
+    }
+    removing(value: Pos) {
+        return new Pos(this.x - value.x, this.y - value.y);
+    }
+
     angleFromZero = (): number => {
         return this.y < 0
             ? Math.PI * 2 -

@@ -3,7 +3,7 @@ import { Pos } from "../common/Pos";
 import { Wire } from "./Wire";
 import { Bus } from "./BaseChips/Bus";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
-import { makeObservable, observable, override } from "mobx";
+import { computed, makeObservable, observable } from "mobx";
 
 let lastChipID = Date.now();
 
@@ -41,5 +41,7 @@ export class Chip {
         this.selected = false;
         this.buses = buses;
     }
-    updateLogic() {}
+    @computed get updatedOutputs() {
+        return this.output;
+    }
 }
