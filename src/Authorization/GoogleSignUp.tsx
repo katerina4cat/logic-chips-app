@@ -1,19 +1,21 @@
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { loginByGoogle } from "../Managers/ApiManager";
 
 export const GoogleSignUp = () => {
     return (
-        <div
-            style={{
-                colorScheme: "light",
-                position: "relative",
-            }}
-        >
-            <GoogleLogin
-                onSuccess={loginByGoogle}
-                theme="filled_black"
-                shape="pill"
-            />
-        </div>
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+            <div
+                style={{
+                    colorScheme: "light",
+                    position: "relative",
+                }}
+            >
+                <GoogleLogin
+                    onSuccess={loginByGoogle}
+                    theme="filled_black"
+                    shape="pill"
+                />
+            </div>
+        </GoogleOAuthProvider>
     );
 };

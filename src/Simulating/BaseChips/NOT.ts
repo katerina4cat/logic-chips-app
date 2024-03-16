@@ -2,6 +2,7 @@ import { Pin } from "../Pin";
 import { State } from "../../common/State";
 import { Pos } from "../../common/Pos";
 import { Chip } from "../Chip";
+import { testRS } from "./AND";
 
 export class NOT extends Chip {
     readonly isBase = true;
@@ -17,6 +18,8 @@ export class NOT extends Chip {
 
     override updatedOutputs() {
         const A = this.input[0].totalState;
+        if (testRS.v) console.log(this.input[0].states);
+        testRS.v = false;
         let res = State.States.UNDEFINED;
         if (A == State.States.FLOATING) res = State.States.FLOATING;
         else if (A == State.States.UNDEFINED) res = State.States.HIGH;

@@ -41,5 +41,7 @@ export class Chip {
         this.selected = false;
         this.buses = buses;
     }
-    updatedOutputs() {}
+    updatedOutputs() {
+        this.subChips.forEach((chip) => chip.updatedOutputs());
+    }
 }

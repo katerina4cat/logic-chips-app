@@ -45,13 +45,11 @@ export class BusMinimalInfo {
     name: string;
     id: number;
     color: string;
-    from: Pos;
-    to: Pos;
-    constructor(name: string, color: string, from: Pos, to: Pos, id: number) {
+    positions: Pos[];
+    constructor(name: string, color: string, positions: Pos[], id: number) {
         this.name = name;
         this.color = color;
-        this.from = from;
-        this.to = to;
+        this.positions = positions;
         this.id = id;
     }
 }

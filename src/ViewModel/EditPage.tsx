@@ -18,10 +18,9 @@ import cl from "./EditPage.module.scss";
 import { AddingChipsBox } from "./Chips/AddingChipsBox";
 import { Bus } from "../Simulating/BaseChips/Bus";
 import { Pos } from "../common/Pos";
-import { ChipTypes } from "../Structs/ChipMinimalInfo";
 import { RBus } from "./Wires/RBus";
-import { RBusIncomplete } from "./Wires/RBusIncomplete";
-import { hotkeys, manyBusSpace } from "../common/Settings";
+import { BusIncomplete } from "./Wires/RBusIncomplete";
+import { hotkeys } from "../common/Settings";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
 import { Wire } from "../Simulating/Wire";
@@ -66,6 +65,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         (this.showCircleAdding[i] = v);
 
     @action handleKeyDown = (e: KeyboardEvent) => {
+        if ((e.target as any).tagName === "INPUT") return;
         // Колесо добавления
         for (let i = 0; i < 9; i++)
             if (e.key == (i + 1).toString() && e.altKey) {
@@ -95,15 +95,8 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
     @action newChip = () => (this.currentChip = new Chip(undefined, 0));
     @action addChips = (chips: Chip[]) =>
         this.currentChip.subChips.push(...chips);
-    @action addBuses = (from: Pos, to: Pos) => {
-        this.currentChip.buses.push(
-            ...new Array(this.addingCount).fill(0).map((_, i) => {
-                return new Bus(
-                    new Pos(from.x + manyBusSpace * i, from.y),
-                    new Pos(to.x + manyBusSpace * i, to.y)
-                );
-            })
-        );
+    @action addBus = (points: Pos[]) => {
+        this.currentChip.buses.push(new Bus(points));
     };
 
     @action removeWire = (wire: Wire) => {
@@ -132,6 +125,8 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
 
     @action removeBus = (bus: Bus) => {
         bus.depentBus.forEach((dep) => removeElement(dep.depentBus, bus));
+        bus.input.forEach((pin) => this.removePin(pin));
+        bus.output.forEach((pin) => this.removePin(pin));
         removeElement(this.currentChip.buses, bus);
     };
     @action clearSelection = () => {
@@ -203,14 +198,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
             (newSizeWindow.y - this.lastSizeWindow.y) / 2
         );
         this.currentChip.subChips.forEach((chip) => {
-            if (chip instanceof Bus) {
-                chip.to.add(delta);
-                chip.from.add(delta);
-                chip.input.forEach((pin) => pin.position.add(delta));
-                chip.output.forEach((pin) => pin.position.add(delta));
-            } else {
-                chip.position.add(delta);
-            }
+            chip.position.add(delta);
         });
 
         this.lastSizeWindow = newSizeWindow;
@@ -328,12 +316,7 @@ export const EditPage = view(EditPageViewModel)<RequiredProps>((props) => {
                 }}
             >
                 <RWireIncomplete />
-
-                <RBusIncomplete
-                    enabled={viewModel.addingBus}
-                    addNewBus={viewModel.addBuses}
-                    addingCount={viewModel.addingCount}
-                />
+                <BusIncomplete />
 
                 <g
                     onClick={(e) => {
@@ -345,11 +328,7 @@ export const EditPage = view(EditPageViewModel)<RequiredProps>((props) => {
                     ))}
                 </g>
                 <g>
-                    {(
-                        viewModel.currentChip.subChips.filter(
-                            (chip) => chip.chipType == ChipTypes.BUS
-                        ) as Bus[]
-                    ).map((bus) => (
+                    {viewModel.currentChip.buses.map((bus) => (
                         <RBus Bus={bus} key={bus.id} />
                     ))}
                 </g>

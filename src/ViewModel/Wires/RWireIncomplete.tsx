@@ -1,6 +1,6 @@
 import cl from "./RWireIncomplete.module.scss";
 import { Wire } from "../../Simulating/Wire";
-import { Pin } from "../../Simulating/Pin";
+import { BusPin, Pin } from "../../Simulating/Pin";
 import { Pos } from "../../common/Pos";
 import { ChipTypes } from "../../Structs/ChipMinimalInfo";
 import { ViewModel, view } from "@yoskutik/react-vvm";
@@ -32,6 +32,40 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
         let pinIsSource =
             (pin.isInput && pin.chip.id == 0) ||
             (!pin.isInput && pin.chip.id != 0);
+
+        if (pin instanceof BusPin && this.firstPin instanceof BusPin)
+            pinIsSource = false;
+
+        if (this.firstPin instanceof BusPin) {
+            this.firstPin.isInput = pinIsSource;
+            if (this.firstPin.isInput)
+                this.firstPin.chip.input.push(this.firstPin);
+            else {
+                this.firstPin.addDefaultState();
+                this.firstPin.chip.output.push(this.firstPin);
+            }
+        }
+
+        if (!(pin instanceof BusPin && this.firstPin instanceof BusPin)) {
+            if (pin instanceof BusPin) {
+                pin.isInput = firstIsSource;
+                if (pin.isInput) pin.chip.input.push(pin);
+                else {
+                    pin.addDefaultState();
+                    pin.chip.output.push(pin);
+                }
+            }
+        } else {
+            pin.isInput = !this.firstPin.isInput;
+        }
+
+        firstIsSource =
+            (this.firstPin.isInput && this.firstPin.chip.id == 0) ||
+            (!this.firstPin.isInput && this.firstPin.chip.id != 0);
+        pinIsSource =
+            (pin.isInput && pin.chip.id == 0) ||
+            (!pin.isInput && pin.chip.id != 0);
+
         if (firstIsSource && !pinIsSource) {
             if (this.firstPin.chip.chipType != ChipTypes.BUS) {
                 this.points.shift();

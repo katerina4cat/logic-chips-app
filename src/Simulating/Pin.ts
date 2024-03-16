@@ -4,6 +4,8 @@ import { Chip } from "./Chip";
 import { Pos } from "../common/Pos";
 import { State } from "../common/State";
 import { action, computed, makeObservable, observable } from "mobx";
+import { Bus } from "./BaseChips/Bus";
+import { testRS } from "./BaseChips/AND";
 
 export type PinState = { id: number; value: State.States };
 
@@ -22,12 +24,13 @@ export class Pin {
     @computed get totalState() {
         let res = State.States.UNDEFINED;
         for (const state of this.states.map((x) => x.value)) {
-            if (state == State.States.FLOATING) return State.States.FLOATING;
-            else if (state != State.States.UNDEFINED) {
-                if (res == State.States.UNDEFINED) res = state;
+            if (state === State.States.FLOATING) return State.States.FLOATING;
+            else if (state !== State.States.UNDEFINED) {
+                if (res === State.States.UNDEFINED) res = state;
                 else return State.States.FLOATING;
             }
         }
+        if (testRS.v) console.log(res);
         return res;
     }
     constructor(
@@ -65,6 +68,15 @@ export class Pin {
     }
 
     /**
+     * Добавляет состояние пина из собственного чипа в список
+     * @param state Состояние
+     * @returns
+     */
+    @action addDefaultState(state: State.States = State.States.UNDEFINED) {
+        this.states.push({ id: this.id, value: state });
+    }
+
+    /**
      * Удаляет состояние из списка
      * @param state Состояние удаляемой связи
      * @returns
@@ -85,5 +97,32 @@ export class Pin {
     @action refreshState(state: PinState) {
         const founded = this.states.filter((sta) => sta.id == state.id)[0];
         if (founded) founded.value = state.value;
+    }
+}
+
+export class BusPin extends Pin {
+    @observable distanceFromZero;
+    constructor(
+        chip: Bus,
+        distance: number,
+        input: boolean,
+        id = Date.now(),
+        name = "BPin",
+        y = 0,
+        hasDefaultState = false,
+        deltaPos?: Pos,
+        canUpdatePropagate = true
+    ) {
+        super(
+            chip,
+            input,
+            id,
+            name,
+            y,
+            hasDefaultState,
+            deltaPos,
+            canUpdatePropagate
+        );
+        this.distanceFromZero = distance;
     }
 }

@@ -2,6 +2,7 @@ import { Pin } from "../Pin";
 import { State } from "../../common/State";
 import { Pos } from "../../common/Pos";
 import { Chip } from "../Chip";
+export let testRS = { v: false };
 
 export class AND extends Chip {
     readonly isBase = true;

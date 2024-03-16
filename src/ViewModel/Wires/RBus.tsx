@@ -1,88 +1,128 @@
-import { Component, ReactNode } from "react";
 import cl from "./RBus.module.scss";
 import { Bus } from "../../Simulating/BaseChips/Bus";
 import { State } from "../../common/State";
 import { getColorWithState } from "../../common/Colors";
-import { Pos } from "../../common/Pos";
 import { BusEndPosWidth, busID } from "../../common/Settings";
+import { ViewModel, view } from "@yoskutik/react-vvm";
+import { action, makeObservable, observable } from "mobx";
+import { EditPageViewModel } from "../EditPage";
+import { Pos } from "../../common/Pos";
+import { BusPin } from "../../Simulating/Pin";
 
 interface RequiredProps {
     Bus: Bus;
 }
 
-interface States {}
-
-export class RBus extends Component<RequiredProps, States> {
-    state: Readonly<States> = {};
-    constructor(props: RequiredProps) {
-        super(props);
+export class BusViewModel extends ViewModel<EditPageViewModel, RequiredProps> {
+    @observable bus = this.viewProps.Bus;
+    radiusWire = 20;
+    constructor() {
+        super();
+        makeObservable(this);
     }
 
-    componentWillUnmount(): void {
-        document.removeEventListener("keydown", this.handleKeydown);
-    }
-
-    handleKeydown = (e: KeyboardEvent) => {
-        // if (e.key == "Backspace") this.props.removeBus(this.props.Bus);
+    @action handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key == "Backspace") this.parent.removeBus(this.bus);
     };
-
-    render(): ReactNode {
-        return (
-            <g>
-                <rect
-                    x={this.props.Bus.from.x - BusEndPosWidth / 2}
-                    y={this.props.Bus.from.y - BusEndPosWidth / 2}
-                    width={BusEndPosWidth}
-                    height={BusEndPosWidth}
-                    className={cl.BusEndPos}
-                />
-                <rect
-                    x={this.props.Bus.to.x - BusEndPosWidth / 2}
-                    y={this.props.Bus.to.y - BusEndPosWidth / 2}
-                    width={BusEndPosWidth}
-                    height={BusEndPosWidth}
-                    className={cl.BusEndPos}
-                />
-                <path
-                    className={cl.RBus}
-                    id={`bus_${this.props.Bus.id}`}
-                    stroke={getColorWithState(
-                        this.props.Bus.output[0]?.totalState ||
-                            State.States.UNDEFINED,
-                        this.props.Bus.Wcolor
-                    )}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        // this.props.interactPin.current(
-                        //     this.props.Bus.phantomPin,
-                        //     e.ctrlKey,
-                        //     new Pos(e.pageX, e.pageY)
-                        // );
-                    }}
-                    onMouseOver={() =>
-                        document.addEventListener("keydown", this.handleKeydown)
-                    }
-                    onMouseOut={() =>
-                        document.removeEventListener(
-                            "keydown",
-                            this.handleKeydown
-                        )
-                    }
-                    ref={this.props.Bus.ref}
-                    d={`M${this.props.Bus.from.x},${this.props.Bus.from.y}L${this.props.Bus.to.x},${this.props.Bus.to.y}`}
-                />
-                {busID ? (
-                    <text>
-                        <textPath
-                            href={`#bus_${this.props.Bus.id}`}
-                            startOffset={"50%"}
-                            stroke="white"
-                        >
-                            {this.props.Bus.id}
-                        </textPath>
-                    </text>
-                ) : undefined}
-            </g>
-        );
-    }
 }
+
+export const RBus = view(BusViewModel)<RequiredProps>(({ viewModel }) => {
+    if (!viewModel.bus) return <></>;
+    return (
+        <g>
+            <rect
+                x={viewModel.bus.positions[0].x - BusEndPosWidth / 2}
+                y={viewModel.bus.positions[0].y - BusEndPosWidth / 2}
+                width={BusEndPosWidth}
+                height={BusEndPosWidth}
+                className={cl.BusEndPos}
+            />
+            <rect
+                x={
+                    viewModel.bus.positions[viewModel.bus.positions.length - 1]
+                        .x -
+                    BusEndPosWidth / 2
+                }
+                y={
+                    viewModel.bus.positions[viewModel.bus.positions.length - 1]
+                        .y -
+                    BusEndPosWidth / 2
+                }
+                width={BusEndPosWidth}
+                height={BusEndPosWidth}
+                className={cl.BusEndPos}
+            />
+            <path
+                className={cl.RBus}
+                stroke={getColorWithState(
+                    viewModel.bus.totalState,
+                    viewModel.bus.BusColor
+                )}
+                d={viewModel.bus.drawWire}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    let closestDistance = Infinity,
+                        distanceFromZero = 0;
+                    for (
+                        let i = 0;
+                        i < e.currentTarget.getTotalLength();
+                        i += 0.25
+                    ) {
+                        const point = e.currentTarget.getPointAtLength(i);
+                        const distance = Math.sqrt(
+                            (point.x - e.pageX) ** 2 + (point.y - e.pageY) ** 2
+                        );
+
+                        if (distance < closestDistance) {
+                            closestDistance = distance;
+                            distanceFromZero = i;
+                        }
+                    }
+                    const point =
+                        e.currentTarget.getPointAtLength(distanceFromZero);
+                    viewModel.parent.wireIncompleteViewModel?.clickToPin(
+                        new BusPin(
+                            viewModel.bus,
+                            distanceFromZero,
+                            false,
+                            undefined,
+                            "BPin",
+                            undefined,
+                            false,
+                            new Pos(point.x, point.y)
+                        ),
+                        e.ctrlKey
+                    );
+                    // this.props.interactPin.current(
+                    //     this.props.Bus.phantomPin,
+                    //     e.ctrlKey,
+                    //     new Pos(e.pageX, e.pageY)
+                    // );
+                }}
+                onMouseOver={() =>
+                    document.addEventListener(
+                        "keydown",
+                        viewModel.handleKeyDown
+                    )
+                }
+                onMouseOut={() =>
+                    document.removeEventListener(
+                        "keydown",
+                        viewModel.handleKeyDown
+                    )
+                }
+            />
+            {busID ? (
+                <text>
+                    <textPath
+                        href={`#bus_${viewModel.bus.id}`}
+                        startOffset={"50%"}
+                        stroke="white"
+                    >
+                        {viewModel.bus.id}
+                    </textPath>
+                </text>
+            ) : undefined}
+        </g>
+    );
+});

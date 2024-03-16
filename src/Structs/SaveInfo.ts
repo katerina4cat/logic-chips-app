@@ -8,8 +8,10 @@ import { Wire } from "../Simulating/Wire";
 import { BusMinimalInfo, ChipMinimalInfo, ChipTypes } from "./ChipMinimalInfo";
 import { PinSaveInfo } from "./PinInfo";
 import { WireSaveInfo } from "./WireSaveInfo";
-import { AND } from "../Simulating/BaseChips/AND";
+import { AND, testRS } from "../Simulating/BaseChips/AND";
 import { NOT } from "../Simulating/BaseChips/NOT";
+import { Colors } from "../common/Colors";
+import { action } from "mobx";
 
 export class SaveInfo {
     Chips: ChipMinimalInfo[] = [
@@ -166,8 +168,7 @@ export class SaveInfo {
                         new BusMinimalInfo(
                             chip.name,
                             chip.color,
-                            (chip as Bus).from,
-                            (chip as Bus).to,
+                            (chip as Bus).positions,
                             chip.id
                         )
                 ),
@@ -204,7 +205,7 @@ export class SaveInfo {
         return true;
     };
 
-    loadChipByName = (
+    @action loadChipByName = (
         chipName: string,
         position: Pos = new Pos(),
         chipID: number = Date.now()
@@ -238,16 +239,7 @@ export class SaveInfo {
                         subChip.id
                     )
                 );
-                SubChips.push(
-                    ...chipInfo.Buses?.map((bus) => {
-                        const buff = new Bus(
-                            new Pos(bus.from).add(delta),
-                            new Pos(bus.to).add(delta),
-                            bus.id
-                        );
-                        return buff;
-                    })
-                );
+
                 const res = new Chip(
                     SubChips,
                     chipID,
@@ -255,6 +247,18 @@ export class SaveInfo {
                     chipInfo.color,
                     position.add(delta)
                 );
+
+                res.buses.push(
+                    ...chipInfo.Buses?.map((bus) => {
+                        const buff = new Bus(
+                            bus.positions,
+                            bus.id,
+                            Colors[bus.color]
+                        );
+                        return buff;
+                    })
+                );
+
                 chipInfo.inputPins.forEach((pin) => {
                     res.input.push(
                         new Pin(
@@ -303,18 +307,18 @@ export class SaveInfo {
                                   (pin) => pin.id == wire.targetID.pinID
                               );
                     //Соеденение двух бусов
-                    if (
-                        sourceChip?.chipType == ChipTypes.BUS &&
-                        targetChip?.chipType == ChipTypes.BUS
-                    ) {
-                        res.wires.push(
-                            (sourceChip as Bus).createWireToBus(
-                                targetChip as Bus,
-                                wire.points
-                            )
-                        );
-                        return;
-                    }
+                    // if (
+                    //     sourceChip?.chipType == ChipTypes.BUS &&
+                    //     targetChip?.chipType == ChipTypes.BUS
+                    // ) {
+                    //     res.wires.push(
+                    //         (sourceChip as Bus).createWireToBus(
+                    //             targetChip as Bus,
+                    //             wire.points
+                    //         )
+                    //     );
+                    //     return;
+                    // }
                     //Подготовка пина для соеденение от бусы к чипу
                     if (source && targetChip?.chipType == ChipTypes.BUS) {
                         target = new Pin(
@@ -349,14 +353,15 @@ export class SaveInfo {
 `
                         );
                         console.log(source, target);
-                    } else
+                    } else {
                         res.wires.push(
                             new Wire(
                                 source,
                                 target,
-                                wire.points.map((p) => new Pos(p))
-                            ).addDeltaToPoints(delta)
+                                wire.points.map((p) => new Pos(p).add(delta))
+                            )
                         );
+                    }
                 });
                 return res;
         }

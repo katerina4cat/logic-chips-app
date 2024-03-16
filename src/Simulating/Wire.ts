@@ -4,6 +4,7 @@ import { Pos } from "../common/Pos";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
 import { Bus } from "./BaseChips/Bus";
 import { action, computed, makeObservable, observable, reaction } from "mobx";
+import { testRS } from "./BaseChips/AND";
 
 const radiusWire = 20;
 let wireIDs = 0;
@@ -36,8 +37,16 @@ export class Wire {
             this.target.chip.chipType == ChipTypes.BUS
         )
             (this.source.chip as Bus).addBusConnection(this.target.chip as Bus);
-        this.target.addState({ id: source.id, value: source.totalState });
+        this.target.addState({
+            id: source.id + source.chip.id,
+            value: source.totalState,
+        });
         target.chip.updatedOutputs();
+        if (source.chip.name == "NOR" && target.chip.name == "NOR") {
+            console.log(source.totalState);
+            console.log(target.totalState);
+            testRS.v = true;
+        }
         reaction(
             () => this.source.totalState,
             (newState) => {
@@ -85,10 +94,6 @@ export class Wire {
         }
     }
 
-    @action addDeltaToPoints = (delta: Pos) => {
-        this.points.forEach((point) => point.add(delta));
-        return this;
-    };
     /**
      * Устанавливает точки провода с расчётом закругления
      * TODO:
