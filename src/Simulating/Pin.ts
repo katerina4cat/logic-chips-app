@@ -95,8 +95,11 @@ export class Pin {
      * @returns
      */
     @action refreshState(state: PinState) {
-        const founded = this.states.filter((sta) => sta.id == state.id)[0];
-        if (founded) founded.value = state.value;
+        this.states.forEach((fstate, i) => {
+            if (fstate.id === state.id) {
+                this.states[i].value = state.value;
+            }
+        });
     }
 }
 
