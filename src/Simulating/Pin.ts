@@ -5,9 +5,7 @@ import { Pos } from "../common/Pos";
 import { State } from "../common/State";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Bus } from "./BaseChips/Bus";
-import { testRS } from "./BaseChips/AND";
-
-export type PinState = { id: number; value: State.States };
+import { PinState } from "../common/State";
 
 export class Pin {
     id: number;
@@ -23,14 +21,15 @@ export class Pin {
     @observable states: PinState[] = [];
     @computed get totalState() {
         let res = State.States.UNDEFINED;
-        for (const state of this.states.map((x) => x.value)) {
-            if (state === State.States.FLOATING) return State.States.FLOATING;
-            else if (state !== State.States.UNDEFINED) {
-                if (res === State.States.UNDEFINED) res = state;
+        for (const state of this.states) {
+            if (state.state === State.States.FLOATING)
+                return State.States.FLOATING;
+            else if (state.state !== State.States.UNDEFINED) {
+                if (res === State.States.UNDEFINED)
+                    res = state.state as State.States;
                 else return State.States.FLOATING;
             }
         }
-        if (testRS.v) console.log(res);
         return res;
     }
     constructor(
@@ -47,13 +46,12 @@ export class Pin {
         this.id = id;
         this.isInput = input;
         this.name = name;
-        this.states = [];
         this.chip = chip;
         this.deltaPos = new Pos(undefined, y);
         this.canUpdatePropagate = canUpdatePropagate;
         if (deltaPos) this.deltaPos = deltaPos;
         if (hasDefaultState) {
-            this.states.push({ id: this.id, value: State.States.LOW });
+            this.addState(new PinState(this.id, State.States.LOW));
         }
     }
 
@@ -65,15 +63,6 @@ export class Pin {
     @action addState(state: PinState | PinState[]) {
         if (Array.isArray(state)) this.states.push(...state);
         else this.states.push(state);
-    }
-
-    /**
-     * Добавляет состояние пина из собственного чипа в список
-     * @param state Состояние
-     * @returns
-     */
-    @action addDefaultState(state: State.States = State.States.UNDEFINED) {
-        this.states.push({ id: this.id, value: state });
     }
 
     /**

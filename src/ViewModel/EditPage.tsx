@@ -44,6 +44,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
     @observable selectedChips: Chip[] = [];
     @observable modalActive = false;
 
+    chipDeep: Chip[] = [];
     saveManager: SaveInfo;
     startClickTime = 0;
     startClickPos = new Pos();
@@ -59,12 +60,29 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         makeObservable(this);
         this.initHotKeys();
     }
+
+    @action viewInChip = (chip: Chip) => {
+        this.chipDeep.push(this.currentChip);
+        this.currentChip = chip;
+    };
+
     @action setLibrary = (v: boolean) => (this.showLibrary = v);
     @action setModal = (v: boolean) => (this.modalActive = v);
     @action setCircleState = (i: number, v: boolean) =>
         (this.showCircleAdding[i] = v);
 
     @action handleKeyDown = (e: KeyboardEvent) => {
+        if (this.currentChip.id !== 0) {
+            if (hotkeys.save.testKey(e)) {
+                e.preventDefault();
+                hotkeys.save.event();
+            }
+            if (e.key === "Backspace") {
+                this.currentChip = this.chipDeep.pop() as Chip;
+            }
+            return;
+        }
+
         if ((e.target as any).tagName === "INPUT") return;
         // Колесо добавления
         for (let i = 0; i < 9; i++)
@@ -100,6 +118,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
     };
 
     @action removeWire = (wire: Wire) => {
+        if (this.currentChip.id !== 0) return;
         wire.deletingWire();
         removeElement(this.currentChip.wires, wire);
     };
@@ -124,6 +143,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
     };
 
     @action removeBus = (bus: Bus) => {
+        if (this.currentChip.id !== 0) return;
         bus.depentBus.forEach((dep) => removeElement(dep.depentBus, bus));
         bus.input.forEach((pin) => this.removePin(pin));
         bus.output.forEach((pin) => this.removePin(pin));
@@ -143,10 +163,11 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         e: React.MouseEvent<HTMLDivElement, MouseEvent>,
         chip: Chip
     ) => {
-        if (e.altKey) {
-            this.setAddingChip(chip.name);
-            return;
-        }
+        if (this.currentChip.id === 0)
+            if (e.altKey) {
+                this.setAddingChip(chip.name);
+                return;
+            }
         this.startClickTime = Date.now();
         this.startClickPos = new Pos(e.pageX, e.pageY);
         this.lastClickedChip = chip;
@@ -193,18 +214,37 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
             (e.currentTarget as Window).innerWidth,
             (e.currentTarget as Window).innerHeight
         );
-        const delta = new Pos(
-            (newSizeWindow.x - this.lastSizeWindow.x) / 2,
-            (newSizeWindow.y - this.lastSizeWindow.y) / 2
-        );
-        this.currentChip.subChips.forEach((chip) => {
-            chip.position.add(delta);
-        });
+        // const delta = new Pos(
+        //     1 +
+        //         (newSizeWindow.x - this.lastSizeWindow.x) /
+        //             2 /
+        //             this.lastSizeWindow.x,
+        //     1 +
+        //         (newSizeWindow.y - this.lastSizeWindow.y) /
+        //             2 /
+        //             this.lastSizeWindow.x
+        // );
+        // console.log(delta.y);
+        // this.currentChip.subChips.forEach((chip) => {
+        //     chip.position.multy(delta);
+        // });
+        // this.currentChip.buses.forEach((bus) =>
+        //     bus.positions.forEach((pos) => pos.multy(delta))
+        // );
+        // this.currentChip.output.forEach((pin) =>
+        //     pin.deltaPos.multy(new Pos((delta.x - 1) * 2 + 1, delta.y))
+        // );
+        // this.currentChip.wires.forEach((wire) =>
+        //     wire.points.forEach((pos, i) => {
+        //         if (i === 0 || i === wire.points.length - 1) return;
+        //         pos.multy(delta);
+        //     })
+        // );
 
         this.lastSizeWindow = newSizeWindow;
     };
     protected onViewMounted(): void {
-        this.lastSizeWindow = new Pos(window.innerWidth, window.innerHeight);
+        this.lastSizeWindow = new Pos(window.outerWidth, window.outerHeight);
         window.addEventListener("resize", this.onResize);
         window.addEventListener("keydown", this.handleKeyDown);
     }
@@ -355,15 +395,7 @@ export const EditPage = view(EditPageViewModel)<RequiredProps>((props) => {
                     />
                 ))}
             </div>
-            <ChipList
-                enabled={viewModel.showLibrary}
-                currentChip={viewModel.currentChip}
-                setEnabled={viewModel.setLibrary}
-                saveManager={viewModel.saveManager}
-                loadChip={viewModel.loadChip}
-                addChip={viewModel.setAddingChip}
-                newChip={viewModel.newChip}
-            />
+            <ChipList />
             {/** maximum 12 элементов */}
             <Modal
                 setEnabled={viewModel.setModal}

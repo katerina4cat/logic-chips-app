@@ -1,12 +1,5 @@
-import { makeObservable, observable } from "mobx";
-
-export class State {
-    @observable value: State.States = State.States.UNDEFINED;
-    constructor(defaultState?: State.States) {
-        if (defaultState != undefined) this.value = defaultState;
-        makeObservable(this);
-    }
-}
+import { computed, makeObservable, observable } from "mobx";
+import { Pin } from "../Simulating/Pin";
 
 export namespace State {
     export enum States {
@@ -14,5 +7,21 @@ export namespace State {
         "HIGH" = 1,
         "FLOATING" = -2,
         "UNDEFINED" = -1,
+    }
+}
+
+export class PinState {
+    id: number;
+    @observable value: State.States;
+    @observable pin?: Pin;
+    constructor(id: number, value?: State.States, pin?: Pin) {
+        this.id = id;
+        this.value = value !== undefined ? value : State.States.UNDEFINED;
+        this.pin = pin;
+        makeObservable(this);
+    }
+
+    @computed get state() {
+        return this.pin ? this.pin?.totalState : this.value;
     }
 }

@@ -1,11 +1,10 @@
 import { removeElement } from "../common/RemoveElement";
-import { Pin, PinState } from "./Pin";
+import { Pin } from "./Pin";
+import { PinState } from "../common/State";
 import { Pos } from "../common/Pos";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
 import { Bus } from "./BaseChips/Bus";
-import { action, computed, makeObservable, observable, reaction } from "mobx";
-import { testRS } from "./BaseChips/AND";
-import { State } from "../common/State";
+import { action, computed, makeObservable, observable } from "mobx";
 
 const radiusWire = 20;
 let wireIDs = 0;
@@ -20,6 +19,7 @@ export class Wire {
         makeObservable(this);
         this.source = source;
         this.target = target;
+
         this.id = wireIDs;
         wireIDs++;
         this.points = [...points];
@@ -39,26 +39,8 @@ export class Wire {
         )
             (this.source.chip as Bus).addBusConnection(this.target.chip as Bus);
 
-        this.target.addState({
-            id: source.id + source.chip.id,
-            value: source.totalState,
-        });
-        target.chip.updatedOutputs();
-
-        if (source.chip.name == "NOR" && target.chip.name == "NOR") {
-            // console.log(source.totalState);
-            console.log(target.totalState);
-            testRS.v = true;
-        }
-        reaction(
-            () => this.source.totalState,
-            (newState) => {
-                target.refreshState({
-                    id: source.id + source.chip.id,
-                    value: newState,
-                });
-                target.chip.updatedOutputs();
-            }
+        this.target.addState(
+            new PinState(this.source.id, undefined, this.source)
         );
     }
 
@@ -93,10 +75,9 @@ export class Wire {
         if (this.target.chip.chipType == ChipTypes.BUS) {
             removeElement((this.target.chip as Bus).input, this.target);
         } else {
-            this.target.removeState({
-                id: this.source.id,
-                value: this.source.totalState,
-            });
+            this.target.removeState(
+                new PinState(this.source.id, undefined, this.source)
+            );
         }
     }
 

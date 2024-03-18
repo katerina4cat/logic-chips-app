@@ -43,12 +43,22 @@ export const DefaultChip = view(DefaultChipViewModel)<RequiredProps>(
                         ? `0px 0px 3px 3px color-mix(in srgb, white 20%, ${viewModel.chip.color})`
                         : "none",
                 }}
+                onContextMenu={(e) => {
+                    e.preventDefault();
+                    viewModel.parent.viewInChip(viewModel.chip);
+                    viewModel.parent.clearSelection();
+                }}
                 className={cl.DefaultChip}
                 onMouseDown={
                     viewModel.viewProps.isPreview
                         ? undefined
-                        : (e) =>
-                              viewModel.parent.clickedToChip(e, viewModel.chip)
+                        : (e) => {
+                              if (e.button === 0)
+                                  viewModel.parent.clickedToChip(
+                                      e,
+                                      viewModel.chip
+                                  );
+                          }
                 }
             >
                 <div className={cl.PinList}>

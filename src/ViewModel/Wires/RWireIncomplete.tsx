@@ -7,6 +7,7 @@ import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, computed, makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../EditPage";
 import { getColorWithState } from "../../common/Colors";
+import { PinState, State } from "../../common/State";
 
 export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
     @observable points: Pos[] = [];
@@ -41,7 +42,9 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
             if (this.firstPin.isInput)
                 this.firstPin.chip.input.push(this.firstPin);
             else {
-                this.firstPin.addDefaultState();
+                this.firstPin.addState(
+                    new PinState(this.firstPin.id, State.States.UNDEFINED)
+                );
                 this.firstPin.chip.output.push(this.firstPin);
             }
         }
@@ -51,7 +54,7 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
                 pin.isInput = firstIsSource;
                 if (pin.isInput) pin.chip.input.push(pin);
                 else {
-                    pin.addDefaultState();
+                    pin.addState(new PinState(pin.id, State.States.UNDEFINED));
                     pin.chip.output.push(pin);
                 }
             }

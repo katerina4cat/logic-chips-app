@@ -48,6 +48,11 @@ export const ViewPin = view(PinViewModel)<RequiredProps>(({ viewModel }) => {
                     viewModel.pin.color
                 ),
             }}
+            onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log(viewModel.pin);
+            }}
             onMouseDown={
                 viewModel.viewProps.isPreview
                     ? undefined

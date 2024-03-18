@@ -1,4 +1,5 @@
 import { Pos } from "../common/Pos";
+import { BusMinimalInfo } from "./BusInfo";
 import { PinSaveInfo } from "./PinInfo";
 import { WireSaveInfo } from "./WireSaveInfo";
 
@@ -38,18 +39,5 @@ export class ChipMinimalInfo {
         this.SubChips = SubChips;
         this.Buses = Buses;
         this.screenSize = screenSize;
-    }
-}
-
-export class BusMinimalInfo {
-    name: string;
-    id: number;
-    color: string;
-    positions: Pos[];
-    constructor(name: string, color: string, positions: Pos[], id: number) {
-        this.name = name;
-        this.color = color;
-        this.positions = positions;
-        this.id = id;
     }
 }

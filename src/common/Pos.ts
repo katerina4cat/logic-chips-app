@@ -26,6 +26,11 @@ export class Pos {
         this.y -= value.y;
         return this;
     }
+    @action multy(value: Pos) {
+        this.x *= value.x;
+        this.y *= value.y;
+        return this;
+    }
     adding(value: Pos) {
         return new Pos(this.x + value.x, this.y + value.y);
     }

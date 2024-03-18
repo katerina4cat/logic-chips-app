@@ -34,6 +34,7 @@ export class Bus extends Chip {
                 }
             }
         }
+        console.log(dependedBuses);
         dependedBuses.forEach((bus) =>
             bus.output.forEach((pin) => (pin.states[0].value = res))
         );
