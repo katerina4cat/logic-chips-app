@@ -103,12 +103,15 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         }
     };
     @action loadChip = (chipName: string) => {
-        this.currentChip = this.saveManager.loadChipByName(
-            chipName,
-            undefined,
-            0
-        );
+        [this.currentChip, this.lastSizeWindow] =
+            this.saveManager.loadChipByName(chipName, undefined, 0);
         this.showLibrary = false;
+        if (this.lastSizeWindow.x === 0 && this.lastSizeWindow.y === 0)
+            this.lastSizeWindow = new Pos(
+                window.innerWidth,
+                window.innerHeight
+            );
+        this.onResize();
     };
     @action newChip = () => (this.currentChip = new Chip(undefined, 0));
     @action addChips = (chips: Chip[]) =>
@@ -209,37 +212,26 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         this.addingCount = 1;
         this.addingBus = false;
     };
-    @action onResize = (e: UIEvent) => {
-        const newSizeWindow = new Pos(
-            (e.currentTarget as Window).innerWidth,
-            (e.currentTarget as Window).innerHeight
+    @action onResize = () => {
+        const newSizeWindow = new Pos(window.innerWidth, window.innerHeight);
+        const delta = new Pos(
+            newSizeWindow.x / this.lastSizeWindow.x,
+            newSizeWindow.y / this.lastSizeWindow.y
         );
-        // const delta = new Pos(
-        //     1 +
-        //         (newSizeWindow.x - this.lastSizeWindow.x) /
-        //             2 /
-        //             this.lastSizeWindow.x,
-        //     1 +
-        //         (newSizeWindow.y - this.lastSizeWindow.y) /
-        //             2 /
-        //             this.lastSizeWindow.x
-        // );
-        // console.log(delta.y);
-        // this.currentChip.subChips.forEach((chip) => {
-        //     chip.position.multy(delta);
-        // });
-        // this.currentChip.buses.forEach((bus) =>
-        //     bus.positions.forEach((pos) => pos.multy(delta))
-        // );
-        // this.currentChip.output.forEach((pin) =>
-        //     pin.deltaPos.multy(new Pos((delta.x - 1) * 2 + 1, delta.y))
-        // );
-        // this.currentChip.wires.forEach((wire) =>
-        //     wire.points.forEach((pos, i) => {
-        //         if (i === 0 || i === wire.points.length - 1) return;
-        //         pos.multy(delta);
-        //     })
-        // );
+        this.currentChip.subChips.forEach((chip) => {
+            chip.position.multy(delta);
+        });
+        this.currentChip.buses.forEach((bus) =>
+            bus.positions.forEach((pos) => pos.multy(delta))
+        );
+        this.currentChip.wires.forEach((wire) =>
+            wire.points.forEach((pos, i) => {
+                if (i === 0 || i === wire.points.length - 1) return;
+                pos.multy(delta);
+            })
+        );
+        this.currentChip.input.forEach((pin) => pin.deltaPos.multy(delta));
+        this.currentChip.output.forEach((pin) => pin.deltaPos.multy(delta));
 
         this.lastSizeWindow = newSizeWindow;
     };
@@ -255,7 +247,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
 
     @action setAddingChip = (chipName: string) => {
         if (chipName != "BUS") {
-            this.addingChip = this.saveManager.loadChipByName(chipName);
+            this.addingChip = this.saveManager.loadChipByName(chipName)[0];
             this.addingBus = false;
             this.addingCount = 1;
             this.showCircleAdding = new Array(9).fill(false);

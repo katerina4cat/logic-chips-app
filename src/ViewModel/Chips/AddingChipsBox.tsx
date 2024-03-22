@@ -41,7 +41,7 @@ class AddingChipViewModel extends ViewModel<EditPageViewModel> {
                                           this.parent.addingChip.name,
                                           new Pos(box?.x, box?.y),
                                           curretTime + i
-                                      )
+                                      )[0]
                                     : undefined;
                                 // TODO sets positions to pins
                                 return res;

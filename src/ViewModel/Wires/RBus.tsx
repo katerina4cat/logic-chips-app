@@ -8,6 +8,7 @@ import { action, makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../EditPage";
 import { Pos } from "../../common/Pos";
 import { BusPin } from "../../Simulating/Pin";
+import { useRef } from "react";
 
 interface RequiredProps {
     Bus: Bus;
@@ -15,10 +16,26 @@ interface RequiredProps {
 
 export class BusViewModel extends ViewModel<EditPageViewModel, RequiredProps> {
     @observable bus = this.viewProps.Bus;
+    ref = useRef<SVGPathElement>(null);
     radiusWire = 20;
     constructor() {
         super();
         makeObservable(this);
+    }
+
+    @action protected onViewMounted(): void {
+        this.bus.input.forEach((pin) => {
+            const position = this.ref.current?.getPointAtLength(
+                (pin as BusPin).distanceFromZero
+            );
+            pin.deltaPos = new Pos(position?.x, position?.y);
+        });
+        this.bus.output.forEach((pin) => {
+            const position = this.ref.current?.getPointAtLength(
+                (pin as BusPin).distanceFromZero
+            );
+            pin.deltaPos = new Pos(position?.x, position?.y);
+        });
     }
 
     @action handleKeyDown = (e: KeyboardEvent) => {
@@ -54,6 +71,7 @@ export const RBus = view(BusViewModel)<RequiredProps>(({ viewModel }) => {
             />
             <path
                 className={cl.RBus}
+                ref={viewModel.ref}
                 stroke={getColorWithState(
                     viewModel.bus.totalState,
                     viewModel.bus.BusColor

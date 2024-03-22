@@ -13,7 +13,6 @@ import { NOT } from "../Simulating/BaseChips/NOT";
 import { Colors } from "../common/Colors";
 import { action, makeObservable, observable } from "mobx";
 import { BusMinimalInfo } from "./BusInfo";
-import { PinState, State } from "../common/State";
 
 export class SaveInfo {
     @observable Chips: ChipMinimalInfo[] = [
@@ -207,14 +206,14 @@ export class SaveInfo {
         position: Pos = new Pos(),
         chipID: number = Date.now(),
         deepth?: boolean
-    ): Chip => {
+    ): [Chip, Pos] => {
         switch (chipName) {
             case "AND":
-                return new AND(chipID, position);
+                return [new AND(chipID, position), new Pos()];
             case "NOT":
-                return new NOT(chipID, position);
+                return [new NOT(chipID, position), new Pos()];
             case "TRI-STATE BUFFER":
-                return new TRI_STATE_BUFFER(chipID, position);
+                return [new TRI_STATE_BUFFER(chipID, position), new Pos()];
             default:
                 const chipInfo = this.Chips.find(
                     (chip) => chip.name == chipName
@@ -224,21 +223,19 @@ export class SaveInfo {
                         `Произошла ошибка при попытке загрузить чип.
 Чип: "${chipName}" не найден`
                     );
-                    return new Chip();
+                    return [new Chip(), new Pos()];
                 }
-                const delta = new Pos(
-                    (window.innerWidth - chipInfo.screenSize.x) / 2,
-                    (window.innerHeight - chipInfo.screenSize.y) / 2
-                );
 
-                const SubChips = chipInfo.SubChips.map((subChip) =>
-                    this.loadChipByName(
-                        subChip.name,
-                        new Pos(subChip.position),
-                        subChip.id,
-                        true
-                    )
+                const SubChips = chipInfo.SubChips.map(
+                    (subChip) =>
+                        this.loadChipByName(
+                            subChip.name,
+                            new Pos(subChip.position),
+                            subChip.id,
+                            true
+                        )[0]
                 );
+                const delta = new Pos(chipInfo.screenSize);
 
                 const res = new Chip(
                     SubChips,
@@ -251,7 +248,7 @@ export class SaveInfo {
                 res.buses.push(
                     ...chipInfo.Buses?.map((bus) => {
                         const buff = new Bus(
-                            bus.positions,
+                            bus.positions.map((pos) => new Pos(pos)),
                             bus.id,
                             Colors[bus.color]
                         );
@@ -284,6 +281,7 @@ export class SaveInfo {
                         return buff;
                     })
                 );
+
                 chipInfo.inputPins.forEach((pin) => {
                     res.input.push(
                         new Pin(
@@ -291,20 +289,14 @@ export class SaveInfo {
                             true,
                             pin.id,
                             pin.name,
-                            pin.position.y + delta.y,
+                            pin.position.y,
                             chipID == 0
                         )
                     );
                 });
                 chipInfo.outputPins.forEach((pin) => {
                     res.output.push(
-                        new Pin(
-                            res,
-                            false,
-                            pin.id,
-                            pin.name,
-                            pin.position.y + delta.y
-                        )
+                        new Pin(res, false, pin.id, pin.name, pin.position.y)
                     );
                 });
 
@@ -336,27 +328,13 @@ export class SaveInfo {
                             : targetChip?.input.find(
                                   (pin) => pin.id == wire.targetID.pinID
                               );
-                    //Соеденение двух бусов
-                    // if (
-                    //     sourceChip?.chipType == ChipTypes.BUS &&
-                    //     targetChip?.chipType == ChipTypes.BUS
-                    // ) {
-                    //     res.wires.push(
-                    //         (sourceChip as Bus).createWireToBus(
-                    //             targetChip as Bus,
-                    //             wire.points
-                    //         )
-                    //     );
-                    //     return;
-                    // }
-                    //Подготовка пина для соеденение от бусы к чипу
                     if (!source || !target) {
-                        //                         alert(
-                        //                             `Не удалось добавить провод в чипе ${chipInfo.name} wireID: ${wire.id}
-                        // От: chip${wire.sourceID.chipID}-pin${wire.sourceID.pinID}
-                        // До: chip${wire.targetID.chipID}-pin${wire.targetID.pinID}
-                        // `
-                        //                         );
+                        alert(
+                            `Не удалось добавить провод в чипе ${chipInfo.name} wireID: ${wire.id}
+                        От: chip${wire.sourceID.chipID}-pin${wire.sourceID.pinID}
+                        До: chip${wire.targetID.chipID}-pin${wire.targetID.pinID}
+                        `
+                        );
                         console.log(sourceChip, targetChip);
                     } else {
                         res.wires.push(
@@ -369,7 +347,7 @@ export class SaveInfo {
                     }
                 });
                 if (!deepth) res.updatedOutputs();
-                return res;
+                return [res, delta];
         }
     };
 }

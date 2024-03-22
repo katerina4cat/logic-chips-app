@@ -1,22 +1,20 @@
 import { computed, makeObservable, observable } from "mobx";
 import { Pin } from "../Simulating/Pin";
 
-export namespace State {
-    export enum States {
-        "LOW" = 0,
-        "HIGH" = 1,
-        "FLOATING" = -2,
-        "UNDEFINED" = -1,
-    }
+export enum States {
+    "LOW" = 0,
+    "HIGH" = 1,
+    "FLOATING" = -2,
+    "UNDEFINED" = -1,
 }
 
 export class PinState {
     id: number;
-    @observable value: State.States;
+    @observable value: States;
     @observable pin?: Pin;
-    constructor(id: number, value?: State.States, pin?: Pin) {
+    constructor(id: number, value?: States, pin?: Pin) {
         this.id = id;
-        this.value = value !== undefined ? value : State.States.UNDEFINED;
+        this.value = value !== undefined ? value : States.UNDEFINED;
         this.pin = pin;
         makeObservable(this);
     }

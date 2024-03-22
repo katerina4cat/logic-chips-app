@@ -4,7 +4,7 @@ import { Pos } from "../../common/Pos";
 import { removeElement } from "../../common/RemoveElement";
 import { Color, Colors } from "../../common/Colors";
 import { action, computed, makeObservable, observable } from "mobx";
-import { State } from "../../common/State";
+import { States } from "../../common/State";
 
 export class Bus extends Chip {
     chipType = ChipTypes.BUS;
@@ -16,30 +16,37 @@ export class Bus extends Chip {
 
     @computed get totalState() {
         const dependedBuses = this.findAllDependentBuses();
-        let res = State.States.UNDEFINED;
+        let res = States.UNDEFINED;
         for (const bus of dependedBuses) {
-            if (res === State.States.FLOATING) break;
+            if (res === States.FLOATING) break;
             for (const pin of bus.input) {
                 const state = pin.totalState;
-                if (state === State.States.FLOATING) {
-                    res = State.States.FLOATING;
+                if (state === States.FLOATING) {
+                    res = States.FLOATING;
                     break;
-                } else if (state !== State.States.UNDEFINED) {
-                    if (res === State.States.UNDEFINED) {
+                } else if (state !== States.UNDEFINED) {
+                    if (res === States.UNDEFINED) {
                         res = state; // Устанавливаем состояние, если оно еще не было определено
                     } else {
-                        res = State.States.FLOATING; // Возвращаем FLOATING, если состояния конфликтуют
+                        res = States.FLOATING; // Возвращаем FLOATING, если состояния конфликтуют
                         break;
                     }
                 }
             }
         }
-        console.log(dependedBuses);
-        dependedBuses.forEach((bus) =>
-            bus.output.forEach((pin) => (pin.states[0].value = res))
-        );
+        this.setToAll(dependedBuses, res);
         return res; // Возвращаем итоговое состояние после проверки всех пинов
     }
+
+    override updatedOutputs() {
+        this.totalState;
+    }
+
+    @action setToAll = (dependedBuses: Bus[], state: States) => {
+        dependedBuses.forEach((bus) =>
+            bus.output.forEach((pin) => (pin.states[0].value = state))
+        );
+    };
 
     constructor(positions: Pos[], id?: number, BusColor?: Color) {
         super(undefined, id, "BUS", undefined, undefined);

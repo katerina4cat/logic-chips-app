@@ -2,7 +2,7 @@ import { Color, Colors } from "../common/Colors";
 import { removeElementByID } from "../common/RemoveElement";
 import { Chip } from "./Chip";
 import { Pos } from "../common/Pos";
-import { State } from "../common/State";
+import { States } from "../common/State";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Bus } from "./BaseChips/Bus";
 import { PinState } from "../common/State";
@@ -20,14 +20,12 @@ export class Pin {
     canUpdatePropagate: boolean;
     @observable states: PinState[] = [];
     @computed get totalState() {
-        let res = State.States.UNDEFINED;
+        let res = States.UNDEFINED;
         for (const state of this.states) {
-            if (state.state === State.States.FLOATING)
-                return State.States.FLOATING;
-            else if (state.state !== State.States.UNDEFINED) {
-                if (res === State.States.UNDEFINED)
-                    res = state.state as State.States;
-                else return State.States.FLOATING;
+            if (state.state === States.FLOATING) return States.FLOATING;
+            else if (state.state !== States.UNDEFINED) {
+                if (res === States.UNDEFINED) res = state.state as States;
+                else return States.FLOATING;
             }
         }
         return res;
@@ -47,11 +45,10 @@ export class Pin {
         this.isInput = input;
         this.name = name;
         this.chip = chip;
-        this.deltaPos = new Pos(undefined, y);
+        this.deltaPos = deltaPos || new Pos(undefined, y);
         this.canUpdatePropagate = canUpdatePropagate;
-        if (deltaPos) this.deltaPos = deltaPos;
         if (hasDefaultState) {
-            this.addState(new PinState(this.id, State.States.LOW));
+            this.addState(new PinState(this.id, States.LOW));
         }
     }
 

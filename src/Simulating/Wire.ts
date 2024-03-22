@@ -4,7 +4,7 @@ import { PinState } from "../common/State";
 import { Pos } from "../common/Pos";
 import { ChipTypes } from "../Structs/ChipMinimalInfo";
 import { Bus } from "./BaseChips/Bus";
-import { action, computed, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable, reaction } from "mobx";
 
 const radiusWire = 20;
 let wireIDs = 0;
@@ -41,6 +41,12 @@ export class Wire {
 
         this.target.addState(
             new PinState(this.source.id, undefined, this.source)
+        );
+        reaction(
+            () => this.source.totalState,
+            () => {
+                if (target.chip.isBase) target.chip.updatedOutputs();
+            }
         );
     }
 

@@ -11,16 +11,17 @@ interface RequiredProps {
     interactPin?: (pin: Pin, ctrlKey: boolean) => void;
     drawTitle?: boolean;
     isPreview?: boolean;
+    isSide?: boolean;
 }
 
 export class PinViewModel extends ViewModel<undefined, RequiredProps> {
     @observable pin: Pin = this.viewProps.Pin;
-    ref?: React.RefObject<SVGCircleElement>;
+    ref = useRef<SVGCircleElement>(null);
     constructor() {
         super();
         makeObservable(this);
     }
-    @action protected onViewMounted(): void {
+    @action protected onResize = () => {
         if (!this.ref) return;
         const rect = this.ref.current?.getBoundingClientRect();
         if (rect) {
@@ -33,11 +34,19 @@ export class PinViewModel extends ViewModel<undefined, RequiredProps> {
                 ).rem(this.pin.chip.position);
             }
         }
+    };
+
+    protected onViewUnmounted(): void {
+        window.removeEventListener("resize", this.onResize);
+    }
+
+    @action protected onViewMounted(): void {
+        window.addEventListener("resize", this.onResize);
+        this.onResize();
     }
 }
 
 export const ViewPin = view(PinViewModel)<RequiredProps>(({ viewModel }) => {
-    viewModel.ref = useRef<SVGCircleElement>(null);
     return (
         <circle
             className={cl.RPin}
