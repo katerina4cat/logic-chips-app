@@ -1,0 +1,36 @@
+.HotKeyEditor {
+    height: 50vh;
+    overflow-y: auto;
+    .HotKeyElement {
+        display: grid;
+        grid-template-columns: 50% 50%;
+        width: 60vw;
+        margin: 0.5em 0;
+        padding: 0.5em 0.25em;
+        border-radius: 8px;
+        background-color: #1f1f1f;
+        align-items: center;
+        .HotkeyTitle {
+            font-weight: bold;
+            padding: 0.25em 1em;
+            font-size: 0.75em;
+        }
+        .AdditionalKeys {
+            display: grid;
+            grid-template-columns: 40% 60%;
+            align-items: center;
+            .Options {
+                justify-self: start;
+                .OptionKey {
+                    font-size: 0.6em;
+                }
+            }
+            .KeyInfo {
+                width: 75%;
+                height: 60%;
+                font-size: 0.75em;
+                cursor: pointer;
+            }
+        }
+    }
+}

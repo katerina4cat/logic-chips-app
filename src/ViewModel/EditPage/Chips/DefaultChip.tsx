@@ -1,7 +1,7 @@
 import cl from "./DefaultChip.module.scss";
-import { Chip } from "../../Simulating/Chip";
+import { Chip } from "../../../Simulating/Chip";
 import { ViewPin } from "../Pins/RPin";
-import { Pos } from "../../common/Pos";
+import { Pos } from "../../../common/Pos";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../EditPage";

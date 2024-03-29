@@ -1,10 +1,12 @@
 import cl from "./RPin.module.scss";
-import { Pin } from "../../Simulating/Pin";
-import { getColorWithState } from "../../common/Colors";
+import { Pin } from "../../../Simulating/Pin";
+import { Color, Colors, getColorWithState } from "../../../common/Colors";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
 import { useRef } from "react";
-import { Pos } from "../../common/Pos";
+import { Pos } from "../../../common/Pos";
+import OutsideClickHandler from "react-outside-click-handler";
+import { States } from "../../../common/State";
 
 interface RequiredProps {
     Pin: Pin;
@@ -16,6 +18,7 @@ interface RequiredProps {
 
 export class PinViewModel extends ViewModel<undefined, RequiredProps> {
     @observable pin: Pin = this.viewProps.Pin;
+    @observable contextMenu = false;
     ref = useRef<SVGCircleElement>(null);
     constructor() {
         super();
@@ -44,6 +47,8 @@ export class PinViewModel extends ViewModel<undefined, RequiredProps> {
         window.addEventListener("resize", this.onResize);
         this.onResize();
     }
+    @action setContextMenu = (value: boolean) => (this.contextMenu = value);
+    @action setPinColor = (value: Color) => (this.pin.color = value);
 }
 
 export const ViewPin = view(PinViewModel)<RequiredProps>(({ viewModel }) => {
@@ -60,7 +65,7 @@ export const ViewPin = view(PinViewModel)<RequiredProps>(({ viewModel }) => {
             onContextMenu={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log(viewModel.pin);
+                viewModel.setContextMenu(true);
             }}
             onMouseDown={
                 viewModel.viewProps.isPreview
@@ -71,6 +76,7 @@ export const ViewPin = view(PinViewModel)<RequiredProps>(({ viewModel }) => {
                 viewModel.viewProps.isPreview
                     ? undefined
                     : (e) => {
+                          if (e.button !== 0) return;
                           if (viewModel.viewProps.interactPin)
                               viewModel.viewProps.interactPin(
                                   viewModel.pin,
@@ -91,6 +97,37 @@ export const ViewPin = view(PinViewModel)<RequiredProps>(({ viewModel }) => {
             >
                 {viewModel.pin.name}
             </div>
+            {viewModel.contextMenu && (
+                <OutsideClickHandler
+                    onOutsideClick={() => viewModel.setContextMenu(false)}
+                >
+                    <div className={cl.ContextMenu}>
+                        {Object.values(Colors)
+                            .filter((_, i) => i !== 0)
+                            .map((clr) => (
+                                <div
+                                    className={cl.SelectColorElement}
+                                    onClick={(e) => {
+                                        viewModel.setContextMenu(false);
+                                        viewModel.setPinColor(clr);
+                                        e.stopPropagation();
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            backgroundColor: getColorWithState(
+                                                States.HIGH,
+                                                clr
+                                            ),
+                                        }}
+                                        className={cl.ColorPreview}
+                                    />
+                                    {clr.title}
+                                </div>
+                            ))}
+                    </div>
+                </OutsideClickHandler>
+            )}
         </circle>
     );
 });

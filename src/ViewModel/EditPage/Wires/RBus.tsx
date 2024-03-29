@@ -1,13 +1,13 @@
 import cl from "./RBus.module.scss";
-import { Bus } from "../../Simulating/BaseChips/Bus";
-import { State } from "../../common/State";
-import { getColorWithState } from "../../common/Colors";
-import { BusEndPosWidth, busID } from "../../common/Settings";
+import { Bus } from "../../../Simulating/BaseChips/Bus";
+import { State } from "../../../common/State";
+import { getColorWithState } from "../../../common/Colors";
+import { BusEndPosWidth, busID } from "../../../common/DefaultSettings";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../EditPage";
-import { Pos } from "../../common/Pos";
-import { BusPin } from "../../Simulating/Pin";
+import { Pos } from "../../../common/Pos";
+import { BusPin } from "../../../Simulating/Pin";
 import { useRef } from "react";
 
 interface RequiredProps {

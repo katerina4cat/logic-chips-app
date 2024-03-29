@@ -14,22 +14,27 @@ import { Colors } from "../common/Colors";
 import { action, makeObservable, observable } from "mobx";
 import { BusMinimalInfo } from "./BusInfo";
 
+const defaultChipsInfo = [
+    new ChipMinimalInfo("AND", ChipTypes.Default, "#267ab2"),
+    new ChipMinimalInfo("NOT", ChipTypes.Default, "#8c1f1a"),
+    new ChipMinimalInfo("TRI-STATE BUFFER", ChipTypes.Default, "#262626"),
+    new ChipMinimalInfo("BUS", ChipTypes.BUS, "#262626"),
+];
+
 export class SaveInfo {
-    @observable Chips: ChipMinimalInfo[] = [
-        new ChipMinimalInfo("AND", ChipTypes.Default, "#267ab2"),
-        new ChipMinimalInfo("NOT", ChipTypes.Default, "#8c1f1a"),
-        new ChipMinimalInfo("TRI-STATE BUFFER", ChipTypes.Default, "#262626"),
-        new ChipMinimalInfo("BUS", ChipTypes.BUS, "#262626"),
-    ];
+    @observable Chips: ChipMinimalInfo[] = [];
     @observable Wheels: string[][];
     saveName: string;
+    defaultChips: number;
 
     constructor(
         Chips: ChipMinimalInfo[],
         Wheels: string[][],
-        saveName: string
+        saveName: string,
+        defaultChips: number = 4
     ) {
         makeObservable(this);
+        this.addDefaultChips();
         this.Chips = this.Chips.filter(
             (chip) =>
                 Chips.find((loadedChips) => loadedChips.name == chip.name) ===
@@ -39,6 +44,7 @@ export class SaveInfo {
         this.Wheels = Wheels;
         for (let i = this.Wheels.length; i < 9; i++) this.Wheels.push([]);
         this.saveName = saveName;
+        this.defaultChips = defaultChips;
     }
 
     swapCircleElement = (
@@ -78,14 +84,27 @@ export class SaveInfo {
 
     static loadSave(saveName: string) {
         const res = JSON.parse(
-            localStorage.getItem(saveName) ||
+            localStorage.getItem("Save:" + saveName) ||
                 `{"Chips":[], "Wheels":[["AND","NOT","TRI-STATE BUFFER"],[],[],[],[],[],[],[],[]]}`
         ) as SaveInfo;
-        return new SaveInfo(res.Chips, res.Wheels, saveName);
+        const loadedSave = new SaveInfo(
+            res.Chips,
+            res.Wheels,
+            saveName,
+            res.defaultChips
+        );
+        if (!("Save:" + saveName in localStorage)) loadedSave.save();
+        return loadedSave;
     }
 
     save() {
-        localStorage.setItem(this.saveName, JSON.stringify(this));
+        this.Chips = this.Chips.slice(this.defaultChips);
+        localStorage.setItem("Save:" + this.saveName, JSON.stringify(this));
+        this.addDefaultChips();
+    }
+
+    addDefaultChips() {
+        defaultChipsInfo.forEach((chip) => this.Chips.unshift(chip));
     }
 
     removeChip = (chipName: string) => {
@@ -260,7 +279,15 @@ export class SaveInfo {
                                         pin.distanceFromZero as number,
                                         true,
                                         pin.id,
-                                        pin.name
+                                        pin.name,
+                                        undefined,
+                                        undefined,
+                                        undefined,
+                                        undefined,
+                                        Object.values(Colors).find(
+                                            (clr) =>
+                                                clr.title === pin.colorTitle
+                                        )
                                     )
                             )
                         );
@@ -274,7 +301,13 @@ export class SaveInfo {
                                         pin.id,
                                         pin.name,
                                         undefined,
-                                        true
+                                        true,
+                                        undefined,
+                                        undefined,
+                                        Object.values(Colors).find(
+                                            (clr) =>
+                                                clr.title === pin.colorTitle
+                                        )
                                     )
                             )
                         );
@@ -290,13 +323,30 @@ export class SaveInfo {
                             pin.id,
                             pin.name,
                             pin.position.y,
-                            chipID == 0
+                            chipID == 0,
+                            undefined,
+                            undefined,
+                            Object.values(Colors).find(
+                                (clr) => clr.title === pin.colorTitle
+                            )
                         )
                     );
                 });
                 chipInfo.outputPins.forEach((pin) => {
                     res.output.push(
-                        new Pin(res, false, pin.id, pin.name, pin.position.y)
+                        new Pin(
+                            res,
+                            false,
+                            pin.id,
+                            pin.name,
+                            pin.position.y,
+                            undefined,
+                            undefined,
+                            undefined,
+                            Object.values(Colors).find(
+                                (clr) => clr.title === pin.colorTitle
+                            )
+                        )
                     );
                 });
 

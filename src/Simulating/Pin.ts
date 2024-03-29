@@ -38,7 +38,8 @@ export class Pin {
         y = 0,
         hasDefaultState = false,
         deltaPos?: Pos,
-        canUpdatePropagate = true
+        canUpdatePropagate = true,
+        color: Color = Colors["red"]
     ) {
         makeObservable(this);
         this.id = id;
@@ -50,6 +51,7 @@ export class Pin {
         if (hasDefaultState) {
             this.addState(new PinState(this.id, States.LOW));
         }
+        this.color = color;
     }
 
     /**
@@ -100,7 +102,8 @@ export class BusPin extends Pin {
         y = 0,
         hasDefaultState = false,
         deltaPos?: Pos,
-        canUpdatePropagate = true
+        canUpdatePropagate = true,
+        color: Color = Colors["red"]
     ) {
         super(
             chip,
@@ -110,7 +113,8 @@ export class BusPin extends Pin {
             y,
             hasDefaultState,
             deltaPos,
-            canUpdatePropagate
+            canUpdatePropagate,
+            color
         );
         this.distanceFromZero = distance;
     }

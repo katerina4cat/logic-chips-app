@@ -1,7 +1,7 @@
 import { Component, ReactNode, createRef } from "react";
 import cl from "./CircleItem.module.scss";
-import { SaveInfo } from "../../Structs/SaveInfo";
-import { Pos } from "../../common/Pos";
+import { SaveInfo } from "../../../Structs/SaveInfo";
+import { Pos } from "../../../common/Pos";
 
 interface RequiredProps {
     centerAngle: number;

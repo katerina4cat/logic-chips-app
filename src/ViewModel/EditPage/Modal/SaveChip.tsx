@@ -1,7 +1,7 @@
 import { Component, ReactNode } from "react";
 import cl from "./SaveChip.module.scss";
-import { SaveInfo } from "../../Structs/SaveInfo";
-import { Chip } from "../../Simulating/Chip";
+import { SaveInfo } from "../../../Structs/SaveInfo";
+import { Chip } from "../../../Simulating/Chip";
 
 interface RequiredProps {
     saveManager: SaveInfo;

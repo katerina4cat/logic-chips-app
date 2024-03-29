@@ -1,6 +1,6 @@
 import { useRef } from "react";
-import { Pos } from "../../common/Pos";
-import { Chip } from "../../Simulating/Chip";
+import { Pos } from "../../../common/Pos";
+import { Chip } from "../../../Simulating/Chip";
 import { DefaultChip } from "./DefaultChip";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { EditPageViewModel } from "../EditPage";

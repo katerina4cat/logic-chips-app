@@ -1,4 +1,4 @@
-import { State } from "./State";
+import { States } from "./State";
 
 export type Color = { color: string; title: string };
 export const Colors: { [key: string]: Color } = {
@@ -9,14 +9,14 @@ export const Colors: { [key: string]: Color } = {
     blue: { color: "#147fff", title: "Синий" },
     yellow: { color: "#ff9b00", title: "Жёлтый" },
 };
-export const getColorWithState = (state: State.States, Color: Color) => {
+export const getColorWithState = (state: States, Color: Color) => {
     return `color-mix(in srgb, ${
-        state == State.States.FLOATING ? Colors.floating.color : Color.color
+        state == States.FLOATING ? Colors.floating.color : Color.color
     } ${
-        state == State.States.HIGH || state == State.States.FLOATING
+        state == States.HIGH || state == States.FLOATING
             ? 100
-            : state == State.States.UNDEFINED
+            : state == States.UNDEFINED
             ? 0
             : 25
-    }%, #000`;
+    }%, #000)`;
 };

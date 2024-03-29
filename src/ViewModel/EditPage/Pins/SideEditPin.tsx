@@ -1,7 +1,7 @@
 import cl from "./SideEditPin.module.scss";
-import { getColorWithState } from "../../common/Colors";
-import { Pin } from "../../Simulating/Pin";
-import { State } from "../../common/State";
+import { getColorWithState } from "../../../common/Colors";
+import { Pin } from "../../../Simulating/Pin";
+import { States } from "../../../common/State";
 import { ViewPin } from "./RPin";
 import OutsideClickHandler from "react-outside-click-handler";
 import { ViewModel, view } from "@yoskutik/react-vvm";
@@ -28,9 +28,7 @@ export class SidePinViewModel extends ViewModel<
     }
     @action changeState = () => {
         this.pin.states[0].value =
-            this.pin.states[0].value == State.States.LOW
-                ? State.States.HIGH
-                : State.States.LOW;
+            this.pin.states[0].value == States.LOW ? States.HIGH : States.LOW;
     };
     @action openDeleting = (value: boolean) => (this.deletingOpen = value);
     startGrabbing = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

@@ -1,13 +1,13 @@
 import cl from "./RWireIncomplete.module.scss";
-import { Wire } from "../../Simulating/Wire";
-import { BusPin, Pin } from "../../Simulating/Pin";
-import { Pos } from "../../common/Pos";
-import { ChipTypes } from "../../Structs/ChipMinimalInfo";
+import { Wire } from "../../../Simulating/Wire";
+import { BusPin, Pin } from "../../../Simulating/Pin";
+import { Pos } from "../../../common/Pos";
+import { ChipTypes } from "../../../Structs/ChipMinimalInfo";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, computed, makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../EditPage";
-import { getColorWithState } from "../../common/Colors";
-import { PinState, State } from "../../common/State";
+import { getColorWithState } from "../../../common/Colors";
+import { PinState, States } from "../../../common/State";
 
 export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
     @observable points: Pos[] = [];
@@ -43,7 +43,7 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
                 this.firstPin.chip.input.push(this.firstPin);
             else {
                 this.firstPin.addState(
-                    new PinState(this.firstPin.id, State.States.UNDEFINED)
+                    new PinState(this.firstPin.id, States.UNDEFINED)
                 );
                 this.firstPin.chip.output.push(this.firstPin);
             }
@@ -54,7 +54,7 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
                 pin.isInput = firstIsSource;
                 if (pin.isInput) pin.chip.input.push(pin);
                 else {
-                    pin.addState(new PinState(pin.id, State.States.UNDEFINED));
+                    pin.addState(new PinState(pin.id, States.UNDEFINED));
                     pin.chip.output.push(pin);
                 }
             }

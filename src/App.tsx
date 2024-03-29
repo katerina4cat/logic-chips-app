@@ -1,20 +1,24 @@
 /* global google */
-import { SignUp } from "./Authorization/SignUp";
-import { EditPage } from "./ViewModel/EditPage";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
+import { MainMenu } from "./ViewModel/MainMenu/MainMenu";
 
 export const debug = true;
 
 export class AppViewModel extends ViewModel {
-    @observable signIn = true;
+    @observable signIn = false;
+
+    constructor() {
+        super();
+        makeObservable(this);
+    }
+
+    @observable currentPage = (<MainMenu />);
+    @action setCurrentPage = (page: JSX.Element) => {
+        this.currentPage = page;
+    };
 }
 
-const App = view(AppViewModel)(({ viewModel }) => (
-    <>{viewModel.signIn ? <EditPage saveName="newSave" /> : <SignUp />}</>
-    // <>
-    //     <Test />
-    // </>
-));
+const App = view(AppViewModel)(({ viewModel }) => viewModel.currentPage);
 
 export default App;

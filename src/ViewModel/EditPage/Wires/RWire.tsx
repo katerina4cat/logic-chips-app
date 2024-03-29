@@ -1,9 +1,9 @@
 import cl from "./RWire.module.scss";
-import { Wire } from "../../Simulating/Wire";
+import { Wire } from "../../../Simulating/Wire";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../EditPage";
-import { getColorWithState } from "../../common/Colors";
+import { getColorWithState } from "../../../common/Colors";
 
 interface RequiredProps {
     wire: Wire;

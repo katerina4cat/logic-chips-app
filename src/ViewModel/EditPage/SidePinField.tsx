@@ -1,5 +1,5 @@
 import cl from "./SidePinField.module.scss";
-import { Pin } from "../Simulating/Pin";
+import { Pin } from "../../Simulating/Pin";
 import { SideEditPin } from "./Pins/SideEditPin";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { EditPageViewModel } from "./EditPage";

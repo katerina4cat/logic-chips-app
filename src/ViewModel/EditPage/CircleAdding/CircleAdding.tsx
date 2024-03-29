@@ -1,7 +1,7 @@
 import { Component, ReactNode } from "react";
 import cl from "./CircleAdding.module.scss";
-import { Pos } from "../../common/Pos";
-import { SaveInfo } from "../../Structs/SaveInfo";
+import { Pos } from "../../../common/Pos";
+import { SaveInfo } from "../../../Structs/SaveInfo";
 import { CircleItem } from "./CircleItem";
 
 interface RequiredProps {

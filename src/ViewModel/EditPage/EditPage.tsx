@@ -1,7 +1,7 @@
-import { Pin } from "../Simulating/Pin";
-import { Chip } from "../Simulating/Chip";
+import { Pin } from "../../Simulating/Pin";
+import { Chip } from "../../Simulating/Chip";
 import { RWire } from "./Wires/RWire";
-import { removeElement } from "../common/RemoveElement";
+import { removeElement } from "../../common/RemoveElement";
 import {
     RWireIncomplete,
     WireIncompleteViewModel,
@@ -9,21 +9,21 @@ import {
 import { SidePinField } from "./SidePinField";
 import { DefaultChip } from "./Chips/DefaultChip";
 import { CircleAdding } from "./CircleAdding/CircleAdding";
-import { SaveInfo } from "../Structs/SaveInfo";
+import { SaveInfo } from "../../Structs/SaveInfo";
 import { Modal } from "./Modal/Modal";
 import { SaveChip } from "./Modal/SaveChip";
 import { ChipList } from "./Modal/ChipList";
 import React from "react";
 import cl from "./EditPage.module.scss";
 import { AddingChipsBox } from "./Chips/AddingChipsBox";
-import { Bus } from "../Simulating/BaseChips/Bus";
-import { Pos } from "../common/Pos";
+import { Bus } from "../../Simulating/BaseChips/Bus";
+import { Pos } from "../../common/Pos";
 import { RBus } from "./Wires/RBus";
 import { BusIncomplete } from "./Wires/RBusIncomplete";
-import { hotkeys } from "../common/Settings";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
-import { Wire } from "../Simulating/Wire";
+import { Wire } from "../../Simulating/Wire";
+import UserManager, { userSettings } from "../../Managers/UserManager";
 
 interface RequiredProps {
     saveName: string;
@@ -73,9 +73,9 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
 
     @action handleKeyDown = (e: KeyboardEvent) => {
         if (this.currentChip.id !== 0) {
-            if (hotkeys.save.testKey(e)) {
+            if (userSettings.hotKeys.save.testKey(e)) {
                 e.preventDefault();
-                hotkeys.save.event();
+                userSettings.hotKeys.save.event();
             }
             if (e.key === "Backspace") {
                 this.currentChip = this.chipDeep.pop() as Chip;
@@ -94,7 +94,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
                     e.preventDefault();
                 return;
             }
-        for (const hotKeyItem of Object.values(hotkeys)) {
+        for (const hotKeyItem of Object.values(userSettings.hotKeys)) {
             if (hotKeyItem.testKey(e)) {
                 e.preventDefault();
                 hotKeyItem.event();
@@ -259,7 +259,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         }
     };
     initHotKeys() {
-        hotkeys.hideAllPin.event = () => {
+        userSettings.hotKeys.hideAllPin.event = () => {
             localStorage.setItem(
                 "showingAllPinTitles",
                 this.showAllPinTitles ? "false" : "true"
@@ -271,19 +271,19 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
             this.showAllPinTitles = !this.showAllPinTitles;
             this.showChipPinTitles = this.showAllPinTitles;
         };
-        hotkeys.hideChipPins.event = () => {
+        userSettings.hotKeys.hideChipPins.event = () => {
             localStorage.setItem(
                 "showingPinTitles",
                 this.showChipPinTitles ? "false" : "true"
             );
             this.showChipPinTitles = !this.showChipPinTitles;
         };
-        hotkeys.library.event = () => {
+        userSettings.hotKeys.library.event = () => {
             this.showLibrary = !this.showLibrary;
             this.showCircleAdding = new Array(9).fill(false);
             this.enabledModal = false;
         };
-        hotkeys.save.event = () => {
+        userSettings.hotKeys.save.event = () => {
             if (
                 this.saveManager.Chips.find(
                     (chip) => chip.name == this.currentChip.name
@@ -300,29 +300,29 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
                 this.setModal(true);
             }
         };
-        hotkeys.newChip.event = () => {
+        userSettings.hotKeys.newChip.event = () => {
             this.showLibrary = false;
             this.showCircleAdding = new Array(9).fill(false);
             this.enabledModal = false;
             this.newChip();
         };
-        hotkeys.addCount.event = () => {
+        userSettings.hotKeys.addCount.event = () => {
             this.addingCount = this.addingCount + 1;
         };
-        hotkeys.reduceCount.event = () => {
+        userSettings.hotKeys.reduceCount.event = () => {
             this.addingCount =
                 this.addingCount - 1 > 0
                     ? this.addingCount - 1
                     : this.addingCount;
         };
-        hotkeys.cancelAction.event = () => {
+        userSettings.hotKeys.cancelAction.event = () => {
             this.showCircleAdding = new Array(9).fill(false);
             this.addingChip = undefined;
             this.addingBus = false;
             this.showLibrary = false;
             this.addingCount = 1;
         };
-        hotkeys.remove.event = this.removingSelectedChip;
+        userSettings.hotKeys.remove.event = this.removingSelectedChip;
     }
     @action removingSelectedChip = () => {
         const chipsToRemove = this.currentChip.subChips.filter(

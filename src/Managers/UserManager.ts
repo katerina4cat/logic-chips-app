@@ -1,18 +1,19 @@
+import { action, makeObservable, observable } from "mobx";
+import { UserSettings } from "./UserSettings";
+
 class UserManager {
-    private _email: string = "-";
-    private _nick: string = "-";
-    private _photoUrl: string = "";
-    private _registered: Date = new Date(0);
-    private _coins: number = 0;
-    private _donate: number = 0;
-    signedIn = false;
+    @observable email: string = "-";
+    @observable nick: string = "-";
+    @observable photoUrl: string = "";
+    @observable registered: Date = new Date(0);
+    @observable coins: number = 0;
+    @observable donate: number = 0;
+    @observable signedIn = false;
+    @observable settings = new UserSettings();
 
-    listeners: Array<() => void> = [];
-
-    private sendListeners = () =>
-        this.listeners.forEach((listener) => listener());
-
-    constructor() {}
+    constructor() {
+        makeObservable(this);
+    }
 
     public init = (info: {
         email: string;
@@ -22,57 +23,26 @@ class UserManager {
         coins?: number;
         donate?: number;
     }): void => {
-        this._email = info.email;
-        this._nick = info.nick;
-        this._photoUrl = info.photoUrl;
-        this._registered = new Date(Date.parse(info.registered));
-        this._coins = info.coins || 0;
-        this._donate = info.donate || 0;
+        this.email = info.email;
+        this.nick = info.nick;
+        this.photoUrl = info.photoUrl;
+        this.registered = new Date(Date.parse(info.registered));
+        this.coins = info.coins || 0;
+        this.donate = info.donate || 0;
         this.signedIn = true;
-        this.sendListeners();
+        makeObservable(this);
     };
 
-    public get email(): string {
-        return this._email;
-    }
-    public set email(value: string) {
-        this._email = value;
-        this.sendListeners();
-    }
-    public get nick(): string {
-        return this._nick;
-    }
-    public set nick(value: string) {
-        this._nick = value;
-        this.sendListeners();
-    }
-    public get photoUrl(): string {
-        return this._photoUrl;
-    }
-    public set photoUrl(value: string) {
-        this._photoUrl = value;
-        this.sendListeners();
-    }
-    public get registered(): Date {
-        return this._registered;
-    }
-    public set registered(value: Date) {
-        this._registered = value;
-        this.sendListeners();
-    }
-    public get coins(): number {
-        return this._coins;
-    }
-    public set coins(value: number) {
-        this._coins = value;
-        this.sendListeners();
-    }
-    public get donate(): number {
-        return this._donate;
-    }
-    public set donate(value: number) {
-        this._donate = value;
-        this.sendListeners();
-    }
+    @action logOut = () => {
+        this.email = "-";
+        this.nick = "-";
+        this.photoUrl = "";
+        this.coins = 0;
+        this.donate = 0;
+        this.registered = new Date(0);
+        this.signedIn = false;
+    };
 }
-export default new UserManager();
+const userManager = new UserManager();
+export default userManager;
+export const userSettings = userManager.settings;

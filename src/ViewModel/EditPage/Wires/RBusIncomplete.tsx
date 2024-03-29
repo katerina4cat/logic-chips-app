@@ -1,8 +1,8 @@
 import cl from "./RBus.module.scss";
-import { Pos } from "../../common/Pos";
-import { Colors, getColorWithState } from "../../common/Colors";
-import { State } from "../../common/State";
-import { BusEndPosWidth } from "../../common/Settings";
+import { Pos } from "../../../common/Pos";
+import { Colors, getColorWithState } from "../../../common/Colors";
+import { State } from "../../../common/State";
+import { BusEndPosWidth } from "../../../common/DefaultSettings";
 import { action, computed, makeObservable, observable } from "mobx";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { EditPageViewModel } from "../EditPage";
@@ -97,7 +97,7 @@ export const BusIncomplete = view(BusIncompleteViewModel)(({ viewModel }) => {
                 y={viewModel.points[0].y - BusEndPosWidth / 2}
                 width={BusEndPosWidth}
                 height={BusEndPosWidth}
-                fill={getColorWithState(State.States.UNDEFINED, Colors["red"])}
+                fill={getColorWithState(States.UNDEFINED, Colors["red"])}
                 className={cl.BusEndPos}
             />
             {viewModel.points.length > 1 && (
@@ -112,18 +112,12 @@ export const BusIncomplete = view(BusIncompleteViewModel)(({ viewModel }) => {
                     }
                     width={BusEndPosWidth}
                     height={BusEndPosWidth}
-                    fill={getColorWithState(
-                        State.States.UNDEFINED,
-                        Colors["red"]
-                    )}
+                    fill={getColorWithState(States.UNDEFINED, Colors["red"])}
                     className={cl.BusEndPos}
                 />
             )}
             <path
-                stroke={getColorWithState(
-                    State.States.UNDEFINED,
-                    Colors["red"]
-                )}
+                stroke={getColorWithState(States.UNDEFINED, Colors["red"])}
                 style={{ cursor: "default", strokeWidth: 4 }}
                 fill="none"
                 d={viewModel.drawWire}

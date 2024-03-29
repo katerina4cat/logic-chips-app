@@ -1,6 +1,6 @@
 import { Component, ReactNode, createRef } from "react";
 import cl from "./ContextMenu.module.scss";
-import { Pos } from "../../common/Pos";
+import { Pos } from "../../../common/Pos";
 import React from "react";
 
 interface RequiredProps {
