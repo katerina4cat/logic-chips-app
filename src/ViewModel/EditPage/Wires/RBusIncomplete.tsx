@@ -1,11 +1,11 @@
 import cl from "./RBus.module.scss";
 import { Pos } from "../../../common/Pos";
 import { Colors, getColorWithState } from "../../../common/Colors";
-import { State } from "../../../common/State";
 import { BusEndPosWidth } from "../../../common/DefaultSettings";
 import { action, computed, makeObservable, observable } from "mobx";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { EditPageViewModel } from "../EditPage";
+import { States } from "../../../common/State";
 
 export class BusIncompleteViewModel extends ViewModel<EditPageViewModel> {
     @observable points: Pos[] = [new Pos()];
@@ -41,7 +41,7 @@ export class BusIncompleteViewModel extends ViewModel<EditPageViewModel> {
      * Нужно оптимизировать периросовка должна реализовываться по первой и последней точки провода
      * @returns
      */
-    @computed get drawWire() {
+    @computed get drawWires() {
         if (this.points.length < 2) return "";
         let path = `M${this.points[0].x},${this.points[0].y}`;
         for (let i = 1; i < this.points.length - 1; i++) {
@@ -120,7 +120,7 @@ export const BusIncomplete = view(BusIncompleteViewModel)(({ viewModel }) => {
                 stroke={getColorWithState(States.UNDEFINED, Colors["red"])}
                 style={{ cursor: "default", strokeWidth: 4 }}
                 fill="none"
-                d={viewModel.drawWire}
+                d={viewModel.drawWires}
             />
         </g>
     );

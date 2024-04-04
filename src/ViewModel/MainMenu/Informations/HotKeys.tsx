@@ -18,10 +18,17 @@ export class HotKeysViewModel extends ViewModel<
         makeObservable(this);
     }
     @observable changeSync = false;
+    currentChanging?: hotKeyItem;
     @action setChangeSync = (value: boolean) =>
         localStorage.setItem("Sett:changeSync", value.toString());
     back = () => {
         this.parent.setCurrentInfo(<Options />);
+    };
+    onKeyDown = (e: KeyboardEvent) => {
+        if (this.currentChanging) this.currentChanging.setKeys([e.code]);
+        e.preventDefault();
+        this.currentChanging = undefined;
+        window.removeEventListener("keydown", this.onKeyDown);
     };
 }
 
@@ -89,12 +96,43 @@ export const HotKeys = view(HotKeysViewModel)<RequiredProps>(
                                             shift
                                         </div>
                                     </div>
-                                    <button
-                                        className={cl.KeyInfo}
-                                        title="Нажмите для изменения клавиши"
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "space-evenly",
+                                        }}
                                     >
-                                        {keyInfo.keys[0]}
-                                    </button>
+                                        <button
+                                            className={cl.KeyInfo}
+                                            title="Нажмите для изменения клавиши"
+                                            onClick={() => {
+                                                viewModel.currentChanging =
+                                                    keyInfo;
+                                                window.addEventListener(
+                                                    "keydown",
+                                                    viewModel.onKeyDown
+                                                );
+                                            }}
+                                        >
+                                            {keyInfo.keys[0]}
+                                        </button>
+                                        <button
+                                            className={cl.ResetButton}
+                                            onClick={() =>
+                                                keyInfo.setKeys(
+                                                    (
+                                                        defaultHotKeys as unknown as {
+                                                            [
+                                                                key: string
+                                                            ]: hotKeyItem;
+                                                        }
+                                                    )[hotkeyName].keys
+                                                )
+                                            }
+                                        >
+                                            Сброс
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         );

@@ -17,11 +17,11 @@ export interface IHotKeys {
     reduceCount: hotKeyItem;
 }
 export const defaultHotKeys: IHotKeys = {
-    save: new hotKeyItem(["s", "S", "ы", "Ы"], undefined, true),
-    library: new hotKeyItem(["a", "A", "ф", "Ф"], undefined, true),
-    newChip: new hotKeyItem(["d", "D", "в", "В"], undefined, true),
+    save: new hotKeyItem(["KeyS"], undefined, true),
+    library: new hotKeyItem(["KeyA"], undefined, true),
+    newChip: new hotKeyItem(["KeyD"], undefined, true),
     hideAllPin: new hotKeyItem(["Tab"]),
-    hideChipPins: new hotKeyItem(["q", "Q", "й", "Й"]),
+    hideChipPins: new hotKeyItem(["KeyQ"]),
     cancelAction: new hotKeyItem(["Escape"]),
     remove: new hotKeyItem(["Backspace"]),
     addCount: new hotKeyItem(["ArrowUp", "ArrowRight"]),

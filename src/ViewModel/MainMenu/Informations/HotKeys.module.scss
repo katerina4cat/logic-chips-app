@@ -28,8 +28,15 @@
             .KeyInfo {
                 width: 75%;
                 height: 60%;
-                font-size: 0.75em;
+                font-size: 0.5em;
                 cursor: pointer;
+            }
+            .ResetButton {
+                align-self: center;
+                font-size: 0.35em;
+                padding: 0.15em;
+                margin: 0.2em;
+                height: min-content;
             }
         }
     }
