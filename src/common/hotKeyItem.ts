@@ -42,7 +42,7 @@ export class hotKeyItem {
             e.ctrlKey == this.ctrlKey &&
             e.shiftKey == this.shiftKey
         )
-            for (const keyReq of this.keys) if (keyReq == e.code) return true;
+            for (const keyReq of this.keys) if (keyReq === e.code) return true;
         return false;
     };
 }

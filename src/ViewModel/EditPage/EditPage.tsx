@@ -23,7 +23,7 @@ import { BusIncomplete } from "./Wires/RBusIncomplete";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
 import { Wire } from "../../Simulating/Wire";
-import UserManager, { userSettings } from "../../Managers/UserManager";
+import { userSettings } from "../../Managers/UserManager";
 
 interface RequiredProps {
     saveName: string;

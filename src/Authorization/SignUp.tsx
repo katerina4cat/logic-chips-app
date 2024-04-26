@@ -1,6 +1,7 @@
 import cl from "./SignUp.module.scss";
 import { GoogleSignUp } from "./GoogleSignUp";
-import { loginByEmail, registerByEmail } from "../Managers/ApiManager";
+import { registerByEmail } from "../Managers/Apis/Authentification";
+import { loginByEmail } from "../Managers/Apis/Authentification";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
 import { AccountViewModel } from "../ViewModel/MainMenu/Informations/Account";

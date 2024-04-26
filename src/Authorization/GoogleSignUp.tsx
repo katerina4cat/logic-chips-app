@@ -1,5 +1,5 @@
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { loginByGoogle } from "../Managers/ApiManager";
+import { loginByGoogle } from "../Managers/Apis/Authentification";
 
 export const GoogleSignUp = () => {
     return (

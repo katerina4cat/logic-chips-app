@@ -19,6 +19,7 @@ export class ChipMinimalInfo {
     Wires: WireSaveInfo[];
     SubChips: { name: string; id: number; position: Pos }[];
     Buses: BusMinimalInfo[];
+    sync: boolean;
     constructor(
         name: string,
         chipStyleType: number = ChipTypes.Default,
@@ -28,7 +29,8 @@ export class ChipMinimalInfo {
         Wires: WireSaveInfo[] = [],
         SubChips: { name: string; id: number; position: Pos }[] = [],
         Buses: BusMinimalInfo[] = [],
-        screenSize: Pos = new Pos()
+        screenSize: Pos = new Pos(),
+        sync: boolean = false
     ) {
         this.name = name;
         this.chipStyleType = chipStyleType;
@@ -39,5 +41,6 @@ export class ChipMinimalInfo {
         this.SubChips = SubChips;
         this.Buses = Buses;
         this.screenSize = screenSize;
+        this.sync = sync;
     }
 }

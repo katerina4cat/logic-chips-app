@@ -1,5 +1,5 @@
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { action, makeObservable, observable } from "mobx";
+import { makeObservable } from "mobx";
 import { MainMenuViewModel } from "../MainMenu";
 import { MainInfo } from "./Main";
 import cl from "./Options.module.scss";
@@ -16,9 +16,6 @@ export class OptionsViewModel extends ViewModel<
         super();
         makeObservable(this);
     }
-    @observable changeSync = false;
-    @action setChangeSync = (value: boolean) =>
-        localStorage.setItem("Sett:changeSync", value.toString());
     back = () => {
         this.parent.setCurrentInfo(<MainInfo />);
     };
@@ -44,7 +41,6 @@ export const Options = view(OptionsViewModel)<RequiredProps>(
                     Синхронизация сохранений{" "}
                     <input
                         type="checkbox"
-                        disabled
                         checked={userSettings.syncSettings}
                     />
                 </div>

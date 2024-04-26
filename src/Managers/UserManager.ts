@@ -1,5 +1,6 @@
 import { action, makeObservable, observable } from "mobx";
 import { UserSettings } from "./UserSettings";
+import { userInfo } from "./Apis/Authentification";
 
 class UserManager {
     @observable email: string = "-";
@@ -10,12 +11,22 @@ class UserManager {
     @observable donate: number = 0;
     @observable signedIn = false;
     @observable settings = new UserSettings();
+    @observable loaded = false;
 
     constructor() {
         makeObservable(this);
+        if ("accessToken" in localStorage) {
+            userInfo();
+        } else {
+            this.loaded = true;
+        }
     }
 
-    public init = (info: {
+    @action public initWithError = () => {
+        this.loaded = true;
+    };
+
+    @action public init = (info: {
         email: string;
         nick: string;
         photoUrl: string;
@@ -30,7 +41,7 @@ class UserManager {
         this.coins = info.coins || 0;
         this.donate = info.donate || 0;
         this.signedIn = true;
-        makeObservable(this);
+        this.loaded = true;
     };
 
     @action logOut = () => {
@@ -41,6 +52,7 @@ class UserManager {
         this.donate = 0;
         this.registered = new Date(0);
         this.signedIn = false;
+        localStorage.removeItem("accessToken");
     };
 }
 const userManager = new UserManager();

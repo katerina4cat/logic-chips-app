@@ -30,8 +30,12 @@ export const Account = view(AccountViewModel)<RequiredProps>(
                 <h1 style={{ textAlign: "center" }}>Аккаунт</h1>
                 {userManager.signedIn ? (
                     <>
-                        <div>
-                            <img src={userManager.photoUrl} alt="Аватар" />
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                            <img
+                                src={userManager.photoUrl}
+                                alt="Аватар"
+                                style={{ borderRadius: "25%" }}
+                            />
                             {userManager.nick}
                         </div>
                         <div>

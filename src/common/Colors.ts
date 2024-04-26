@@ -20,3 +20,4 @@ export const getColorWithState = (state: States, Color: Color) => {
             : 25
     }%, #000)`;
 };
+export const int2hex = (num: number) => "#" + num.toString(16).padStart(6, "0");

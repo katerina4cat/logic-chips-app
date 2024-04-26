@@ -4,6 +4,8 @@ import { MainMenuViewModel } from "../MainMenu";
 import cl from "./NewGame.module.scss";
 import { MainInfo } from "./Main";
 import { EditPage } from "../../EditPage/EditPage";
+import { userSettings } from "../../../Managers/UserManager";
+import { createSave } from "../../../Managers/Apis/Saves";
 
 interface RequiredProps {}
 
@@ -28,10 +30,12 @@ export class NewGameViewModel extends ViewModel<
         this.parent.setCurrentInfo(<MainInfo />);
     };
     create = () => {
-        if (!this.errorName)
+        if (!this.errorName) {
             this.parent.parent.setCurrentPage(
                 <EditPage saveName={this.gameName} />
             );
+            if (userSettings.IsUserSync) createSave(this.gameName);
+        }
     };
 }
 

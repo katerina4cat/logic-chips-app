@@ -13,6 +13,8 @@ import { NOT } from "../Simulating/BaseChips/NOT";
 import { Colors } from "../common/Colors";
 import { action, makeObservable, observable } from "mobx";
 import { BusMinimalInfo } from "./BusInfo";
+import { userSettings } from "../Managers/UserManager";
+import { deleteChip, saveChip } from "../Managers/Apis/Saves";
 
 const defaultChipsInfo = [
     new ChipMinimalInfo("AND", ChipTypes.Default, "#267ab2"),
@@ -26,15 +28,18 @@ export class SaveInfo {
     @observable Wheels: string[][];
     saveName: string;
     defaultChips: number;
+    created: Date;
 
     constructor(
         Chips: ChipMinimalInfo[],
         Wheels: string[][],
         saveName: string,
-        defaultChips: number = 4
+        defaultChips: number = 4,
+        withoutBase: boolean = false,
+        created: Date = new Date()
     ) {
         makeObservable(this);
-        this.addDefaultChips();
+        if (!withoutBase) this.addDefaultChips();
         this.Chips = this.Chips.filter(
             (chip) =>
                 Chips.find((loadedChips) => loadedChips.name == chip.name) ===
@@ -45,6 +50,7 @@ export class SaveInfo {
         for (let i = this.Wheels.length; i < 9; i++) this.Wheels.push([]);
         this.saveName = saveName;
         this.defaultChips = defaultChips;
+        this.created = created;
     }
 
     swapCircleElement = (
@@ -82,7 +88,7 @@ export class SaveInfo {
         this.Wheels[wheelID][secondInd] = buff;
     };
 
-    static loadSave(saveName: string) {
+    static loadSave(saveName: string, withoutBase?: boolean) {
         const res = JSON.parse(
             localStorage.getItem("Save:" + saveName) ||
                 `{"Chips":[], "Wheels":[["AND","NOT","TRI-STATE BUFFER"],[],[],[],[],[],[],[],[]]}`
@@ -91,9 +97,9 @@ export class SaveInfo {
             res.Chips,
             res.Wheels,
             saveName,
-            res.defaultChips
+            res.defaultChips,
+            withoutBase
         );
-        if (!("Save:" + saveName in localStorage)) loadedSave.save();
         return loadedSave;
     }
 
@@ -114,6 +120,7 @@ export class SaveInfo {
         if (deletingChipInfo) {
             removeElement(this.Chips, deletingChipInfo);
             this.save();
+            if (userSettings.IsUserSync) deleteChip(this.saveName, chipName);
             return true;
         }
         return false;
@@ -189,6 +196,21 @@ export class SaveInfo {
             ),
             new Pos(window.innerWidth, window.innerHeight)
         );
+        if (userSettings.IsUserSync) {
+            saveChip(this.saveName, {
+                color: color,
+                chipStyle: chipType,
+                title: name,
+                screenX: window.innerWidth,
+                screenY: window.innerHeight,
+                inputPins: savingChip.inputPins,
+                outputPins: savingChip.outputPins,
+                subChips: savingChip.SubChips,
+                buses: savingChip.Buses,
+                wires: savingChip.Wires,
+            });
+            savingChip.sync = true;
+        }
         if (this.Chips.find((chip) => chip.name == name)) {
             if (rewrite) {
                 this.Chips = this.Chips.map((chip) =>
@@ -200,9 +222,8 @@ export class SaveInfo {
         } else {
             this.Chips.push(savingChip);
             this.save();
-            return true;
         }
-        return false;
+        return true;
     };
 
     canAddedChipToCurrentEdit = (
