@@ -7,6 +7,7 @@ import OutsideClickHandler from "react-outside-click-handler";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
 import { SidePinFieldViewModel } from "../SidePinField";
+import { userSettings } from "../../../Managers/UserManager";
 
 interface RequiredProps {
     Pin: Pin;
@@ -38,7 +39,11 @@ export class SidePinViewModel extends ViewModel<
         window.addEventListener("mousemove", this.processGrabbing);
     };
     @action processGrabbing = (e: MouseEvent) => {
-        if (this.grabbing) this.pin.deltaPos.y = e.pageY + this.delta;
+        if (this.grabbing)
+            this.pin.deltaPos.y =
+                e.pageY +
+                this.delta -
+                (userSettings.cellCord ? e.pageY % userSettings.cellSize : 0);
     };
     stopGrabbing = () => {
         this.grabbing = false;

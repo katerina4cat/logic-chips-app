@@ -6,6 +6,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { EditPageViewModel } from "../EditPage";
 import { States } from "../../../common/State";
+import { userSettings } from "../../../Managers/UserManager";
 
 export class BusIncompleteViewModel extends ViewModel<EditPageViewModel> {
     @observable points: Pos[] = [new Pos()];
@@ -31,8 +32,12 @@ export class BusIncompleteViewModel extends ViewModel<EditPageViewModel> {
     };
 
     @action mouseMove = (e: MouseEvent) => {
-        this.points[this.points.length - 1].x = e.pageX;
-        this.points[this.points.length - 1].y = e.pageY;
+        this.points[this.points.length - 1].x =
+            e.pageX -
+            (userSettings.cellCord ? e.pageX % userSettings.cellSize : 0);
+        this.points[this.points.length - 1].y =
+            e.pageY -
+            (userSettings.cellCord ? e.pageY % userSettings.cellSize : 0);
     };
 
     /**

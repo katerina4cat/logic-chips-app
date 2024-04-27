@@ -5,6 +5,7 @@ import { DefaultChip } from "./DefaultChip";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { EditPageViewModel } from "../EditPage";
 import { action, makeObservable, observable } from "mobx";
+import { userSettings } from "../../../Managers/UserManager";
 
 class AddingChipViewModel extends ViewModel<EditPageViewModel> {
     @observable cursorPosition: Pos = new Pos();
@@ -21,8 +22,12 @@ class AddingChipViewModel extends ViewModel<EditPageViewModel> {
         window.removeEventListener("mousemove", this.handleMouseMove);
     }
     @action handleMouseMove = (e: MouseEvent) => {
-        this.cursorPosition.x = e.pageX;
-        this.cursorPosition.y = e.pageY;
+        this.cursorPosition.x =
+            e.pageX -
+            (userSettings.cellCord ? e.pageX % userSettings.cellSize : 0);
+        this.cursorPosition.y =
+            e.pageY -
+            (userSettings.cellCord ? e.pageY % userSettings.cellSize : 0);
     };
     @action handleClickToPlaceChip = () => {
         if (!this.parent.addingChip) return;

@@ -58,6 +58,15 @@ export const Options = view(OptionsViewModel)<RequiredProps>(
                         checked={userSettings.smartConnection}
                     />
                 </div>
+                <div
+                    className={cl.Option}
+                    onClick={(e) =>
+                        userSettings.setCellCord(!userSettings.cellCord)
+                    }
+                >
+                    Точная привязка элементов к сетке{" "}
+                    <input type="checkbox" checked={userSettings.cellCord} />
+                </div>
                 <button onClick={viewModel.hotKeys}>Горячие клавиши</button>
                 <button onClick={viewModel.back}>Назад</button>
             </>

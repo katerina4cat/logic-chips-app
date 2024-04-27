@@ -4,7 +4,7 @@ import {
     delayedTypes,
 } from "../Models/common/delayedSending";
 import { ChipModel } from "../Models/request/ChipModel";
-import { ChipResModel, SyncResModel } from "../Models/response/ChipResModel";
+import { SyncResModel } from "../Models/response/ChipResModel";
 
 export const createSave = async (saveName: string) => {
     try {

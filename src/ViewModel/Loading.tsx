@@ -1,8 +1,7 @@
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { makeObservable, reaction } from "mobx";
+import { makeObservable } from "mobx";
 import cl from "./Loading.module.scss";
 import { AppViewModel } from "../App";
-import userManager from "../Managers/UserManager";
 import { MainMenu } from "./MainMenu/MainMenu";
 
 interface RequiredProps {}
@@ -22,8 +21,6 @@ export class LoadingViewModel extends ViewModel<AppViewModel, RequiredProps> {
     };
 }
 
-export const Loading = view(LoadingViewModel)<RequiredProps>(
-    ({ viewModel }) => {
-        return <div className={cl.Loading}>Loading...</div>;
-    }
-);
+export const Loading = view(LoadingViewModel)<RequiredProps>(({}) => {
+    return <div className={cl.Loading}>Loading...</div>;
+});

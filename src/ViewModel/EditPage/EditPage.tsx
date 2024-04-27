@@ -201,9 +201,9 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         );
         this.currentChip.subChips
             .filter((chip) => chip.selected)
-            .forEach((chip) =>
-                chip.position.add(this.deltaMove.removing(this.chipMoved))
-            );
+            .forEach((chip) => {
+                chip.position.add(this.deltaMove.removing(this.chipMoved));
+            });
         this.chipMoved = this.deltaMove.copy();
     };
     @action selectingChip = (chip: Chip) => (chip.selected = !chip.selected);
@@ -316,11 +316,21 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
                     : this.addingCount;
         };
         userSettings.hotKeys.cancelAction.event = () => {
-            this.showCircleAdding = new Array(9).fill(false);
-            this.addingChip = undefined;
-            this.addingBus = false;
-            this.showLibrary = false;
-            this.addingCount = 1;
+            if (
+                this.addingBus ||
+                this.addingChip ||
+                this.showLibrary ||
+                this.showCircleAdding.find((circlShow) => circlShow) ||
+                this.wireIncompleteViewModel?.firstPin
+            ) {
+                this.showCircleAdding = new Array(9).fill(false);
+                this.addingChip = undefined;
+                this.addingBus = false;
+                this.showLibrary = false;
+                this.addingCount = 1;
+            } else {
+                alert("esc menu");
+            }
         };
         userSettings.hotKeys.remove.event = this.removingSelectedChip;
     }

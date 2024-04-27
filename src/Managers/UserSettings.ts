@@ -9,12 +9,15 @@ import { createSaves, saveChip } from "./Apis/Saves";
 const settingsTitle = {
     syncSettings: "Sett:syncSettings",
     smartConnection: "Sett:smartConnect",
+    cellCord: "Sett:cellCord",
     hotKeys: "Sett:HotKeys",
 };
 
 export class UserSettings {
     @observable syncSettings: boolean;
     @observable smartConnection: boolean;
+    @observable cellCord: boolean;
+    @observable cellSize: number = 10.0;
     @observable hotKeys: IHotKeys;
     constructor() {
         this.syncSettings = JSON.parse(
@@ -22,6 +25,9 @@ export class UserSettings {
         );
         this.smartConnection = JSON.parse(
             localStorage.getItem(settingsTitle.smartConnection) || "false"
+        );
+        this.cellCord = JSON.parse(
+            localStorage.getItem(settingsTitle.cellCord) || "false"
         );
         const parseResult = JSON.parse(
             localStorage.getItem(settingsTitle.hotKeys) || "false"
@@ -79,6 +85,13 @@ export class UserSettings {
                 saveInfo.save();
             });
         }
+    };
+    @action setCellCord = (value: boolean) => {
+        this.cellCord = value;
+        localStorage.setItem(
+            settingsTitle.cellCord,
+            JSON.stringify(this.cellCord)
+        );
     };
     @action setSmartConnection = (value: boolean) => {
         this.smartConnection = value;

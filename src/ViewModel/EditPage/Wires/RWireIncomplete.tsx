@@ -8,6 +8,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../EditPage";
 import { getColorWithState } from "../../../common/Colors";
 import { PinState, States } from "../../../common/State";
+import { userSettings } from "../../../Managers/UserManager";
 
 export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
     @observable points: Pos[] = [];
@@ -102,12 +103,18 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
     };
 
     @action handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key == "Escape") this.clear();
+        if (e.key == "Escape") {
+            this.clear();
+        }
     };
 
     @action handleMouseMove = (e: MouseEvent) => {
-        this.points[this.points.length - 1].x = e.pageX;
-        this.points[this.points.length - 1].y = e.pageY;
+        this.points[this.points.length - 1].x =
+            e.pageX -
+            (userSettings.cellCord ? e.pageX % userSettings.cellSize : 0);
+        this.points[this.points.length - 1].y =
+            e.pageY -
+            (userSettings.cellCord ? e.pageY % userSettings.cellSize : 0);
     };
 
     @computed get drawWire() {
