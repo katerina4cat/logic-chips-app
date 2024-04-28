@@ -41,6 +41,7 @@ export class Wire {
         this.target.addState(
             new PinState(this.source.id, undefined, this.source)
         );
+        this.target.chip.updatedOutputs();
         reaction(
             () => this.source.totalState,
             () => {
@@ -136,10 +137,13 @@ export class Wire {
      * Конвертирует текущий объект в JSON объект для сохранения
      * @returns
      */
-    toPinInfo = () =>
-        new WireInfo(
+    toPinInfo = () => {
+        const buffPoints = [...this.points];
+        if (this.source.chip.chipType != ChipTypes.BUS) buffPoints.shift();
+        if (this.target.chip.chipType != ChipTypes.BUS) buffPoints.pop();
+        return new WireInfo(
             this.id,
-            this.points,
+            buffPoints,
             {
                 chipID: this.source.chip.id,
                 chipType: this.source.chip.chipType,
@@ -151,4 +155,5 @@ export class Wire {
                 pinID: this.target.id,
             }
         );
+    };
 }
