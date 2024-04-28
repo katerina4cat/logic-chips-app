@@ -1,6 +1,6 @@
-import { BusMinimalInfo } from "../../../Structs/BusInfo";
-import { PinSaveInfo } from "../../../Structs/PinInfo";
-import { WireSaveInfo } from "../../../Structs/WireSaveInfo";
+import { BusInfo } from "../../../Structs/BusInfo";
+import { PinInfo } from "../../../Structs/PinInfo";
+import { WireInfo } from "../../../Structs/WireInfo";
 import { Pos } from "../../../common/Pos";
 
 export interface ChipResModel {
@@ -10,11 +10,11 @@ export interface ChipResModel {
     chipName: string;
     screenX: number;
     screenY: number;
-    inputPins: PinSaveInfo[];
-    outputPins: PinSaveInfo[];
+    inputPins: PinInfo[];
+    outputPins: PinInfo[];
     subChips: { name: string; id: number; position: Pos }[];
-    buses: BusMinimalInfo[];
-    wires: WireSaveInfo[];
+    buses: BusInfo[];
+    wires: WireInfo[];
 }
 
 export interface SyncResModel {

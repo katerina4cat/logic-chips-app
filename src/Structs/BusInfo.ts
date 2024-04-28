@@ -1,20 +1,21 @@
 import { Pos } from "../common/Pos";
-import { PinSaveInfo } from "./PinInfo";
+import { PinInfo } from "./PinInfo";
 
-export class BusMinimalInfo {
-    name: string;
+export class BusInfo {
     id: number;
-    color: string;
+    name: string;
+    color: number;
+
     positions: Pos[];
-    inputs: PinSaveInfo[];
-    outputs: PinSaveInfo[];
+    inputs: PinInfo[];
+    outputs: PinInfo[];
     constructor(
-        name: string,
-        color: string,
-        positions: Pos[],
         id: number,
-        inputs: PinSaveInfo[],
-        outputs: PinSaveInfo[]
+        name: string,
+        color: number,
+        positions: Pos[],
+        inputs: PinInfo[],
+        outputs: PinInfo[]
     ) {
         this.name = name;
         this.color = color;

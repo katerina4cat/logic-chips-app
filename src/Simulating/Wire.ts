@@ -2,18 +2,19 @@ import { removeElement } from "../common/RemoveElement";
 import { Pin } from "./Pin";
 import { PinState } from "../common/State";
 import { Pos } from "../common/Pos";
-import { ChipTypes } from "../Structs/ChipMinimalInfo";
+import { ChipTypes } from "../Structs/ChipInfo";
 import { Bus } from "./BaseChips/Bus";
 import { action, computed, makeObservable, observable, reaction } from "mobx";
+import { WireInfo } from "../Structs/WireInfo";
 
 const radiusWire = 20;
-let wireIDs = 0;
+let wireIDs = Date.now();
 
 export class Wire {
+    id: number;
+    @observable points: Pos[];
     @observable source: Pin;
     @observable target: Pin;
-    @observable points: Pos[];
-    id: number;
     error = false;
     constructor(source: Pin, target: Pin, points: Pos[]) {
         makeObservable(this);
@@ -24,9 +25,7 @@ export class Wire {
         wireIDs++;
         this.points = [...points];
         if (this.testRecurse(source.chip.id)) {
-            alert("Ошибка! Возможная бесконечная рекурсия при симуляции!");
-            this.error = true;
-            return;
+            throw "Recurse error";
         }
 
         if (this.source.chip.chipType != ChipTypes.BUS)
@@ -77,13 +76,13 @@ export class Wire {
         if (this.source.chip.chipType == ChipTypes.BUS) {
             removeElement((this.source.chip as Bus).output, this.source);
         }
-
         if (this.target.chip.chipType == ChipTypes.BUS) {
             removeElement((this.target.chip as Bus).input, this.target);
         } else {
             this.target.removeState(
                 new PinState(this.source.id, undefined, this.source)
             );
+            this.target.chip.updatedOutputs();
         }
     }
 
@@ -132,4 +131,24 @@ export class Wire {
         path += `L${this.target.position.x},${this.target.position.y}`;
         return path;
     }
+
+    /**
+     * Конвертирует текущий объект в JSON объект для сохранения
+     * @returns
+     */
+    toPinInfo = () =>
+        new WireInfo(
+            this.id,
+            this.points,
+            {
+                chipID: this.source.chip.id,
+                chipType: this.source.chip.chipType,
+                pinID: this.source.id,
+            },
+            {
+                chipID: this.target.chip.id,
+                chipType: this.target.chip.chipType,
+                pinID: this.target.id,
+            }
+        );
 }

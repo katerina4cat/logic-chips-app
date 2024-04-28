@@ -1,18 +1,21 @@
 import { Chip } from "../Chip";
-import { ChipTypes } from "../../Structs/ChipMinimalInfo";
+import { ChipTypes } from "../../Structs/ChipInfo";
 import { Pos } from "../../common/Pos";
 import { removeElement } from "../../common/RemoveElement";
 import { Color, Colors } from "../../common/Colors";
 import { action, computed, makeObservable, observable } from "mobx";
 import { States } from "../../common/State";
+import { BusInfo } from "../../Structs/BusInfo";
+import { BusPin } from "../Pin";
 
 export class Bus extends Chip {
+    @observable positions: Pos[];
+    @observable depentBus: Bus[] = [];
+    @observable BusColor: Color;
+
+    radius = 20;
     chipType = ChipTypes.BUS;
     isBase = true;
-    radius = 20;
-    @observable depentBus: Bus[] = [];
-    @observable positions: Pos[];
-    @observable BusColor: Color;
 
     @computed get totalState() {
         const dependedBuses = this.findAllDependentBuses();
@@ -42,6 +45,11 @@ export class Bus extends Chip {
         this.totalState;
     }
 
+    /**
+     * Устанавливает всем
+     * **dependedBuses** значение состояния
+     * **state**
+     */
     @action setToAll = (dependedBuses: Bus[], state: States) => {
         dependedBuses.forEach((bus) =>
             bus.output.forEach((pin) => (pin.states[0].value = state))
@@ -140,4 +148,55 @@ export class Bus extends Chip {
         }`;
         return path;
     }
+
+    /**
+     * Конвертирует текущий объект в JSON объект для сохранения
+     * @returns
+     */
+    toBusInfo = () =>
+        new BusInfo(
+            this.id,
+            this.name,
+            this.BusColor.id,
+            this.positions,
+            this.input.map((pin) => pin.toPinInfo()),
+            this.output.map((pin) => pin.toPinInfo())
+        );
+
+    static fromBusInfo = (source: BusInfo) => {
+        const buff = new Bus(
+            source.positions.map((pos) => new Pos(pos)),
+            source.id,
+            Colors[source.color]
+        );
+        buff.input = source.inputs.map(
+            (pin) =>
+                new BusPin(
+                    buff,
+                    pin.distanceFromZero as number,
+                    true,
+                    pin.id,
+                    pin.name,
+                    undefined,
+                    undefined,
+                    undefined,
+                    Object.values(Colors).find((clr) => clr.id === pin.colorID)
+                )
+        );
+        buff.output = source.outputs.map(
+            (pin) =>
+                new BusPin(
+                    buff,
+                    pin.distanceFromZero as number,
+                    false,
+                    pin.id,
+                    pin.name,
+                    undefined,
+                    true,
+                    undefined,
+                    Object.values(Colors).find((clr) => clr.id === pin.chipID)
+                )
+        );
+        return buff;
+    };
 }

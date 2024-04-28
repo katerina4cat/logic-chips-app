@@ -6,18 +6,19 @@ import { States } from "../common/State";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Bus } from "./BaseChips/Bus";
 import { PinState } from "../common/State";
+import { PinInfo } from "../Structs/PinInfo";
 
 export class Pin {
     id: number;
     @observable name: string;
+    @observable chip: Chip;
+    @observable color: Color = Colors.red;
+    @observable deltaPos = new Pos();
     @computed get position() {
         return this.chip.position.adding(this.deltaPos);
     }
-    @observable deltaPos = new Pos();
-    @observable color: Color = Colors.red;
-    @observable chip: Chip;
     isInput: boolean;
-    canUpdatePropagate: boolean;
+
     @observable states: PinState[] = [];
     @computed get totalState() {
         let res = States.UNDEFINED;
@@ -30,6 +31,7 @@ export class Pin {
         }
         return res;
     }
+
     constructor(
         chip: Chip,
         input: boolean,
@@ -38,8 +40,7 @@ export class Pin {
         y = 0,
         hasDefaultState = false,
         deltaPos?: Pos,
-        canUpdatePropagate = true,
-        color: Color = Colors["red"]
+        color: Color = Colors.red
     ) {
         makeObservable(this);
         this.id = id;
@@ -47,7 +48,6 @@ export class Pin {
         this.name = name;
         this.chip = chip;
         this.deltaPos = deltaPos || new Pos(undefined, y);
-        this.canUpdatePropagate = canUpdatePropagate;
         if (hasDefaultState) {
             this.addState(new PinState(this.id, States.LOW));
         }
@@ -89,6 +89,20 @@ export class Pin {
             }
         });
     }
+
+    /**
+     * Конвертирует текущий объект в JSON объект для сохранения
+     * @returns
+     */
+    toPinInfo = () =>
+        new PinInfo(
+            this.id,
+            this.name,
+            this.chip.id,
+            this.color.id,
+            this.position,
+            this instanceof BusPin ? this.distanceFromZero : undefined
+        );
 }
 
 export class BusPin extends Pin {
@@ -102,20 +116,9 @@ export class BusPin extends Pin {
         y = 0,
         hasDefaultState = false,
         deltaPos?: Pos,
-        canUpdatePropagate = true,
-        color: Color = Colors["red"]
+        color: Color = Colors.red
     ) {
-        super(
-            chip,
-            input,
-            id,
-            name,
-            y,
-            hasDefaultState,
-            deltaPos,
-            canUpdatePropagate,
-            color
-        );
+        super(chip, input, id, name, y, hasDefaultState, deltaPos, color);
         this.distanceFromZero = distance;
     }
 }

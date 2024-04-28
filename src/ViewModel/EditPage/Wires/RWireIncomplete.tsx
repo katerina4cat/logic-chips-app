@@ -2,7 +2,7 @@ import cl from "./RWireIncomplete.module.scss";
 import { Wire } from "../../../Simulating/Wire";
 import { BusPin, Pin } from "../../../Simulating/Pin";
 import { Pos } from "../../../common/Pos";
-import { ChipTypes } from "../../../Structs/ChipMinimalInfo";
+import { ChipTypes } from "../../../Structs/ChipInfo";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, computed, makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../EditPage";

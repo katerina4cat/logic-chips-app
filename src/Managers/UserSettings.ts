@@ -3,8 +3,8 @@ import { IHotKeys, defaultHotKeys } from "../common/DefaultSettings";
 import { changedHotKey, hotKeyItem } from "../common/hotKeyItem";
 import { plainToClass } from "class-transformer";
 import userManager from "./UserManager";
-import { SaveInfo } from "../Structs/SaveInfo";
 import { createSaves, saveChip } from "./Apis/Saves";
+import { SaveManager } from "./SaveManager";
 
 const settingsTitle = {
     syncSettings: "Sett:syncSettings",
@@ -64,21 +64,10 @@ export class UserSettings {
                 .map((saveKey) => saveKey.slice(5));
             createSaves(keys).then((res) => console.log(res));
             keys.forEach((key) => {
-                const saveInfo = SaveInfo.loadSave(key, true);
+                const saveInfo = SaveManager.loadSaveByName(key);
                 saveInfo.Chips.forEach((chip) => {
                     if (!chip.sync) {
-                        saveChip(key, {
-                            color: chip.color,
-                            chipStyle: chip.chipStyleType,
-                            title: chip.name,
-                            screenX: window.innerWidth,
-                            screenY: window.innerHeight,
-                            inputPins: chip.inputPins,
-                            outputPins: chip.outputPins,
-                            subChips: chip.SubChips,
-                            buses: chip.Buses,
-                            wires: chip.Wires,
-                        });
+                        saveChip(key, chip);
                         chip.sync = true;
                     }
                 });

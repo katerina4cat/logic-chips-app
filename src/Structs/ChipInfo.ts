@@ -1,7 +1,7 @@
 import { Pos } from "../common/Pos";
-import { BusMinimalInfo } from "./BusInfo";
-import { PinSaveInfo } from "./PinInfo";
-import { WireSaveInfo } from "./WireSaveInfo";
+import { BusInfo } from "./BusInfo";
+import { PinInfo } from "./PinInfo";
+import { WireInfo } from "./WireInfo";
 
 export enum ChipTypes {
     "Default" = 1,
@@ -9,26 +9,28 @@ export enum ChipTypes {
     "SevenSegment" = 3,
 }
 
-export class ChipMinimalInfo {
+export class ChipInfo {
     name: string;
-    chipStyleType: number;
     color: string;
-    screenSize: Pos;
-    inputPins: PinSaveInfo[];
-    outputPins: PinSaveInfo[];
-    Wires: WireSaveInfo[];
+    chipStyleType: number;
+
+    inputPins: PinInfo[];
+    outputPins: PinInfo[];
     SubChips: { name: string; id: number; position: Pos }[];
-    Buses: BusMinimalInfo[];
+    Buses: BusInfo[];
+    Wires: WireInfo[];
+
     sync: boolean;
+    screenSize: Pos;
     constructor(
         name: string,
         chipStyleType: number = ChipTypes.Default,
         color: string = "#909090",
-        inputPins: PinSaveInfo[] = [],
-        outputPins: PinSaveInfo[] = [],
-        Wires: WireSaveInfo[] = [],
+        inputPins: PinInfo[] = [],
+        outputPins: PinInfo[] = [],
+        Wires: WireInfo[] = [],
         SubChips: { name: string; id: number; position: Pos }[] = [],
-        Buses: BusMinimalInfo[] = [],
+        Buses: BusInfo[] = [],
         screenSize: Pos = new Pos(),
         sync: boolean = false
     ) {
@@ -42,5 +44,16 @@ export class ChipMinimalInfo {
         this.Buses = Buses;
         this.screenSize = screenSize;
         this.sync = sync;
+    }
+}
+
+export class SubChipInfo {
+    id: number;
+    name: string;
+    position: Pos;
+    constructor(id: number, name: string, position: Pos) {
+        this.id = id;
+        this.name = name;
+        this.position = position;
     }
 }

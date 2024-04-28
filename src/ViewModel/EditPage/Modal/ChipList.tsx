@@ -46,7 +46,10 @@ export const ChipList = view(ChipListViewModel)(({ viewModel }) => {
             <div className={cl.ChipList} onClick={(e) => e.stopPropagation()}>
                 <div className={cl.Title}>Chip library</div>
                 <div className={cl.List} onClick={(e) => e.stopPropagation()}>
-                    {viewModel.parent.saveManager.Chips.map((chip) => (
+                    {[
+                        ...viewModel.parent.saveManager.defaultChips,
+                        ...viewModel.parent.saveManager.Chips,
+                    ].map((chip) => (
                         <div
                             className={cl.LibraryItem}
                             onClick={() => viewModel.setSelection(chip.name)}
@@ -90,7 +93,7 @@ export const ChipList = view(ChipListViewModel)(({ viewModel }) => {
                         className={cl.Button}
                         disabled={
                             !viewModel.currentSelect ||
-                            !viewModel.parent.saveManager.canAddedChipToCurrentEdit(
+                            !viewModel.parent.saveManager.currentChipNeddedForSelected(
                                 viewModel.parent.currentChip.name,
                                 viewModel.currentSelect
                             )

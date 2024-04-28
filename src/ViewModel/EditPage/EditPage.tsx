@@ -9,7 +9,6 @@ import {
 import { SidePinField } from "./SidePinField";
 import { DefaultChip } from "./Chips/DefaultChip";
 import { CircleAdding } from "./CircleAdding/CircleAdding";
-import { SaveInfo } from "../../Structs/SaveInfo";
 import { Modal } from "./Modal/Modal";
 import { SaveChip } from "./Modal/SaveChip";
 import { ChipList } from "./Modal/ChipList";
@@ -24,6 +23,7 @@ import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
 import { Wire } from "../../Simulating/Wire";
 import { userSettings } from "../../Managers/UserManager";
+import { SaveManager } from "../../Managers/SaveManager";
 
 interface RequiredProps {
     saveName: string;
@@ -45,7 +45,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
     @observable modalActive = false;
 
     chipDeep: Chip[] = [];
-    saveManager: SaveInfo;
+    saveManager: SaveManager;
     startClickTime = 0;
     startClickPos = new Pos();
     deltaMove = new Pos();
@@ -56,7 +56,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
 
     constructor() {
         super();
-        this.saveManager = SaveInfo.loadSave(this.viewProps.saveName);
+        this.saveManager = SaveManager.loadSaveByName(this.viewProps.saveName);
         makeObservable(this);
         this.initHotKeys();
     }
@@ -292,9 +292,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
                 this.saveManager.saveNewChip(
                     this.currentChip,
                     this.currentChip.name,
-                    this.currentChip.color,
-                    undefined,
-                    true
+                    this.currentChip.color
                 );
             else {
                 this.setModal(true);

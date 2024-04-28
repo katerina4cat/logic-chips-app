@@ -1,9 +1,9 @@
+import { ChipInfo } from "../../Structs/ChipInfo";
 import { sender } from "../ApiManager";
 import {
     addDelayedSending,
     delayedTypes,
 } from "../Models/common/delayedSending";
-import { ChipModel } from "../Models/request/ChipModel";
 import { SyncResModel } from "../Models/response/ChipResModel";
 
 export const createSave = async (saveName: string) => {
@@ -38,11 +38,11 @@ export const createSaves = async (saveNames: string[]) => {
     return false;
 };
 
-export const saveChip = async (saveName: string, chipToSave: ChipModel) => {
+export const saveChip = async (saveName: string, chipToSave: ChipInfo) => {
     try {
         const result = await sender.post("/api/saves/saveChip", {
             saves: saveName,
-            ...chipToSave,
+            chp: chipToSave,
         });
         if (result.status == 200) {
             return true;

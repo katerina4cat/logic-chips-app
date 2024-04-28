@@ -3,22 +3,29 @@ import { action, makeObservable, observable, reaction } from "mobx";
 import cl from "./MainMenu.module.scss";
 import { MainInfo } from "./Informations/Main";
 import { AppViewModel } from "../../App";
-import { SaveInfo } from "../../Structs/SaveInfo";
-import { ChipMinimalInfo } from "../../Structs/ChipMinimalInfo";
+import { ChipInfo } from "../../Structs/ChipInfo";
 import { int2hex } from "../../common/Colors";
 import { Pos } from "../../common/Pos";
 import { removeElementByField } from "../../common/RemoveElement";
 import { getSyncChanges } from "../../Managers/Apis/Saves";
 import userManager, { userSettings } from "../../Managers/UserManager";
+import { SaveManager } from "../../Managers/SaveManager";
 
 class Save {
     title: string;
     chips: number;
     created: Date;
-    constructor(title: string, chips: number, lastEdit: Date = new Date(0)) {
+    lastEdit: Date;
+    constructor(
+        title: string,
+        chips: number,
+        created: Date = new Date(0),
+        lastEdit: Date = new Date(0)
+    ) {
         this.title = title;
         this.chips = chips;
-        this.created = lastEdit;
+        this.created = created;
+        this.lastEdit = lastEdit;
     }
 }
 
@@ -31,7 +38,7 @@ export const checkSync = async () => {
     if (!allChanges) return;
     // Применение всех изменений, если они были получены и имеются
     allChanges.forEach((save) => {
-        const saveInfo = SaveInfo.loadSave(save.saveName);
+        const saveInfo = SaveManager.loadSaveByName(save.saveName);
         if (save.created) saveInfo.created = save.created;
         save.deleting.forEach((deletingInfo) =>
             removeElementByField(saveInfo.Chips, deletingInfo, "name")
@@ -40,7 +47,7 @@ export const checkSync = async () => {
             const index = saveInfo.Chips.findIndex(
                 (chip) => chip.name === chipsInfo.chipName
             );
-            const loadedChipInfo = new ChipMinimalInfo(
+            const loadedChipInfo = new ChipInfo(
                 chipsInfo.chipName,
                 chipsInfo.chipStyle,
                 int2hex(chipsInfo.color),
@@ -103,11 +110,12 @@ export class MainMenuViewModel extends ViewModel<AppViewModel, RequiredProps> {
             .filter((key) => key.startsWith("Save:"))
             .map((key) => key.slice(5));
         this.saves = keys.map((key) => {
-            const saveInfo = SaveInfo.loadSave(key, true);
+            const saveInfo = SaveManager.loadSaveByName(key);
             return new Save(
                 saveInfo.saveName,
                 saveInfo.Chips.length,
-                saveInfo.created
+                saveInfo.created,
+                saveInfo.lastEdit
             );
         });
     };

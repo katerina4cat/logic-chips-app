@@ -1,4 +1,4 @@
-import { ChipModel } from "../request/ChipModel";
+import { ChipInfo } from "../../../Structs/ChipInfo";
 
 export interface delayedSending {
     deletingChip: delayedDeleting[];
@@ -19,7 +19,7 @@ interface delayedDeleting {
 }
 interface delayedChipSaving {
     saves: string;
-    chip: ChipModel;
+    chip: ChipInfo;
     added?: Date;
 }
 interface delayedCreatingSave {
