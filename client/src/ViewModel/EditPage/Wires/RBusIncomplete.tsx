@@ -5,7 +5,7 @@ import { getColorWithState } from "../../../common/Colors";
 import { BusEndPosWidth } from "../../../common/DefaultSettings";
 import { action, computed, makeObservable, observable } from "mobx";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { EditPageViewModel } from "../EditPage";
+import { EditPageViewModel } from "../EditPageViewModel";
 import { States } from "../../../common/State";
 import { userSettings } from "../../../Managers/UserManager";
 

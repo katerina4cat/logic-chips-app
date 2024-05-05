@@ -1,7 +1,7 @@
 import cl from "./ChipList.module.scss";
 import { EditCircleAdding } from "../CircleAdding/EditCircleAdding";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { EditPageViewModel } from "../EditPage";
+import { EditPageViewModel } from "../EditPageViewModel";
 import { action, makeObservable, observable } from "mobx";
 
 class ChipListViewModel extends ViewModel<EditPageViewModel> {

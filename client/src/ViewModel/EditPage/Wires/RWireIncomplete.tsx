@@ -5,7 +5,7 @@ import { Pos } from "../../../common/Pos";
 import { ChipTypes } from "@shared/models/saves/ChipInfo";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, computed, makeObservable, observable } from "mobx";
-import { EditPageViewModel } from "../EditPage";
+import { EditPageViewModel } from "../EditPageViewModel";
 import { getColorWithState } from "../../../common/Colors";
 import { PinState, States } from "../../../common/State";
 import { userSettings } from "../../../Managers/UserManager";

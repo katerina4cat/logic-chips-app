@@ -107,12 +107,18 @@ export class SaveManager {
     static loadSaveByName(saveName: string, withBase: boolean = true) {
         return this.loadSave(
             localStorage.getItem("Save:" + saveName) || defaultSave,
-            withBase
+            withBase,
+            saveName
         );
     }
 
-    static loadSave(saveStruct: string, withBase: boolean = true) {
+    static loadSave(
+        saveStruct: string,
+        withBase: boolean = true,
+        saveName?: string
+    ) {
         const data = JSON.parse(saveStruct) as SaveManager;
+        if (saveName) data.saveName = saveName;
         return new SaveManager(
             data.Chips,
             data.Wheels,
@@ -136,6 +142,7 @@ export class SaveManager {
         );
         if (deletingChipInfo) {
             removeElement(this.Chips, deletingChipInfo);
+            this.lastEdit = new Date(new Date().getTime());
             this.save();
             if (userSettings.IsUserSync) deleteChip(this.saveName, chipName);
             return true;
@@ -153,15 +160,17 @@ export class SaveManager {
         chip.color = color;
         chip.chipType = chipType;
         const savingChip = chip.toChipInfo();
-        if (userSettings.IsUserSync) {
-            saveChip(this.saveName, savingChip);
-        }
+        savingChip.lastEdit = new Date(new Date().getTime());
+        this.lastEdit = savingChip.lastEdit;
         const index = this.Chips.findIndex((chip) => chip.name == name);
         if (index === -1) {
             this.Chips.push(savingChip);
         } else {
             this.Chips[index] = savingChip;
             alert("Чип сохранён!");
+        }
+        if (userSettings.IsUserSync) {
+            saveChip(this.saveName, savingChip);
         }
         this.save();
         return true;

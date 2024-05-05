@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { initUser } from "./Apis/Authentification";
+import { roots } from "@shared/Roots";
 
 export const sender = axios.create({
     withCredentials: true,
@@ -16,6 +17,7 @@ export const sendPost = <RequestData = any, ResponseData = any>(
         data,
         config
     );
+
 sender.interceptors.request.use((config) => {
     if (localStorage.getItem("accessToken") != null)
         config.headers.Authorization = `Bearer ${localStorage.getItem(
@@ -32,7 +34,7 @@ sender.interceptors.response.use(
                 try {
                     const res = await axios.get(
                         import.meta.env.VITE_API_SERVER_URL +
-                            "/api/users/refresh",
+                            roots.auth.refresh,
                         {
                             withCredentials: true,
                         }

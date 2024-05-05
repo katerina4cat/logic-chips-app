@@ -29,11 +29,12 @@ class SyncManager {
                 if (index === -1) localSave.Chips.push(cloudChipsInfo);
                 else {
                     if (
-                        cloudChipsInfo.lastEdit >
-                        localSave.Chips[index].lastEdit
+                        new Date(cloudChipsInfo.lastEdit) >=
+                        new Date(localSave.Chips[index].lastEdit)
                     )
                         localSave.Chips[index] = cloudChipsInfo;
                     else {
+                        console.log(cloudChipsInfo.lastEdit);
                         const userConfirm =
                             confirm(`Синхронизация сохранения "${save.saveName}"
 Обновить чип ${cloudChipsInfo.name} из облака?

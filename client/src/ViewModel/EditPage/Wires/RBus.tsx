@@ -3,7 +3,7 @@ import { Bus } from "../../../Simulating/BaseChips/Bus";
 import { BusEndPosWidth, busID } from "../../../common/DefaultSettings";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
-import { EditPageViewModel } from "../EditPage";
+import { EditPageViewModel } from "../EditPageViewModel";
 import { Pos } from "../../../common/Pos";
 import { BusPin } from "../../../Simulating/Pin";
 import { useRef } from "react";

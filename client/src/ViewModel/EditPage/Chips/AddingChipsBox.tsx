@@ -3,7 +3,7 @@ import { Pos } from "../../../common/Pos";
 import { Chip } from "../../../Simulating/Chip";
 import { DefaultChip } from "./DefaultChip";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { EditPageViewModel } from "../EditPage";
+import { EditPageViewModel } from "../EditPageViewModel";
 import { action, makeObservable, observable } from "mobx";
 import { userSettings } from "../../../Managers/UserManager";
 

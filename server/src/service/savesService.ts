@@ -61,20 +61,23 @@ class saveService {
                 '${JSON.stringify(chip.SubChips)}',
                 '${JSON.stringify(chip.Buses)}',
                 '${JSON.stringify(chip.Wires)}',
-                '${chip.lastEdit
+                '${new Date(chip.lastEdit)
                     .toISOString()
                     .replace("T", " ")
-                    .replace("Z", "")}'
+                    .replace("Z", "")}',
                 ${rewrite});`
             );
-            if (res[0])
+            if (res && res[0]) {
+                console.log(res[0].lastEdit);
                 return {
                     saveName: saveName,
                     chip: chip,
                     lastEdit: res[0].lastEdit,
                 };
+            }
             return false;
         } catch (err) {
+            console.log(err);
             throw ApiError.RuntimeError(
                 "Произошла ошибка при сохранении в облаке"
             );

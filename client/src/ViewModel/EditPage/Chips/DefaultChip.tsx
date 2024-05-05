@@ -4,7 +4,7 @@ import { ViewPin } from "../Pins/RPin";
 import { Pos } from "../../../common/Pos";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { makeObservable, observable } from "mobx";
-import { EditPageViewModel } from "../EditPage";
+import { EditPageViewModel } from "../EditPageViewModel";
 
 interface RequiredProps {
     chip: Chip;

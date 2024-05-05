@@ -44,7 +44,7 @@ BEGIN
 
     IF EXISTS (SELECT 1 FROM `saves` WHERE `id` = saveID AND `saves`.`userID` = userID) THEN
         SELECT `lastEdit` INTO chipLastEdit FROM `chips` WHERE `chipName` = title AND `chips`.`saveID` = saveID;
-        IF chipLastEdit IS NULL OR chipLastEdit < lastEditTime OR rewrite THEN
+        IF chipLastEdit IS NULL OR chipLastEdit <= lastEditTime OR rewrite THEN
             IF EXISTS (SELECT 1 FROM `chips` WHERE `chipName` = title AND `chips`.`saveID` = saveID) THEN
                 UPDATE `chips`
                 SET `lastEdit` = lastEditTime,
