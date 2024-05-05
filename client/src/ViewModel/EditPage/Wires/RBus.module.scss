@@ -1,0 +1,12 @@
+.RBus {
+    stroke-width: 4px;
+    fill: none;
+    &:hover {
+        stroke-width: 6px;
+        cursor: pointer;
+    }
+    .BusEndPos {
+        stroke-width: 1px;
+        stroke: black;
+    }
+}

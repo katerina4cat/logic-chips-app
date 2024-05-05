@@ -1,0 +1,41 @@
+.SideEditPin {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    transform: translateY(-50%);
+    .MoveBar {
+        width: 0.5em;
+        height: 3em;
+        cursor: n-resize;
+        background-color: #222;
+        position: relative;
+        .DeletingConfirm {
+            position: absolute;
+            background-color: #222;
+            border-radius: 8px;
+            padding: 1em;
+            width: max-content;
+            cursor: default;
+            margin-top: 3em;
+        }
+    }
+    .SwitchButton {
+        height: 2.35em;
+        width: 2.35em;
+        border-radius: 50%;
+        border: 0.2em solid black;
+    }
+    .DecorativeWire {
+        background-color: black;
+        width: 1em;
+        height: 0.35em;
+    }
+    .sidePinTitle {
+        padding: 0.2em;
+        border: none;
+        background-color: transparent;
+        border-bottom: 1px solid white;
+        width: 4em;
+        margin: 0 1em;
+    }
+}

@@ -1,0 +1,13 @@
+.NewGameTitle {
+    background-color: gray;
+    outline: none;
+    border: none;
+    border-radius: 4px;
+    color: black;
+    &::placeholder {
+        font-size: 0.8em;
+    }
+}
+.NewGameTitleError {
+    color: maroon;
+}
