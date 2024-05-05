@@ -3,8 +3,8 @@ export const roots = {
         userInfo: "/api/users/info",
         loginByGoogle: "/api/users/login/google",
         loginByEmail: "/api/users/login/email",
-        logout: "api/users/logout",
-        refresh: "api/users/refresh",
+        logout: "/api/users/logout",
+        refresh: "/api/users/refresh",
         registerByEmail: "/api/users/register",
     },
     saves: {

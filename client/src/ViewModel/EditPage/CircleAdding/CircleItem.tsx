@@ -1,7 +1,7 @@
 import { Component, ReactNode, createRef } from "react";
 import cl from "./CircleItem.module.scss";
-import { SaveInfo } from "../../../Structs/SaveInfo";
 import { Pos } from "../../../common/Pos";
+import { SaveManager } from "../../../Managers/SaveManager";
 
 interface RequiredProps {
     centerAngle: number;
@@ -11,7 +11,7 @@ interface RequiredProps {
     circleID: number;
     addNewChip: (chipName: string) => void;
     updateCircle: () => void;
-    saveManager: SaveInfo;
+    saveManager: SaveManager;
     contextMenu: (chipName: string, positionCursor: Pos) => void;
     edit?: boolean;
 }
@@ -182,7 +182,7 @@ export class CircleItem extends Component<RequiredProps, States> {
                               }`
                     }
                 />
-                <text text-anchor="middle">
+                <text textAnchor="middle">
                     <textPath
                         href={`#selector_${this.props.circleID}${
                             this.props.edit ? "e" : ""

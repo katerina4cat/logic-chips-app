@@ -12,7 +12,7 @@ interface RequiredProps {
 interface States {}
 
 export class ContextMenu extends Component<
-    RequiredProps & React.HTMLAttributes<HTMLDivElement>,
+    React.HTMLAttributes<HTMLDivElement> & RequiredProps,
     States
 > {
     state: Readonly<States> = {};

@@ -1,15 +1,15 @@
 import { Component, ReactNode, createRef } from "react";
 import cl from "./EditCircleAdding.module.scss";
-import { SaveInfo } from "../../../Structs/SaveInfo";
 import { CircleItem } from "./CircleItem";
 import { ContextMenu } from "../Modal/ContextMenu";
 import { Pos } from "../../../common/Pos";
 import { removeElement } from "../../../common/RemoveElement";
+import { SaveManager } from "../../../Managers/SaveManager";
 
 interface RequiredProps {
     enabled?: boolean;
     setEnabled: (e: boolean) => void;
-    saveManager: SaveInfo;
+    saveManager: SaveManager;
     circleID: number;
 }
 

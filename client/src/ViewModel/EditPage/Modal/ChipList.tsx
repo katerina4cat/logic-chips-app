@@ -1,8 +1,8 @@
 import cl from "./ChipList.module.scss";
 import { EditCircleAdding } from "../CircleAdding/EditCircleAdding";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { EditPageViewModel } from "../EditPageViewModel";
 import { action, makeObservable, observable } from "mobx";
+import { EditPageViewModel } from "../EditPage";
 
 class ChipListViewModel extends ViewModel<EditPageViewModel> {
     @observable currentSelect?: string;
@@ -63,6 +63,7 @@ export const ChipList = view(ChipListViewModel)(({ viewModel }) => {
                             onDragStart={(e) =>
                                 e.dataTransfer.setData("chip", chip.name)
                             }
+                            key={chip.name}
                         >
                             {chip.name}
                         </div>

@@ -3,7 +3,7 @@ import { Pin } from "../../../Simulating/Pin";
 import { Color, Colors } from "@shared/models/common/Colors";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
-import { useRef } from "react";
+import { createRef } from "react";
 import { Pos } from "../../../common/Pos";
 import OutsideClickHandler from "react-outside-click-handler";
 import { States } from "../../../common/State";
@@ -20,7 +20,7 @@ interface RequiredProps {
 export class PinViewModel extends ViewModel<undefined, RequiredProps> {
     @observable pin: Pin = this.viewProps.Pin;
     @observable contextMenu = false;
-    ref = useRef<SVGCircleElement>(null);
+    ref = createRef<SVGCircleElement>();
     constructor() {
         super();
         makeObservable(this);

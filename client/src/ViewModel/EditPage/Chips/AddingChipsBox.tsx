@@ -1,15 +1,15 @@
-import { useRef } from "react";
+import { createRef } from "react";
 import { Pos } from "../../../common/Pos";
 import { Chip } from "../../../Simulating/Chip";
 import { DefaultChip } from "./DefaultChip";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { EditPageViewModel } from "../EditPageViewModel";
 import { action, makeObservable, observable } from "mobx";
 import { userSettings } from "../../../Managers/UserManager";
+import { EditPageViewModel } from "../EditPage";
 
 class AddingChipViewModel extends ViewModel<EditPageViewModel> {
     @observable cursorPosition: Pos = new Pos();
-    addingChipBoxRef = useRef<HTMLDivElement>(null);
+    addingChipBoxRef = createRef<HTMLDivElement>();
     constructor() {
         super();
         makeObservable(this);
