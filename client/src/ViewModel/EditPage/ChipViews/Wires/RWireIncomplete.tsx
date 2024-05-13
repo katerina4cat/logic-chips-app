@@ -1,14 +1,14 @@
 import cl from "./RWireIncomplete.module.scss";
-import { Wire } from "../../../Simulating/Wire";
-import { BusPin, Pin } from "../../../Simulating/Pin";
-import { Pos } from "../../../common/Pos";
+import { Wire } from "../../../../Simulating/Wire";
+import { BusPin, Pin } from "../../../../Simulating/Pin";
+import { Pos } from "../../../../common/Pos";
 import { ChipTypes } from "@shared/models/saves/ChipInfo";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, computed, makeObservable, observable } from "mobx";
-import { EditPageViewModel } from "../EditPageViewModel";
-import { getColorWithState } from "../../../common/Colors";
-import { PinState, States } from "../../../common/State";
-import { userSettings } from "../../../Managers/UserManager";
+import { getColorWithState } from "../../../../common/Colors";
+import { PinState, States } from "../../../../common/State";
+import { userSettings } from "../../../../Managers/UserManager";
+import { EditPageViewModel } from "../../EditPage";
 
 export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
     @observable points: Pos[] = [];
@@ -18,7 +18,7 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
     constructor() {
         super();
         makeObservable(this);
-        this.parent.wireIncompleteViewModel = this;
+        this.parent.editorObjectsManager.wireIncompleteViewModel = this;
     }
     @action clickToPin = (pin: Pin, ctrlKey: boolean) => {
         if (!this.firstPin) {
@@ -75,7 +75,9 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
                 this.points.shift();
             }
             if (pin.chip.chipType != ChipTypes.BUS) this.points.pop();
-            this.parent.addWire(new Wire(this.firstPin, pin, [...this.points]));
+            this.parent.editorObjectsManager.addWire(
+                new Wire(this.firstPin, pin, [...this.points])
+            );
             if (!ctrlKey) this.clear();
             return;
         }
@@ -83,7 +85,9 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
             this.points.reverse();
             if (this.firstPin.chip.chipType != ChipTypes.BUS) this.points.pop();
             if (pin.chip.chipType != ChipTypes.BUS) this.points.shift();
-            this.parent.addWire(new Wire(pin, this.firstPin, [...this.points]));
+            this.parent.editorObjectsManager.addWire(
+                new Wire(pin, this.firstPin, [...this.points])
+            );
             this.clear();
             return;
         }

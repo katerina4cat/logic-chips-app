@@ -1,49 +1,35 @@
 import { createRef } from "react";
-import { Pos } from "../../../common/Pos";
-import { Chip } from "../../../Simulating/Chip";
+import { Pos } from "../../../../common/Pos";
+import { Chip } from "../../../../Simulating/Chip";
 import { DefaultChip } from "./DefaultChip";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { action, makeObservable, observable } from "mobx";
-import { userSettings } from "../../../Managers/UserManager";
-import { EditPageViewModel } from "../EditPage";
+import { action, makeObservable } from "mobx";
+import { EditPageViewModel } from "../../EditPage";
 
 class AddingChipViewModel extends ViewModel<EditPageViewModel> {
-    @observable cursorPosition: Pos = new Pos();
     addingChipBoxRef = createRef<HTMLDivElement>();
     constructor() {
         super();
         makeObservable(this);
     }
 
-    protected onViewMounted(): void {
-        window.addEventListener("mousemove", this.handleMouseMove);
-    }
-    protected onViewUnmounted(): void {
-        window.removeEventListener("mousemove", this.handleMouseMove);
-    }
-    @action handleMouseMove = (e: MouseEvent) => {
-        this.cursorPosition.x =
-            e.pageX -
-            (userSettings.cellCord ? e.pageX % userSettings.cellSize : 0);
-        this.cursorPosition.y =
-            e.pageY -
-            (userSettings.cellCord ? e.pageY % userSettings.cellSize : 0);
-    };
     @action handleClickToPlaceChip = () => {
-        if (!this.parent.addingChip) return;
+        if (!this.parent.editorObjectsManager.addingChip) return;
         try {
             const curretTime = Date.now();
             if (this.addingChipBoxRef.current)
                 if (this.addingChipBoxRef.current.children.length > 0)
-                    this.parent.addChips(
+                    this.parent.editorObjectsManager.addChips(
                         Array.from(
                             this.addingChipBoxRef.current?.children || []
                         )
                             .map((child, i) => {
                                 const box = child?.getBoundingClientRect();
-                                const res = this.parent.addingChip
+                                const res = this.parent.editorObjectsManager
+                                    .addingChip
                                     ? this.parent.saveManager.loadChipByName(
-                                          this.parent.addingChip.name,
+                                          this.parent.editorObjectsManager
+                                              .addingChip.name,
                                           new Pos(box?.x, box?.y),
                                           curretTime + i
                                       )[0]
@@ -57,13 +43,14 @@ class AddingChipViewModel extends ViewModel<EditPageViewModel> {
             console.log(err);
         }
         setTimeout(() => {
-            this.parent.clearAdding();
-        }, 1);
+            this.parent.editorObjectsManager.cancelAll();
+        }, 2);
     };
 }
 
 export const AddingChipsBox = view(AddingChipViewModel)((props) => {
-    if (props.viewModel.parent.addingChip === undefined) return <></>;
+    if (props.viewModel.parent.editorObjectsManager.addingChip === undefined)
+        return <></>;
     return (
         <>
             <div
@@ -71,18 +58,23 @@ export const AddingChipsBox = view(AddingChipViewModel)((props) => {
                     display: "flex",
                     flexDirection: "column",
                     position: "absolute",
-                    left: props.viewModel.cursorPosition.x - 25,
-                    top: props.viewModel.cursorPosition.y - 25,
+                    left: props.viewModel.parent.cursorPosition.x - 25,
+                    top: props.viewModel.parent.cursorPosition.y - 25,
                 }}
                 ref={props.viewModel.addingChipBoxRef}
             >
-                {new Array(props.viewModel.parent.addingCount)
+                {new Array(
+                    props.viewModel.parent.editorObjectsManager.addingCount
+                )
                     .fill(1)
                     .map((_e, i) => (
                         <DefaultChip
                             key={i}
                             isPreview
-                            chip={props.viewModel.parent.addingChip as Chip}
+                            chip={
+                                props.viewModel.parent.editorObjectsManager
+                                    .addingChip as Chip
+                            }
                         />
                     ))}
             </div>
@@ -90,7 +82,8 @@ export const AddingChipsBox = view(AddingChipViewModel)((props) => {
                 style={{
                     width: "100%",
                     height: "100%",
-                    display: props.viewModel.parent.addingChip
+                    display: props.viewModel.parent.editorObjectsManager
+                        .addingChip
                         ? "block"
                         : "none",
                     position: "fixed",

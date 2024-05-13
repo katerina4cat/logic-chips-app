@@ -1,28 +1,30 @@
-import { Component, ReactNode, createRef } from "react";
+import { createRef } from "react";
 import cl from "./ContextMenu.module.scss";
 import { Pos } from "../../../common/Pos";
 import React from "react";
+import { ViewModel, view } from "@yoskutik/react-vvm";
+import { makeObservable } from "mobx";
 
 interface RequiredProps {
     enabled: boolean;
+    setEnabled: (e?: boolean) => void;
     pos: Pos;
-    setEnabled: (e: boolean) => void;
 }
 
-interface States {}
-
-export class ContextMenu extends Component<
-    React.HTMLAttributes<HTMLDivElement> & RequiredProps,
-    States
+export class ContexViewModel extends ViewModel<
+    undefined,
+    React.HTMLAttributes<HTMLDivElement> & RequiredProps
 > {
-    state: Readonly<States> = {};
-    constructor(props: RequiredProps) {
-        super(props);
+    ref = createRef<HTMLDivElement>();
+
+    constructor() {
+        super();
+        makeObservable(this);
     }
 
     handleClickOutside = (e: MouseEvent) => {
         if (this.ref.current && !this.ref.current.contains(e.target as Node))
-            this.props.setEnabled(false);
+            this.viewProps.setEnabled(false);
     };
 
     componentDidMount(): void {
@@ -31,21 +33,21 @@ export class ContextMenu extends Component<
     componentWillUnmount(): void {
         window.removeEventListener("mousedown", this.handleClickOutside);
     }
-
-    ref = createRef<HTMLDivElement>();
-
-    render(): ReactNode {
-        return (
-            <div
-                {...this.props}
-                style={{
-                    top: this.props.pos.y,
-                    left: this.props.pos.x,
-                    display: this.props.enabled ? "flex" : "none",
-                }}
-                ref={this.ref}
-                className={`${cl.ContextMenu} ${this.props.className}`}
-            />
-        );
-    }
 }
+
+export const ContextMenu = view(ContexViewModel)<
+    React.HTMLAttributes<HTMLDivElement> & RequiredProps
+>(({ viewModel }) => {
+    return (
+        <div
+            {...viewModel.viewProps}
+            style={{
+                top: viewModel.viewProps.pos.y,
+                left: viewModel.viewProps.pos.x,
+                display: viewModel.viewProps.enabled ? "flex" : "none",
+            }}
+            ref={viewModel.ref}
+            className={`${cl.ContextMenu} ${viewModel.viewProps.className}`}
+        />
+    );
+});

@@ -142,7 +142,10 @@ export class SaveManager {
         );
         if (deletingChipInfo) {
             removeElement(this.Chips, deletingChipInfo);
-            this.lastEdit = new Date(new Date().getTime());
+            this.lastEdit = new Date();
+            for (let i = 0; i < this.Wheels.length; i++)
+                while (this.Wheels[i].includes(chipName))
+                    removeElement(this.Wheels[i], chipName);
             this.save();
             if (userSettings.IsUserSync) deleteChip(this.saveName, chipName);
             return true;
@@ -150,7 +153,7 @@ export class SaveManager {
         return false;
     };
 
-    saveNewChip = (
+    @action saveNewChip = (
         chip: Chip,
         name: string,
         color: string,

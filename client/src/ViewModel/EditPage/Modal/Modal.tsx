@@ -1,48 +1,48 @@
-import { Component, ReactNode } from "react";
 import cl from "./Modal.module.scss";
+import { ViewModel, view } from "@yoskutik/react-vvm";
+import { makeObservable } from "mobx";
 
 interface RequiredProps {
     enabled: boolean;
-    setEnabled: (e: boolean) => void;
+    setEnabled: (e?: boolean) => void;
     modalBG?: string;
 }
 
-interface States {}
-
-export class Modal extends Component<
-    RequiredProps & React.HTMLAttributes<HTMLDivElement>,
-    States
+export class ModalViewModel extends ViewModel<
+    undefined,
+    React.HTMLAttributes<HTMLDivElement> & RequiredProps
 > {
-    state: Readonly<States> = {};
-    constructor(props: RequiredProps) {
-        super(props);
-    }
-
-    render(): ReactNode {
-        return (
-            <div
-                className={`${cl.Modal}`}
-                style={{ display: this.props.enabled ? "flex" : "none" }}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    this.props.setEnabled(false);
-                }}
-            >
-                <div
-                    {...this.props}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                    }}
-                    className={`${cl.ModalWindow} ${
-                        this.props.className ? this.props.className : ""
-                    }`}
-                    style={
-                        this.props.modalBG
-                            ? { backgroundColor: this.props.modalBG }
-                            : undefined
-                    }
-                />
-            </div>
-        );
+    constructor() {
+        super();
+        makeObservable(this);
     }
 }
+export const Modal = view(ModalViewModel)<
+    React.HTMLAttributes<HTMLDivElement> & RequiredProps
+>(({ viewModel }) => {
+    return (
+        <div
+            className={`${cl.Modal}`}
+            style={{
+                display: viewModel.viewProps.enabled ? "flex" : "none",
+            }}
+            onClick={(e) => {
+                e.stopPropagation();
+                viewModel.viewProps.setEnabled(false);
+            }}
+        >
+            <div
+                {...viewModel.viewProps}
+                onClick={(e) => {
+                    e.stopPropagation();
+                }}
+                className={`${cl.ModalWindow} ${viewModel.viewProps.className}`}
+                style={
+                    viewModel.viewProps.modalBG
+                        ? { backgroundColor: viewModel.viewProps.modalBG }
+                        : undefined
+                }
+            />
+        </div>
+    );
+});

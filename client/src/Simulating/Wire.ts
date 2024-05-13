@@ -1,5 +1,5 @@
 import { removeElement } from "../common/RemoveElement";
-import { Pin } from "./Pin";
+import { BusPin, Pin } from "./Pin";
 import { PinState } from "../common/State";
 import { Pos } from "../common/Pos";
 import { ChipTypes } from "@shared/models/saves/ChipInfo";
@@ -41,6 +41,8 @@ export class Wire {
         this.target.addState(
             new PinState(this.source.id, undefined, this.source)
         );
+        if (this.source instanceof BusPin)
+            this.source.states[0].value = (this.source.chip as Bus).totalState;
         this.target.chip.updatedOutputs();
         reaction(
             () => this.source.totalState,

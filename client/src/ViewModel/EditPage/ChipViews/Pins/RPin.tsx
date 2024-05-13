@@ -1,13 +1,13 @@
 import cl from "./RPin.module.scss";
-import { Pin } from "../../../Simulating/Pin";
+import { Pin } from "../../../../Simulating/Pin";
 import { Color, Colors } from "@shared/models/common/Colors";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
 import { createRef } from "react";
-import { Pos } from "../../../common/Pos";
+import { Pos } from "../../../../common/Pos";
 import OutsideClickHandler from "react-outside-click-handler";
-import { States } from "../../../common/State";
-import { getColorWithState } from "../../../common/Colors";
+import { States } from "../../../../common/State";
+import { getColorWithState } from "../../../../common/Colors";
 
 interface RequiredProps {
     Pin: Pin;

@@ -1,9 +1,9 @@
 import cl from "./SidePinField.module.scss";
-import { Pin } from "../../Simulating/Pin";
-import { SideEditPin } from "./Pins/SideEditPin";
+import { Pin } from "../../../../Simulating/Pin";
+import { SideEditPin } from "./SideEditPin";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { EditPageViewModel } from "./EditPageViewModel";
 import { action, makeObservable, observable } from "mobx";
+import { EditPageViewModel } from "../../EditPage";
 
 interface RequiredProps {
     Pins: Pin[];
@@ -16,7 +16,7 @@ export class SidePinFieldViewModel extends ViewModel<
 > {
     @observable hiden = true;
     @observable previewPin = new Pin(
-        this.parent.currentChip,
+        this.parent.editorObjectsManager.currentChip,
         !!this.viewProps.isInput,
         -1,
         "",
@@ -37,9 +37,9 @@ export class SidePinFieldViewModel extends ViewModel<
     };
 
     @action handleClickAddPin = () => {
-        this.parent.addPin(
+        this.parent.editorObjectsManager.addPin(
             new Pin(
-                this.parent.currentChip,
+                this.parent.editorObjectsManager.currentChip,
                 !!this.viewProps.isInput,
                 Date.now(),
                 "Pin",

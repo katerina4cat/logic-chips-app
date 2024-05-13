@@ -1,13 +1,13 @@
 import cl from "./RBus.module.scss";
-import { Bus } from "../../../Simulating/BaseChips/Bus";
-import { BusEndPosWidth, busID } from "../../../common/DefaultSettings";
+import { Bus } from "../../../../Simulating/BaseChips/Bus";
+import { BusEndPosWidth, busID } from "../../../../common/DefaultSettings";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { action, makeObservable, observable } from "mobx";
-import { EditPageViewModel } from "../EditPageViewModel";
-import { Pos } from "../../../common/Pos";
-import { BusPin } from "../../../Simulating/Pin";
-import { useRef } from "react";
-import { getColorWithState } from "../../../common/Colors";
+import { action, makeObservable, observable, runInAction } from "mobx";
+import { Pos } from "../../../../common/Pos";
+import { BusPin } from "../../../../Simulating/Pin";
+import { createRef } from "react";
+import { getColorWithState } from "../../../../common/Colors";
+import { EditPageViewModel } from "../../EditPage";
 
 interface RequiredProps {
     Bus: Bus;
@@ -15,7 +15,7 @@ interface RequiredProps {
 
 export class BusViewModel extends ViewModel<EditPageViewModel, RequiredProps> {
     @observable bus = this.viewProps.Bus;
-    ref = useRef<SVGPathElement>(null);
+    ref = createRef<SVGPathElement>();
     radiusWire = 20;
     constructor() {
         super();
@@ -38,7 +38,8 @@ export class BusViewModel extends ViewModel<EditPageViewModel, RequiredProps> {
     }
 
     @action handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key == "Backspace") this.parent.removeBus(this.bus);
+        if (e.key == "Backspace")
+            this.parent.editorObjectsManager.removeBus(this.bus);
     };
 }
 
@@ -97,7 +98,7 @@ export const RBus = view(BusViewModel)<RequiredProps>(({ viewModel }) => {
                     }
                     const point =
                         e.currentTarget.getPointAtLength(distanceFromZero);
-                    viewModel.parent.wireIncompleteViewModel?.clickToPin(
+                    viewModel.parent.editorObjectsManager.wireIncompleteViewModel?.clickToPin(
                         new BusPin(
                             viewModel.bus,
                             distanceFromZero,
@@ -116,18 +117,26 @@ export const RBus = view(BusViewModel)<RequiredProps>(({ viewModel }) => {
                     //     new Pos(e.pageX, e.pageY)
                     // );
                 }}
-                onMouseOver={() =>
+                onMouseOver={() => {
                     document.addEventListener(
                         "keydown",
                         viewModel.handleKeyDown
-                    )
-                }
-                onMouseOut={() =>
+                    );
+                    runInAction(() => {
+                        viewModel.parent.editorObjectsManager.wireHovered =
+                            true;
+                    });
+                }}
+                onMouseOut={() => {
                     document.removeEventListener(
                         "keydown",
                         viewModel.handleKeyDown
-                    )
-                }
+                    );
+                    runInAction(() => {
+                        viewModel.parent.editorObjectsManager.wireHovered =
+                            false;
+                    });
+                }}
             />
             {busID ? (
                 <text>

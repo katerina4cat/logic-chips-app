@@ -62,8 +62,8 @@ export class ChipSQLModel {
         this.wires = wires;
     }
 
-    toChipInfo = () =>
-        new ChipInfo(
+    toChipInfo = () => {
+        return new ChipInfo(
             this.chipName,
             this.chipStyle,
             int2hex(this.color),
@@ -75,6 +75,7 @@ export class ChipSQLModel {
             new Pos(this.screenX, this.screenY),
             this.lastEdit
         );
+    };
 }
 
 export interface SavingSQLModel {

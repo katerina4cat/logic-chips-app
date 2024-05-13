@@ -1,7 +1,9 @@
-import { Component, ReactNode, createRef } from "react";
+import { createRef } from "react";
 import cl from "./CircleItem.module.scss";
-import { Pos } from "../../../common/Pos";
-import { SaveManager } from "../../../Managers/SaveManager";
+import { Pos } from "../../../../common/Pos";
+import { SaveManager } from "../../../../Managers/SaveManager";
+import { ViewModel, view } from "@yoskutik/react-vvm";
+import { makeObservable, action } from "mobx";
 
 interface RequiredProps {
     centerAngle: number;
@@ -9,20 +11,21 @@ interface RequiredProps {
     element: string;
     elementInd: number;
     circleID: number;
-    addNewChip: (chipName: string) => void;
-    updateCircle: () => void;
+    addNewChip?: (chipName: string) => void;
     saveManager: SaveManager;
     contextMenu: (chipName: string, positionCursor: Pos) => void;
     edit?: boolean;
 }
 
-interface States {}
+export class CircleItemViewModel extends ViewModel<undefined, RequiredProps> {
+    elementBackgroundRef = createRef<SVGPathElement>();
+    elementTitleRef = createRef<SVGPathElement>();
 
-export class CircleItem extends Component<RequiredProps, States> {
-    constructor(props: RequiredProps) {
-        super(props);
+    constructor() {
+        super();
+        makeObservable(this);
     }
-    startGrabbing = () => {
+    @action startGrabbing = () => {
         window.addEventListener("mouseup", this.stopGrabbing);
         window.addEventListener("mousemove", this.grabbingProcess);
         if (!this.elementBackgroundRef.current) return;
@@ -31,22 +34,23 @@ export class CircleItem extends Component<RequiredProps, States> {
         this.elementBackgroundRef.current.style.strokeWidth = "42";
     };
 
-    grabbingProcess = (e: MouseEvent) => {
+    @action grabbingProcess = (e: MouseEvent) => {
         const delta = new Pos(
             e.pageX - window.innerWidth * 0.72433704,
             e.pageY - window.innerHeight / 2
         );
         const angle = delta.angleFromZero();
 
-        const x1 = Math.cos(angle - this.props.halfAngle) * 26 + 50;
-        const y1 = Math.sin(angle - this.props.halfAngle) * 26 + 50;
-        const x2 = Math.cos(angle + this.props.halfAngle) * 26 + 50;
-        const y2 = Math.sin(angle + this.props.halfAngle) * 26 + 50;
+        const x1 = Math.cos(angle - this.viewProps.halfAngle) * 26 + 50;
+        const y1 = Math.sin(angle - this.viewProps.halfAngle) * 26 + 50;
+        const x2 = Math.cos(angle + this.viewProps.halfAngle) * 26 + 50;
+        const y2 = Math.sin(angle + this.viewProps.halfAngle) * 26 + 50;
         const rawTextx = Math.cos(angle);
         const rawTexty = Math.sin(angle);
         this.elementBackgroundRef.current?.setAttribute(
             "d",
-            this.props.saveManager.Wheels[this.props.circleID].length == 1
+            this.viewProps.saveManager.Wheels[this.viewProps.circleID].length ==
+                1
                 ? `M${x1},${y1}A26,26,0,0,${1},${rawTextx * 26 + 50},${
                       rawTexty * 26 + 50
                   }A26,26,0,0,${1},${x2},${y2}`
@@ -60,24 +64,23 @@ export class CircleItem extends Component<RequiredProps, States> {
                 : `M50,50L${rawTextx * 50 + 50},${rawTexty * 50 + 50}`
         );
         let deltaInd =
-            angle / (this.props.halfAngle * 2) - this.props.elementInd;
+            angle / (this.viewProps.halfAngle * 2) - this.viewProps.elementInd;
         if (deltaInd > 1.5)
             deltaInd -=
-                this.props.saveManager.Wheels[this.props.circleID].length;
+                this.viewProps.saveManager.Wheels[this.viewProps.circleID]
+                    .length;
         if (deltaInd > 0.875 && deltaInd < 1.5) {
-            this.props.saveManager.swapCircleElement(
-                this.props.circleID,
-                this.props.element,
+            this.viewProps.saveManager.swapCircleElement(
+                this.viewProps.circleID,
+                this.viewProps.element,
                 false
             );
-            this.props.updateCircle();
         } else if (deltaInd < -0.875 && deltaInd > -1.5) {
-            this.props.saveManager.swapCircleElement(
-                this.props.circleID,
-                this.props.element,
+            this.viewProps.saveManager.swapCircleElement(
+                this.viewProps.circleID,
+                this.viewProps.element,
                 true
             );
-            this.props.updateCircle();
         }
     };
 
@@ -86,19 +89,28 @@ export class CircleItem extends Component<RequiredProps, States> {
         window.removeEventListener("mousemove", this.grabbingProcess);
 
         const x1 =
-            Math.cos(this.props.centerAngle - this.props.halfAngle) * 26 + 50;
+            Math.cos(this.viewProps.centerAngle - this.viewProps.halfAngle) *
+                26 +
+            50;
         const y1 =
-            Math.sin(this.props.centerAngle - this.props.halfAngle) * 26 + 50;
+            Math.sin(this.viewProps.centerAngle - this.viewProps.halfAngle) *
+                26 +
+            50;
         const x2 =
-            Math.cos(this.props.centerAngle + this.props.halfAngle) * 26 + 50;
+            Math.cos(this.viewProps.centerAngle + this.viewProps.halfAngle) *
+                26 +
+            50;
         const y2 =
-            Math.sin(this.props.centerAngle + this.props.halfAngle) * 26 + 50;
-        const rawTextx = Math.cos(this.props.centerAngle);
-        const rawTexty = Math.sin(this.props.centerAngle);
+            Math.sin(this.viewProps.centerAngle + this.viewProps.halfAngle) *
+                26 +
+            50;
+        const rawTextx = Math.cos(this.viewProps.centerAngle);
+        const rawTexty = Math.sin(this.viewProps.centerAngle);
 
         this.elementBackgroundRef.current?.setAttribute(
             "d",
-            this.props.saveManager.Wheels[this.props.circleID].length == 1
+            this.viewProps.saveManager.Wheels[this.viewProps.circleID].length ==
+                1
                 ? `M${x1},${y1}A26,26,0,0,${1},${rawTextx * 26 + 50},${
                       rawTexty * 26 + 50
                   }A26,26,0,0,${1},${x2},${y2}`
@@ -116,30 +128,45 @@ export class CircleItem extends Component<RequiredProps, States> {
             "rgba(255,255,255,0.3)";
         this.elementBackgroundRef.current.style.strokeWidth = "40";
     };
-
-    elementBackgroundRef = createRef<SVGPathElement>();
-    elementTitleRef = createRef<SVGPathElement>();
-
-    render(): ReactNode {
+}
+export const CircleItem = view(CircleItemViewModel)<RequiredProps>(
+    ({ viewModel }) => {
         const x1 =
-            Math.cos(this.props.centerAngle - this.props.halfAngle) * 26 + 50;
+            Math.cos(
+                viewModel.viewProps.centerAngle - viewModel.viewProps.halfAngle
+            ) *
+                26 +
+            50;
         const y1 =
-            Math.sin(this.props.centerAngle - this.props.halfAngle) * 26 + 50;
+            Math.sin(
+                viewModel.viewProps.centerAngle - viewModel.viewProps.halfAngle
+            ) *
+                26 +
+            50;
         const x2 =
-            Math.cos(this.props.centerAngle + this.props.halfAngle) * 26 + 50;
+            Math.cos(
+                viewModel.viewProps.centerAngle + viewModel.viewProps.halfAngle
+            ) *
+                26 +
+            50;
         const y2 =
-            Math.sin(this.props.centerAngle + this.props.halfAngle) * 26 + 50;
-        const rawTextx = Math.cos(this.props.centerAngle);
-        const rawTexty = Math.sin(this.props.centerAngle);
+            Math.sin(
+                viewModel.viewProps.centerAngle + viewModel.viewProps.halfAngle
+            ) *
+                26 +
+            50;
+        const rawTextx = Math.cos(viewModel.viewProps.centerAngle);
+        const rawTexty = Math.sin(viewModel.viewProps.centerAngle);
         return (
             <g>
                 <path
                     className={`${cl.CircleItem} ${
-                        this.props.edit ? cl.CircleItemEdit : undefined
+                        viewModel.viewProps.edit ? cl.CircleItemEdit : undefined
                     }`}
                     d={
-                        this.props.saveManager.Wheels[this.props.circleID]
-                            .length == 1
+                        viewModel.viewProps.saveManager.Wheels[
+                            viewModel.viewProps.circleID
+                        ].length == 1
                             ? `M${x1},${y1}A26,26,0,0,${1},${
                                   rawTextx * 26 + 50
                               },${
@@ -148,30 +175,35 @@ export class CircleItem extends Component<RequiredProps, States> {
                             : `M${x1},${y1}A26,26,0,0,${1},${x2},${y2}`
                     }
                     onClick={
-                        this.props.edit
+                        viewModel.viewProps.edit
                             ? undefined
                             : (e) => {
+                                  if (!viewModel.viewProps.addNewChip) return;
                                   e.stopPropagation();
-                                  this.props.addNewChip(this.props.element);
+                                  viewModel.viewProps.addNewChip(
+                                      viewModel.viewProps.element
+                                  );
                               }
                     }
                     onContextMenu={(e) => {
                         e.preventDefault();
-                        this.props.contextMenu(
-                            this.props.element,
+                        viewModel.viewProps.contextMenu(
+                            viewModel.viewProps.element,
                             new Pos(e.pageX, e.pageY)
                         );
                     }}
                     onMouseDown={
-                        this.props.edit ? this.startGrabbing : undefined
+                        viewModel.viewProps.edit
+                            ? viewModel.startGrabbing
+                            : undefined
                     }
-                    ref={this.elementBackgroundRef}
+                    ref={viewModel.elementBackgroundRef}
                 />
                 <path
-                    id={`selector_${this.props.circleID}${
-                        this.props.edit ? "e" : ""
-                    }${this.props.element}`}
-                    ref={this.elementTitleRef}
+                    id={`selector_${viewModel.viewProps.circleID}${
+                        viewModel.viewProps.edit ? "e" : ""
+                    }${viewModel.viewProps.element}`}
+                    ref={viewModel.elementTitleRef}
                     d={
                         rawTextx < 0
                             ? `M${rawTextx * 50 + 50},${
@@ -184,16 +216,16 @@ export class CircleItem extends Component<RequiredProps, States> {
                 />
                 <text textAnchor="middle">
                     <textPath
-                        href={`#selector_${this.props.circleID}${
-                            this.props.edit ? "e" : ""
-                        }${this.props.element}`}
+                        href={`#selector_${viewModel.viewProps.circleID}${
+                            viewModel.viewProps.edit ? "e" : ""
+                        }${viewModel.viewProps.element}`}
                         className={cl.TitleItem}
                         startOffset="50%"
                     >
-                        {this.props.element}
+                        {viewModel.viewProps.element}
                     </textPath>
                 </text>
             </g>
         );
     }
-}
+);

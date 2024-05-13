@@ -1,13 +1,13 @@
 import cl from "./SideEditPin.module.scss";
-import { getColorWithState } from "../../../common/Colors";
-import { Pin } from "../../../Simulating/Pin";
-import { States } from "../../../common/State";
+import { getColorWithState } from "../../../../common/Colors";
+import { Pin } from "../../../../Simulating/Pin";
+import { States } from "../../../../common/State";
 import { ViewPin } from "./RPin";
 import OutsideClickHandler from "react-outside-click-handler";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
-import { SidePinFieldViewModel } from "../SidePinField";
-import { userSettings } from "../../../Managers/UserManager";
+import { SidePinFieldViewModel } from "./SidePinField";
+import { userSettings } from "../../../../Managers/UserManager";
 
 interface RequiredProps {
     Pin: Pin;
@@ -109,7 +109,7 @@ export const SideEditPin = view(SidePinViewModel)<RequiredProps>(
                             <br />
                             <button
                                 onClick={() => {
-                                    viewModel.parent.parent.removePin(
+                                    viewModel.parent.parent.editorObjectsManager.removePin(
                                         viewModel.pin
                                     );
                                 }}
@@ -141,8 +141,8 @@ export const SideEditPin = view(SidePinViewModel)<RequiredProps>(
                 <ViewPin
                     Pin={viewModel.pin}
                     interactPin={
-                        viewModel.parent.parent.wireIncompleteViewModel
-                            ?.clickToPin
+                        viewModel.parent.parent.editorObjectsManager
+                            .wireIncompleteViewModel?.clickToPin
                     }
                 />
                 {viewModel.viewProps.isPreview ? undefined : (
@@ -153,7 +153,8 @@ export const SideEditPin = view(SidePinViewModel)<RequiredProps>(
                         }}
                         value={viewModel.pin.name}
                         style={{
-                            display: viewModel.parent.parent.showAllPinTitles
+                            display: viewModel.parent.parent.statesManager
+                                .showAllPinTitles
                                 ? "block"
                                 : "none",
                         }}

@@ -11,10 +11,10 @@ export interface IHotKeys {
     newChip: hotKeyItem;
     hideAllPin: hotKeyItem;
     hideChipPins: hotKeyItem;
-    cancelAction: hotKeyItem;
+    escAction: hotKeyItem;
     remove: hotKeyItem;
-    addCount: hotKeyItem;
-    reduceCount: hotKeyItem;
+    increaseCount: hotKeyItem;
+    decreaseCount: hotKeyItem;
 }
 export const defaultHotKeys: IHotKeys = {
     save: new hotKeyItem(["KeyS"], undefined, true),
@@ -22,10 +22,10 @@ export const defaultHotKeys: IHotKeys = {
     newChip: new hotKeyItem(["KeyD"], undefined, true),
     hideAllPin: new hotKeyItem(["Tab"]),
     hideChipPins: new hotKeyItem(["KeyQ"]),
-    cancelAction: new hotKeyItem(["Escape"]),
+    escAction: new hotKeyItem(["Escape"]),
     remove: new hotKeyItem(["Backspace"]),
-    addCount: new hotKeyItem(["ArrowUp", "ArrowRight"]),
-    reduceCount: new hotKeyItem(["ArrowDown", "ArrowLeft"]),
+    increaseCount: new hotKeyItem(["ArrowUp", "ArrowRight"]),
+    decreaseCount: new hotKeyItem(["ArrowDown", "ArrowLeft"]),
 };
 export const hotkeyInfo: { [key in keyof IHotKeys]: { title: string } } = {
     save: {
@@ -43,16 +43,16 @@ export const hotkeyInfo: { [key in keyof IHotKeys]: { title: string } } = {
     hideChipPins: {
         title: "Скрыть описания пинов дочерних чипов",
     },
-    cancelAction: {
+    escAction: {
         title: "Отмена операции",
     },
     remove: {
         title: "Кнопка удаления",
     },
-    addCount: {
+    increaseCount: {
         title: "Увеличение добавляемых чипов",
     },
-    reduceCount: {
+    decreaseCount: {
         title: "Уменьшение добавляемых чипов",
     },
 };

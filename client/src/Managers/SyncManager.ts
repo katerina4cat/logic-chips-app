@@ -22,34 +22,36 @@ class SyncManager {
                 if (deletingInfo.deletedAt > localSave.Chips[index].lastEdit)
                     removeElementByField(localSave.Chips, deletingInfo, "name");
             });
-            save.creatingChips.forEach((cloudChipsInfo) => {
+            save.creatingChips.forEach((cloudChipInfo) => {
                 const index = localSave.Chips.findIndex(
-                    (chip) => chip.name === cloudChipsInfo.name
+                    (chip) => chip.name === cloudChipInfo.name
                 );
-                if (index === -1) localSave.Chips.push(cloudChipsInfo);
+                if (index === -1) localSave.Chips.push(cloudChipInfo);
                 else {
-                    if (
-                        new Date(cloudChipsInfo.lastEdit) >=
-                        new Date(localSave.Chips[index].lastEdit)
-                    )
-                        localSave.Chips[index] = cloudChipsInfo;
-                    else {
-                        console.log(cloudChipsInfo.lastEdit);
+                    const deltaTime =
+                        new Date(localSave.Chips[index].lastEdit).valueOf() -
+                        new Date(cloudChipInfo.lastEdit).valueOf();
+                    // Если локальное время последнего сохранения больше, облачного больше чем на 1.75 сек, то спрашиваем кого сохранять
+                    if (deltaTime > 1100) {
+                        console.log(cloudChipInfo.lastEdit);
                         const userConfirm =
                             confirm(`Синхронизация сохранения "${save.saveName}"
-Обновить чип ${cloudChipsInfo.name} из облака?
+Обновить чип ${cloudChipInfo.name} из облака?
 Даты изменения:
 Локальная: ${new Date(localSave.Chips[index].lastEdit || 0)
                                 .toISOString()
                                 .replace("T", " ")
                                 .replace("Z", "")}
-Облачная: ${new Date(cloudChipsInfo.lastEdit)
+Облачная: ${new Date(cloudChipInfo.lastEdit)
                                 .toISOString()
                                 .replace("T", " ")
                                 .replace("Z", "")}
 `);
-                        if (userConfirm)
-                            localSave.Chips[index] = cloudChipsInfo;
+                        if (userConfirm) localSave.Chips[index] = cloudChipInfo;
+                    } else {
+                        if (deltaTime < -1100) {
+                            localSave.Chips[index] = cloudChipInfo;
+                        }
                     }
                 }
             });

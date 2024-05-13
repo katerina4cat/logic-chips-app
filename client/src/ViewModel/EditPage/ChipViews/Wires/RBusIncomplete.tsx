@@ -1,13 +1,13 @@
 import cl from "./RBus.module.scss";
-import { Pos } from "../../../common/Pos";
+import { Pos } from "../../../../common/Pos";
 import { Colors } from "@shared/models/common/Colors";
-import { getColorWithState } from "../../../common/Colors";
-import { BusEndPosWidth } from "../../../common/DefaultSettings";
+import { getColorWithState } from "../../../../common/Colors";
+import { BusEndPosWidth } from "../../../../common/DefaultSettings";
 import { action, computed, makeObservable, observable } from "mobx";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { EditPageViewModel } from "../EditPageViewModel";
-import { States } from "../../../common/State";
-import { userSettings } from "../../../Managers/UserManager";
+import { States } from "../../../../common/State";
+import { userSettings } from "../../../../Managers/UserManager";
+import { EditPageViewModel } from "../../EditPage";
 
 export class BusIncompleteViewModel extends ViewModel<EditPageViewModel> {
     @observable points: Pos[] = [new Pos()];
@@ -28,8 +28,8 @@ export class BusIncompleteViewModel extends ViewModel<EditPageViewModel> {
         const pastedPoints = [...this.points];
         this.points = [new Pos()];
         pastedPoints.pop();
-        this.parent.addBus(pastedPoints);
-        this.parent.addingBus = false;
+        this.parent.editorObjectsManager.addBus(pastedPoints);
+        this.parent.editorObjectsManager.addingBus = false;
     };
 
     @action mouseMove = (e: MouseEvent) => {
@@ -88,7 +88,7 @@ export class BusIncompleteViewModel extends ViewModel<EditPageViewModel> {
 }
 
 export const BusIncomplete = view(BusIncompleteViewModel)(({ viewModel }) => {
-    if (viewModel.parent.addingBus) {
+    if (viewModel.parent.editorObjectsManager.addingBus) {
         window.addEventListener("mousedown", viewModel.mouseDown);
         window.addEventListener("mousemove", viewModel.mouseMove);
     } else {

@@ -116,10 +116,10 @@ BEGIN
 
     IF ROW_COUNT() > 0 THEN
         INSERT INTO DeletingLog (saveID, deletedAt, chipName) 
-        VALUES (saveID, CURRENT_TIMESTAMP, title);
+        VALUES (saveID, deleteTime, title);
         
         UPDATE saves 
-        SET lastEdit = CURRENT_TIMESTAMP 
+        SET lastEdit = deleteTime 
         WHERE saves.id = saveID;
     END IF;
 END //
