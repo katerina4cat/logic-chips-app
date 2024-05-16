@@ -1,0 +1,59 @@
+.EightSegmentChip {
+    display: flex;
+    width: max-content;
+    height: min-content;
+    align-items: center;
+    margin: 0.1em 0;
+    cursor: move;
+    font-size: 1.25em;
+    & > :first-child {
+        margin: 0.25em auto 0.25em -0.5em;
+    }
+    .ChipDisplay {
+        padding: 0 0.75em;
+        display: flex;
+        align-items: flex-end;
+        .RowSegments {
+            display: flex;
+            justify-content: space-between;
+        }
+        .HorisontalSegment {
+            height: 0.75em;
+            aspect-ratio: 5;
+            clip-path: polygon(
+                10% 0,
+                90% 0,
+                100% 50%,
+                90% 100%,
+                10% 100%,
+                0% 50%
+            );
+            margin: 0 0.5em;
+        }
+        .VerticalSegment {
+            width: 0.75em;
+            aspect-ratio: 1/5;
+            clip-path: polygon(
+                50% 0,
+                100% 10%,
+                100% 90%,
+                50% 100%,
+                0 90%,
+                0 10%
+            );
+        }
+        .Dot {
+            border-radius: 50%;
+            width: 0.75em;
+            aspect-ratio: 1;
+        }
+    }
+    .PinList {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        & > circle {
+            margin: 0.125em 0em;
+        }
+    }
+}

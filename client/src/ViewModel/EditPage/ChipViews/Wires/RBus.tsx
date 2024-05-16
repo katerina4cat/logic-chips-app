@@ -1,5 +1,5 @@
 import cl from "./RBus.module.scss";
-import { Bus } from "../../../../Simulating/BaseChips/Bus";
+import { Bus } from "../../../../Simulating/BaseChips/BUS";
 import { BusEndPosWidth, busID } from "../../../../common/DefaultSettings";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable, runInAction } from "mobx";

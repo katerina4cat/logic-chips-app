@@ -35,10 +35,25 @@ export const Options = view(OptionsViewModel)<RequiredProps>(
                     }`}
                     onClick={() => {
                         if (UserManager.signedIn)
-                            userSettings.setSync(!userSettings.syncSettings);
+                            userSettings.setSyncSaves(!userSettings.syncSaves);
                     }}
                 >
                     Синхронизация сохранений{" "}
+                    <input type="checkbox" checked={userSettings.syncSaves} />
+                </div>
+
+                <div
+                    className={`${cl.Option} ${
+                        !UserManager.signedIn && cl.Disabled
+                    }`}
+                    onClick={() => {
+                        if (UserManager.signedIn)
+                            userSettings.setSyncSettings(
+                                !userSettings.syncSettings
+                            );
+                    }}
+                >
+                    Синхронизация настроек{" "}
                     <input
                         type="checkbox"
                         checked={userSettings.syncSettings}
@@ -46,7 +61,7 @@ export const Options = view(OptionsViewModel)<RequiredProps>(
                 </div>
                 <div
                     className={cl.Option}
-                    onClick={(e) =>
+                    onClick={() =>
                         userSettings.setSmartConnection(
                             !userSettings.smartConnection
                         )
@@ -57,15 +72,6 @@ export const Options = view(OptionsViewModel)<RequiredProps>(
                         type="checkbox"
                         checked={userSettings.smartConnection}
                     />
-                </div>
-                <div
-                    className={cl.Option}
-                    onClick={(e) =>
-                        userSettings.setCellCord(!userSettings.cellCord)
-                    }
-                >
-                    Точная привязка элементов к сетке{" "}
-                    <input type="checkbox" checked={userSettings.cellCord} />
                 </div>
                 <button onClick={viewModel.hotKeys}>Горячие клавиши</button>
                 <button onClick={viewModel.back}>Назад</button>

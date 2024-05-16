@@ -6,7 +6,7 @@ import { WireInfo } from "./WireInfo";
 export enum ChipTypes {
     "Default" = 1,
     "BUS" = 2,
-    "SevenSegment" = 3,
+    "EightSegment" = 3,
 }
 
 export class ChipInfo {

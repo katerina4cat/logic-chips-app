@@ -7,6 +7,7 @@ import { createSaves, saveChip } from "./Apis/Saves";
 import { SaveManager } from "./SaveManager";
 
 const settingsTitle = {
+    syncSaves: "Sett:syncSaves",
     syncSettings: "Sett:syncSettings",
     smartConnection: "Sett:smartConnect",
     cellCord: "Sett:cellCord",
@@ -14,20 +15,19 @@ const settingsTitle = {
 };
 
 export class UserSettings {
+    @observable syncSaves: boolean;
     @observable syncSettings: boolean;
     @observable smartConnection: boolean;
-    @observable cellCord: boolean;
-    @observable cellSize: number = 10.0;
     @observable hotKeys: IHotKeys;
     constructor() {
+        this.syncSaves = JSON.parse(
+            localStorage.getItem(settingsTitle.syncSaves) || "false"
+        );
         this.syncSettings = JSON.parse(
             localStorage.getItem(settingsTitle.syncSettings) || "false"
         );
         this.smartConnection = JSON.parse(
             localStorage.getItem(settingsTitle.smartConnection) || "false"
-        );
-        this.cellCord = JSON.parse(
-            localStorage.getItem(settingsTitle.cellCord) || "false"
         );
         const parseResult = JSON.parse(
             localStorage.getItem(settingsTitle.hotKeys) || "false"
@@ -50,19 +50,18 @@ export class UserSettings {
         };
     }
     get IsUserSync() {
-        return userManager.signedIn && this.syncSettings;
+        return userManager.signedIn && this.syncSaves;
     }
-    @action setSync = (value: boolean) => {
-        this.syncSettings = value;
+    @action setSyncSaves = (value: boolean) => {
+        this.syncSaves = value;
         localStorage.setItem(
-            settingsTitle.syncSettings,
-            JSON.stringify(this.syncSettings)
+            settingsTitle.syncSaves,
+            JSON.stringify(this.syncSaves)
         );
         if (this.IsUserSync) {
             const keys = Object.keys(localStorage)
                 .filter((key) => key.startsWith("Save:"))
                 .map((saveKey) => saveKey.slice(5));
-            createSaves(keys).then((res) => console.log(res));
             keys.forEach((key) => {
                 const saveInfo = SaveManager.loadSaveByName(key);
                 saveInfo.Chips.forEach((chip) => {
@@ -72,12 +71,14 @@ export class UserSettings {
             });
         }
     };
-    @action setCellCord = (value: boolean) => {
-        this.cellCord = value;
+    @action setSyncSettings = (value: boolean) => {
+        this.syncSettings = value;
         localStorage.setItem(
-            settingsTitle.cellCord,
-            JSON.stringify(this.cellCord)
+            settingsTitle.syncSettings,
+            JSON.stringify(this.syncSettings)
         );
+        if (userManager.signedIn && this.syncSettings) {
+        }
     };
     @action setSmartConnection = (value: boolean) => {
         this.smartConnection = value;

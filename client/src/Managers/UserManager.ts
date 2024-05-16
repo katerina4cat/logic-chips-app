@@ -13,7 +13,7 @@ class UserManager {
     @observable signedIn = false;
     @observable settings = new UserSettings();
     @observable loaded = false;
-    donateLevel = 0b1;
+    donateLevel = 0b111;
 
     constructor() {
         makeObservable(this);

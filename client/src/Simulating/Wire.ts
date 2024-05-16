@@ -3,7 +3,7 @@ import { BusPin, Pin } from "./Pin";
 import { PinState } from "../common/State";
 import { Pos } from "../common/Pos";
 import { ChipTypes } from "@shared/models/saves/ChipInfo";
-import { Bus } from "./BaseChips/Bus";
+import { Bus } from "./BaseChips/BUS";
 import { action, computed, makeObservable, observable, reaction } from "mobx";
 import { WireInfo } from "@shared/models/saves/WireInfo";
 

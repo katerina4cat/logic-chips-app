@@ -1,13 +1,15 @@
 import { Pin } from "./Pin";
 import { Pos } from "../common/Pos";
 import { Wire } from "./Wire";
-import { Bus } from "./BaseChips/Bus";
+import { Bus } from "./BaseChips/BUS";
 import {
     ChipInfo,
     ChipTypes,
     SubChipInfo,
 } from "@shared/models/saves/ChipInfo";
 import { action, makeObservable, observable } from "mobx";
+import { DefaultChip } from "../ViewModel/EditPage/ChipViews/Chips/DefaultChip";
+import { EightSegmentChip } from "../ViewModel/EditPage/ChipViews/Chips/EightSegmentChip";
 
 let lastChipID = Date.now();
 
@@ -57,6 +59,19 @@ export class Chip {
      * @returns
      */
     toSubChipInfo = () => new SubChipInfo(this.id, this.name, this.position);
+
+    /**
+     * Создаёт новый элемент для отображения на основе текущего чипа
+     * @returns
+     */
+    createElement = () => {
+        switch (this.chipType) {
+            case ChipTypes.EightSegment:
+                return <EightSegmentChip chip={this} key={this.id} />;
+            default:
+                return <DefaultChip chip={this} key={this.id} />;
+        }
+    };
 
     /**
      * Конвертирует текущий объект в JSON объект для сохранения как дочерний чип

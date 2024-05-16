@@ -4,7 +4,7 @@ import { Chip } from "./Chip";
 import { Pos } from "../common/Pos";
 import { States } from "../common/State";
 import { action, computed, makeObservable, observable } from "mobx";
-import { Bus } from "./BaseChips/Bus";
+import { Bus } from "./BaseChips/BUS";
 import { PinState } from "../common/State";
 import { PinInfo } from "@shared/models/saves/PinInfo";
 

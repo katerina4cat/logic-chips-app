@@ -1,7 +1,6 @@
 import { RWire } from "./ChipViews/Wires/RWire";
 import { RWireIncomplete } from "./ChipViews/Wires/RWireIncomplete";
 import { SidePinField } from "./ChipViews/Pins/SidePinField";
-import { DefaultChip } from "./ChipViews/Chips/DefaultChip";
 import { CircleAdding } from "./Modal/CircleAdding/CircleAdding";
 import { SaveChip } from "./Modal/DefaultModals/SaveChip";
 import { ChipList } from "./Modal/DefaultModals/ChipList";
@@ -12,15 +11,17 @@ import { BusIncomplete } from "./ChipViews/Wires/RBusIncomplete";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { observable, makeObservable, runInAction } from "mobx";
 import { SaveManager } from "../../Managers/SaveManager";
-import { userSettings } from "../../Managers/UserManager";
 import { Pos } from "../../common/Pos";
 import { MouseEvent } from "react";
 import { StatesManager } from "./RedactorManagers/StatesManager";
 import { HotKeysManager } from "./RedactorManagers/HotKeysManager";
 import { EditorObjectsManager } from "./RedactorManagers/EditorObjectsManager";
+import { lastEditSaves } from "../../common/lastEditSaves";
+import { ChipInfo } from "@shared/models/saves/ChipInfo";
 
 export interface RequiredProps {
     saveName: string;
+    chipInfo?: ChipInfo;
 }
 
 export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
@@ -44,21 +45,15 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
             mousemove: this.handleMouseMove,
             keydown: this.hotKeysManager.handleKeyDown,
         };
+        if (this.viewProps.chipInfo) {
+            this.editorObjectsManager.loadChipByInfo(this.viewProps.chipInfo);
+        }
         makeObservable(this);
     }
 
     handleMouseMove = (e: MouseEvent) => {
         runInAction(() => {
-            this.cursorPosition = new Pos(
-                e.pageX -
-                    (userSettings.cellCord
-                        ? e.pageX % userSettings.cellSize
-                        : 0),
-                e.pageY -
-                    (userSettings.cellCord
-                        ? e.pageY % userSettings.cellSize
-                        : 0)
-            );
+            this.cursorPosition = new Pos(e.pageX, e.pageY);
         });
     };
 
@@ -76,6 +71,15 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
 
     // -------
 
+    onClosingWindow = () => {
+        if (!this.editorObjectsManager.notSavedChanges) return;
+        const lastEditSave: lastEditSaves = {
+            saveName: this.saveManager.saveName,
+            chipInfo: this.editorObjectsManager.currentChip.toChipInfo(),
+        };
+        localStorage.setItem("Recovery:lastEdit", JSON.stringify(lastEditSave));
+    };
+
     protected onViewMounted(): void {
         this.editorObjectsManager.lastSizeWindow = new Pos(
             window.outerWidth,
@@ -83,6 +87,7 @@ export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
         );
         for (const key in this.listeners)
             window.addEventListener(key, this.listeners[key]);
+        window.addEventListener("beforeunload", this.onClosingWindow);
     }
     protected onViewUnmounted(): void {
         for (const key in this.listeners)
@@ -126,17 +131,15 @@ export const EditPage = view(EditPageViewModel)<RequiredProps>(
                 />
                 <div className={cl.ChipField}>
                     {viewModel.editorObjectsManager.currentChip.subChips.map(
-                        (chip) => (
-                            <DefaultChip key={chip.id} chip={chip} />
-                        )
+                        (chip) => chip.createElement()
                     )}
                     <AddingChipsBox />
                 </div>
                 <SidePinField
                     Pins={viewModel.editorObjectsManager.currentChip.output}
                 />
-                {/* Modals windows */}
                 <>
+                    {/* Modals windows */}
                     <div>
                         {viewModel.statesManager.circleAddingWindow.map(
                             (circleEnabled, i) => (
@@ -154,7 +157,6 @@ export const EditPage = view(EditPageViewModel)<RequiredProps>(
                         )}
                     </div>
                     <ChipList />
-                    {/** maximum 12 элементов */}
                     <SaveChip />
                 </>
             </div>

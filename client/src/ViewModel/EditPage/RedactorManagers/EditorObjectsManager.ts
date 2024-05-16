@@ -3,11 +3,12 @@ import { EditPageViewModel } from "../EditPage";
 import { StatesManager } from "./StatesManager";
 import { Chip } from "../../../Simulating/Chip";
 import { Pos } from "../../../common/Pos";
-import { Bus } from "../../../Simulating/BaseChips/Bus";
+import { Bus } from "../../../Simulating/BaseChips/BUS";
 import { Wire } from "../../../Simulating/Wire";
 import { removeElement } from "../../../common/RemoveElement";
 import { Pin } from "../../../Simulating/Pin";
 import { WireIncompleteViewModel } from "../ChipViews/Wires/RWireIncomplete";
+import { ChipInfo } from "@shared/models/saves/ChipInfo";
 
 export class EditorObjectsManager {
     pageViewModel: EditPageViewModel;
@@ -22,6 +23,7 @@ export class EditorObjectsManager {
 
     lastSizeWindow = new Pos();
     wireHovered = false;
+    notSavedChanges = false;
 
     // Главные переменные для отображения
     @observable currentChip: Chip = new Chip(undefined, 0);
@@ -56,12 +58,30 @@ export class EditorObjectsManager {
     @action newChip = () => {
         this.pageViewModel.cancelAll();
         this.currentChip = new Chip(undefined, 0);
+        this.notSavedChanges = false;
     };
 
     @action loadChip = (chipName: string) => {
         [this.currentChip, this.lastSizeWindow] =
             this.pageViewModel.saveManager.loadChipByName(
                 chipName,
+                undefined,
+                0
+            );
+        this.pageViewModel.cancelAll();
+        if (this.lastSizeWindow.x === 0 && this.lastSizeWindow.y === 0)
+            this.lastSizeWindow = new Pos(
+                window.innerWidth,
+                window.innerHeight
+            );
+        this.windowResized();
+        this.notSavedChanges = false;
+    };
+
+    @action loadChipByInfo = (chipInfo: ChipInfo) => {
+        [this.currentChip, this.lastSizeWindow] =
+            this.pageViewModel.saveManager.loadChipByChipInfo(
+                chipInfo,
                 undefined,
                 0
             );
@@ -128,24 +148,30 @@ export class EditorObjectsManager {
 
     // Элементы чипа
 
-    @action addChips = (chips: Chip[]) =>
+    @action addChips = (chips: Chip[]) => {
         this.currentChip.subChips.push(...chips);
+        this.notSavedChanges = true;
+    };
 
     @action addBus = (points: Pos[]) => {
         this.currentChip.buses.push(new Bus(points));
+        this.notSavedChanges = true;
     };
 
     @action removeWire = (wire: Wire) => {
         if (this.currentChip.id !== 0) return;
         wire.deletingWire();
         removeElement(this.currentChip.wires, wire);
+        this.notSavedChanges = true;
     };
     @action addWire = (wire: Wire) => {
         this.currentChip.wires.push(wire);
+        this.notSavedChanges = true;
     };
     @action addPin = (pin: Pin) => {
         if (pin.isInput) this.currentChip.input.push(pin);
         else this.currentChip.output.push(pin);
+        this.notSavedChanges = true;
     };
 
     @action removePin = (pin: Pin) => {
@@ -158,6 +184,7 @@ export class EditorObjectsManager {
         }
         if (pin.isInput) removeElement(this.currentChip.input, pin);
         else removeElement(this.currentChip.output, pin);
+        this.notSavedChanges = true;
     };
 
     @action removeBus = (bus: Bus) => {
@@ -166,6 +193,7 @@ export class EditorObjectsManager {
         bus.input.forEach((pin) => this.removePin(pin));
         bus.output.forEach((pin) => this.removePin(pin));
         removeElement(this.currentChip.buses, bus);
+        this.notSavedChanges = true;
     };
 
     @action removingSelectedChip = () => {
@@ -178,5 +206,6 @@ export class EditorObjectsManager {
             chipRemoving.output.forEach((pin) => this.removePin(pin));
             removeElement(this.currentChip.subChips, chipRemoving);
         }
+        this.notSavedChanges = true;
     };
 }
