@@ -3,7 +3,7 @@ import { Chip } from "../../../../Simulating/Chip";
 import { ViewPin } from "../Pins/RPin";
 import { Pos } from "../../../../common/Pos";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { action, makeObservable, observable } from "mobx";
+import { action, flow, makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../../EditPage";
 import { getColorWithState } from "../../../../common/Colors";
 
@@ -12,11 +12,32 @@ interface RequiredProps {
     isPreview?: boolean;
 }
 
+enum SegmentsPins {
+    A = 0,
+    B = 1,
+    C = 2,
+    D = 3,
+    E = 4,
+    F = 5,
+    G = 6,
+    DP = 7,
+}
+
 class EightSegmentChipViewModel extends ViewModel<
     EditPageViewModel,
     RequiredProps
 > {
     @observable chip: Chip;
+    @observable hovered = [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+    ];
     editChip: Chip = new Chip(undefined, -1);
 
     mouseDownTime: number = 0;
@@ -84,6 +105,8 @@ class EightSegmentChipViewModel extends ViewModel<
         chip.selected = true;
     };
     @action selectingChip = (chip: Chip) => (chip.selected = !chip.selected);
+    @action hoverPin = (index: number, value: boolean = false) =>
+        (this.hovered[index] = value);
 }
 
 export const EightSegmentChip = view(EightSegmentChipViewModel)<RequiredProps>(
@@ -121,7 +144,7 @@ export const EightSegmentChip = view(EightSegmentChipViewModel)<RequiredProps>(
                 }
             >
                 <div className={cl.PinList}>
-                    {viewModel.chip.input.map((pin) => (
+                    {viewModel.chip.input.map((pin, index) => (
                         <ViewPin
                             key={pin.id}
                             Pin={pin}
@@ -138,6 +161,9 @@ export const EightSegmentChip = view(EightSegmentChipViewModel)<RequiredProps>(
                                           .showChipPinTitles
                             }
                             isPreview={viewModel.viewProps.isPreview}
+                            onHover={(value) => {
+                                viewModel.hoverPin(index, value);
+                            }}
                         />
                     ))}
                 </div>
@@ -147,9 +173,13 @@ export const EightSegmentChip = view(EightSegmentChipViewModel)<RequiredProps>(
                             className={cl.HorisontalSegment}
                             style={{
                                 backgroundColor: getColorWithState(
-                                    viewModel.chip.input[0].totalState,
-                                    viewModel.chip.input[0].color
+                                    viewModel.chip.input[SegmentsPins.A]
+                                        .totalState,
+                                    viewModel.chip.input[SegmentsPins.A].color
                                 ),
+                                opacity: viewModel.hovered[SegmentsPins.A]
+                                    ? 0.2
+                                    : 1,
                             }}
                         />
                         <div className={cl.RowSegments}>
@@ -157,18 +187,28 @@ export const EightSegmentChip = view(EightSegmentChipViewModel)<RequiredProps>(
                                 className={cl.VerticalSegment}
                                 style={{
                                     backgroundColor: getColorWithState(
-                                        viewModel.chip.input[1].totalState,
-                                        viewModel.chip.input[1].color
+                                        viewModel.chip.input[SegmentsPins.F]
+                                            .totalState,
+                                        viewModel.chip.input[SegmentsPins.F]
+                                            .color
                                     ),
+                                    opacity: viewModel.hovered[SegmentsPins.F]
+                                        ? 0.2
+                                        : 1,
                                 }}
                             />
                             <div
                                 className={cl.VerticalSegment}
                                 style={{
                                     backgroundColor: getColorWithState(
-                                        viewModel.chip.input[2].totalState,
-                                        viewModel.chip.input[2].color
+                                        viewModel.chip.input[SegmentsPins.B]
+                                            .totalState,
+                                        viewModel.chip.input[SegmentsPins.B]
+                                            .color
                                     ),
+                                    opacity: viewModel.hovered[SegmentsPins.B]
+                                        ? 0.2
+                                        : 1,
                                 }}
                             />
                         </div>
@@ -176,9 +216,13 @@ export const EightSegmentChip = view(EightSegmentChipViewModel)<RequiredProps>(
                             className={cl.HorisontalSegment}
                             style={{
                                 backgroundColor: getColorWithState(
-                                    viewModel.chip.input[3].totalState,
-                                    viewModel.chip.input[3].color
+                                    viewModel.chip.input[SegmentsPins.G]
+                                        .totalState,
+                                    viewModel.chip.input[SegmentsPins.G].color
                                 ),
+                                opacity: viewModel.hovered[SegmentsPins.G]
+                                    ? 0.2
+                                    : 1,
                             }}
                         />
                         <div className={cl.RowSegments}>
@@ -186,18 +230,28 @@ export const EightSegmentChip = view(EightSegmentChipViewModel)<RequiredProps>(
                                 className={cl.VerticalSegment}
                                 style={{
                                     backgroundColor: getColorWithState(
-                                        viewModel.chip.input[4].totalState,
-                                        viewModel.chip.input[4].color
+                                        viewModel.chip.input[SegmentsPins.E]
+                                            .totalState,
+                                        viewModel.chip.input[SegmentsPins.E]
+                                            .color
                                     ),
+                                    opacity: viewModel.hovered[SegmentsPins.E]
+                                        ? 0.2
+                                        : 1,
                                 }}
                             />
                             <div
                                 className={cl.VerticalSegment}
                                 style={{
                                     backgroundColor: getColorWithState(
-                                        viewModel.chip.input[5].totalState,
-                                        viewModel.chip.input[5].color
+                                        viewModel.chip.input[SegmentsPins.C]
+                                            .totalState,
+                                        viewModel.chip.input[SegmentsPins.C]
+                                            .color
                                     ),
+                                    opacity: viewModel.hovered[SegmentsPins.C]
+                                        ? 0.2
+                                        : 1,
                                 }}
                             />
                         </div>
@@ -205,9 +259,13 @@ export const EightSegmentChip = view(EightSegmentChipViewModel)<RequiredProps>(
                             className={cl.HorisontalSegment}
                             style={{
                                 backgroundColor: getColorWithState(
-                                    viewModel.chip.input[6].totalState,
-                                    viewModel.chip.input[6].color
+                                    viewModel.chip.input[SegmentsPins.D]
+                                        .totalState,
+                                    viewModel.chip.input[SegmentsPins.D].color
                                 ),
+                                opacity: viewModel.hovered[SegmentsPins.D]
+                                    ? 0.2
+                                    : 1,
                             }}
                         />
                     </div>
@@ -215,9 +273,13 @@ export const EightSegmentChip = view(EightSegmentChipViewModel)<RequiredProps>(
                         className={cl.Dot}
                         style={{
                             backgroundColor: getColorWithState(
-                                viewModel.chip.input[7].totalState,
-                                viewModel.chip.input[7].color
+                                viewModel.chip.input[SegmentsPins.DP]
+                                    .totalState,
+                                viewModel.chip.input[SegmentsPins.DP].color
                             ),
+                            opacity: viewModel.hovered[SegmentsPins.DP]
+                                ? 0.2
+                                : 1,
                         }}
                     />
                 </div>

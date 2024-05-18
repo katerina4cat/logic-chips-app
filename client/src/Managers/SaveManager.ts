@@ -310,6 +310,17 @@ export class SaveManager {
                     : targetChip?.input.find(
                           (pin) => pin.id == wire.targetPin.pinID
                       );
+            if (sourceChip instanceof Bus && targetChip instanceof Bus) {
+                if (!source)
+                    source = sourceChip.input.find(
+                        (pin) => pin.id === wire.sourcePin.pinID
+                    );
+                if (!target) {
+                    target = targetChip.output.find(
+                        (pin) => pin.id === wire.targetPin.pinID
+                    );
+                }
+            }
             if (!source || !target) {
                 alert(
                     `Не удалось добавить провод в чипе ${chipInfo.name} wireID: ${wire.id}
@@ -317,7 +328,7 @@ export class SaveManager {
                 До: chip${wire.targetPin.chipID}-pin${wire.targetPin.pinID}
                 `
                 );
-                console.log(sourceChip, targetChip);
+                // console.log(sourceChip, targetChip);
             } else {
                 res.wires.push(
                     new Wire(

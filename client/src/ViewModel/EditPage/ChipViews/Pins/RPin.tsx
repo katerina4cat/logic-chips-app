@@ -15,6 +15,7 @@ interface RequiredProps {
     drawTitle?: boolean;
     isPreview?: boolean;
     isSide?: boolean;
+    onHover?: (value: boolean) => void;
 }
 
 export class PinViewModel extends ViewModel<undefined, RequiredProps> {
@@ -87,6 +88,14 @@ export const ViewPin = view(PinViewModel)<RequiredProps>(({ viewModel }) => {
                               console.log("Не инициализирован WireIncomplete!");
                       }
             }
+            onMouseEnter={() => {
+                if (viewModel.viewProps.onHover)
+                    viewModel.viewProps.onHover(true);
+            }}
+            onMouseLeave={() => {
+                if (viewModel.viewProps.onHover)
+                    viewModel.viewProps.onHover(false);
+            }}
         >
             <div
                 className={cl.PinTitle}

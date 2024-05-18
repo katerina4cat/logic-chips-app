@@ -7,7 +7,6 @@ import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, computed, makeObservable, observable } from "mobx";
 import { getColorWithState } from "../../../../common/Colors";
 import { PinState, States } from "../../../../common/State";
-import { userSettings } from "../../../../Managers/UserManager";
 import { EditPageViewModel } from "../../EditPage";
 
 export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
@@ -61,6 +60,7 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
             }
         } else {
             pin.isInput = !this.firstPin.isInput;
+            pin.chip.output.push(pin);
         }
 
         firstIsSource =
@@ -113,12 +113,8 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
     };
 
     @action handleMouseMove = (e: MouseEvent) => {
-        this.points[this.points.length - 1].x =
-            e.pageX -
-            (userSettings.cellCord ? e.pageX % userSettings.cellSize : 0);
-        this.points[this.points.length - 1].y =
-            e.pageY -
-            (userSettings.cellCord ? e.pageY % userSettings.cellSize : 0);
+        this.points[this.points.length - 1].x = e.pageX;
+        this.points[this.points.length - 1].y = e.pageY;
     };
 
     @computed get drawWire() {
