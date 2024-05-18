@@ -19,6 +19,11 @@ export class HotKeysManager {
     }
 
     @action handleKeyDown = (e: KeyboardEvent) => {
+        if (this.statesManager.escWindow) {
+            if (userSettings.hotKeys.escAction.testKey(e))
+                userSettings.hotKeys.escAction.event();
+            return;
+        }
         // Проверка находимся ли в основном чипе
         if (this.editorObjectsManager.currentChip.id !== 0) {
             if (userSettings.hotKeys.save.testKey(e)) {
@@ -72,11 +77,14 @@ export class HotKeysManager {
             this.editorObjectsManager.decreaseAdding;
         // escAction
         userSettings.hotKeys.escAction.event = () => {
+            if (this.statesManager.escWindow)
+                return this.statesManager.switchEscWindow(false);
+
             // Если что-то можно отменить
             if (this.pageViewModel.isAnyCancelable)
                 return this.pageViewModel.cancelAll();
             // Иначе, открываем меню
-            this.statesManager.menuWindow = true;
+            this.statesManager.escWindow = true;
         };
         // Удаление
         userSettings.hotKeys.remove.event =

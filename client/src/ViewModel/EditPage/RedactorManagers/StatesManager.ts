@@ -13,7 +13,7 @@ export class StatesManager {
     @observable circleAddingWindow: boolean[] = new Array(9).fill(false);
     @observable libraryWindow: boolean = false;
     @observable savingWindow = false;
-    @observable menuWindow = false;
+    @observable escWindow = false;
 
     constructor(editPageViewModel: EditPageViewModel) {
         this.pageViewModel = editPageViewModel;
@@ -25,7 +25,7 @@ export class StatesManager {
         return (
             this.libraryWindow ||
             this.savingWindow ||
-            this.menuWindow ||
+            this.escWindow ||
             this.circleAddingWindow.find((circlShow) => circlShow)
         );
     }
@@ -33,7 +33,7 @@ export class StatesManager {
     @action closeAll = () => {
         this.libraryWindow = false;
         this.savingWindow = false;
-        this.menuWindow = false;
+        this.escWindow = false;
         this.circleAddingWindow = new Array(9).fill(false);
     };
 
@@ -73,5 +73,11 @@ export class StatesManager {
         this.closeAll();
         if (value === undefined) this.savingWindow = !this.savingWindow;
         else this.savingWindow = value;
+    };
+
+    @action switchEscWindow = (value?: boolean) => {
+        this.closeAll();
+        if (value === undefined) this.escWindow = !this.escWindow;
+        else this.escWindow = value;
     };
 }

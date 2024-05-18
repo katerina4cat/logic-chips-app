@@ -37,11 +37,12 @@ export const Modal = view(ModalViewModel)<
                     e.stopPropagation();
                 }}
                 className={`${cl.ModalWindow} ${viewModel.viewProps.className}`}
-                style={
-                    viewModel.viewProps.modalBG
-                        ? { backgroundColor: viewModel.viewProps.modalBG }
-                        : undefined
-                }
+                style={{
+                    backgroundColor: viewModel.viewProps.modalBG
+                        ? viewModel.viewProps.modalBG
+                        : undefined,
+                    ...viewModel.viewProps.style,
+                }}
             />
         </div>
     );

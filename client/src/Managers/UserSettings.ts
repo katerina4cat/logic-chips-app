@@ -3,7 +3,7 @@ import { IHotKeys, defaultHotKeys } from "../common/DefaultSettings";
 import { changedHotKey, hotKeyItem } from "../common/hotKeyItem";
 import { plainToClass } from "class-transformer";
 import userManager from "./UserManager";
-import { createSaves, saveChip } from "./Apis/Saves";
+import { saveChip } from "./Apis/Saves";
 import { SaveManager } from "./SaveManager";
 
 const settingsTitle = {

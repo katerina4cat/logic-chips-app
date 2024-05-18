@@ -3,7 +3,7 @@ import { Chip } from "../../../../Simulating/Chip";
 import { ViewPin } from "../Pins/RPin";
 import { Pos } from "../../../../common/Pos";
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { action, flow, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../../EditPage";
 import { getColorWithState } from "../../../../common/Colors";
 

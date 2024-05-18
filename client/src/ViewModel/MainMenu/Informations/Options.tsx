@@ -6,7 +6,9 @@ import cl from "./Options.module.scss";
 import UserManager, { userSettings } from "../../../Managers/UserManager";
 import { HotKeys } from "./HotKeys";
 
-interface RequiredProps {}
+interface RequiredProps {
+    backOther?: JSX.Element;
+}
 
 export class OptionsViewModel extends ViewModel<
     MainMenuViewModel,
@@ -17,7 +19,9 @@ export class OptionsViewModel extends ViewModel<
         makeObservable(this);
     }
     back = () => {
-        this.parent.setCurrentInfo(<MainInfo />);
+        this.parent.setCurrentInfo(
+            this.viewProps.backOther ? this.viewProps.backOther : <MainInfo />
+        );
     };
     hotKeys = () => {
         this.parent.setCurrentInfo(<HotKeys />);
@@ -52,6 +56,7 @@ export const Options = view(OptionsViewModel)<RequiredProps>(
                                 !userSettings.syncSettings
                             );
                     }}
+                    style={{ textDecoration: "line-through" }}
                 >
                     Синхронизация настроек{" "}
                     <input
@@ -66,6 +71,7 @@ export const Options = view(OptionsViewModel)<RequiredProps>(
                             !userSettings.smartConnection
                         )
                     }
+                    style={{ textDecoration: "line-through" }}
                 >
                     Умное подключение провода к пину{" "}
                     <input

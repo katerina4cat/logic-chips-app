@@ -25,7 +25,9 @@ class Save {
     }
 }
 
-interface RequiredProps {}
+interface RequiredProps {
+    startInfo?: JSX.Element;
+}
 
 export class MainMenuViewModel extends ViewModel<AppViewModel, RequiredProps> {
     constructor() {
@@ -74,7 +76,11 @@ export class MainMenuViewModel extends ViewModel<AppViewModel, RequiredProps> {
     };
 
     @observable saves: Save[] = [];
-    @observable currentInfo = (<MainInfo />);
+    @observable currentInfo = this.viewProps.startInfo ? (
+        this.viewProps.startInfo
+    ) : (
+        <MainInfo />
+    );
     @action setCurrentInfo = (info: JSX.Element) => {
         this.currentInfo = info;
     };

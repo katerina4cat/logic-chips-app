@@ -18,13 +18,15 @@ import { HotKeysManager } from "./RedactorManagers/HotKeysManager";
 import { EditorObjectsManager } from "./RedactorManagers/EditorObjectsManager";
 import { lastEditSaves } from "../../common/lastEditSaves";
 import { ChipInfo } from "@shared/models/saves/ChipInfo";
+import { EscMenu } from "./Modal/DefaultModals/EscMenu";
+import { AppViewModel } from "../../App";
 
 export interface RequiredProps {
     saveName: string;
     chipInfo?: ChipInfo;
 }
 
-export class EditPageViewModel extends ViewModel<undefined, RequiredProps> {
+export class EditPageViewModel extends ViewModel<AppViewModel, RequiredProps> {
     saveManager: SaveManager;
     statesManager: StatesManager;
     hotKeysManager: HotKeysManager;
@@ -158,6 +160,7 @@ export const EditPage = view(EditPageViewModel)<RequiredProps>(
                     </div>
                     <ChipList />
                     <SaveChip />
+                    <EscMenu />
                 </>
             </div>
         );
