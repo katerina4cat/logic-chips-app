@@ -39,6 +39,7 @@ class authentification {
             res.cookie("refreshToken", result.refreshToken, {
                 maxAge: Number(process.env.REFRESH_TIME_MS),
                 httpOnly: true,
+                secure: false,
             });
             res.status(201).json({
                 ...result.userData,
@@ -69,6 +70,7 @@ class authentification {
             res.cookie("refreshToken", result.refreshToken, {
                 maxAge: Number(process.env.REFRESH_TIME_MS),
                 httpOnly: true,
+                secure: false,
             });
             res.status(201).json({
                 ...result.userData,
@@ -109,6 +111,7 @@ class authentification {
             res.cookie("refreshToken", result.refreshToken, {
                 maxAge: Number(process.env.REFRESH_TIME_MS),
                 httpOnly: true,
+                secure: false,
             });
             res.status(201).json({
                 ...result.userData,

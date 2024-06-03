@@ -14,6 +14,10 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
     @observable firstPin?: Pin;
     @observable radiusWire = 20;
 
+    get isStretching() {
+        return !!this.firstPin;
+    }
+
     constructor() {
         super();
         makeObservable(this);

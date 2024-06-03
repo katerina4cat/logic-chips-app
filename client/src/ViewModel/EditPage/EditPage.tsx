@@ -62,7 +62,8 @@ export class EditPageViewModel extends ViewModel<AppViewModel, RequiredProps> {
     get isAnyCancelable() {
         return (
             this.statesManager.isAnyEnabled ||
-            this.editorObjectsManager.isAnyCancelable
+            this.editorObjectsManager.isAnyCancelable ||
+            this.editorObjectsManager.wireIncompleteViewModel?.isStretching
         );
     }
 

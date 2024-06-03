@@ -31,9 +31,9 @@ const defaultChipsInfo = [
             "#262626"
         ),
     },
-    { access: 0b101, chipInfo: new ChipInfo("BUS", ChipTypes.BUS, "#262626") },
+    { access: 0b10, chipInfo: new ChipInfo("BUS", ChipTypes.BUS, "#262626") },
     {
-        access: 0b11,
+        access: 0b100,
         chipInfo: new ChipInfo("8 SEGMENT", ChipTypes.EightSegment, "#242529"),
     },
 ];
