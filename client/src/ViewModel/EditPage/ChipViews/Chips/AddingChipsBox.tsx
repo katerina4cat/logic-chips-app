@@ -27,7 +27,7 @@ class AddingChipViewModel extends ViewModel<EditPageViewModel> {
                                 const box = child?.getBoundingClientRect();
                                 const res = this.parent.editorObjectsManager
                                     .addingChip
-                                    ? this.parent.saveManager.loadChipByName(
+                                    ? this.parent.saveLoder.loadChipByName(
                                           this.parent.editorObjectsManager
                                               .addingChip.name,
                                           new Pos(box?.x, box?.y),

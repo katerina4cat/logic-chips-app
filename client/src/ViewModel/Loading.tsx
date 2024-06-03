@@ -27,12 +27,12 @@ export class LoadingViewModel extends ViewModel<AppViewModel, RequiredProps> {
             // Редактируя чип: ${lastEditSave.chipInfo.name}
             // Возобновить редактирование?`);
             if (userAnswer) {
-                this.parent.setCurrentPage(
-                    <EditPage
-                        saveName={lastEditSave.saveName}
-                        chipInfo={lastEditSave.chipInfo}
-                    />
-                );
+                // this.parent.setCurrentPage(
+                //     <EditPage
+                //         saveLoader={lastEditSave.saveName}
+                //         chipInfo={lastEditSave.chipInfo}
+                //     />
+                // );
             } else {
                 localStorage.removeItem("Recovery:lastEdit");
             }

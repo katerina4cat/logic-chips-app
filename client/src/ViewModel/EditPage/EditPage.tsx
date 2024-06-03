@@ -10,24 +10,22 @@ import { RBus } from "./ChipViews/Wires/RBus";
 import { BusIncomplete } from "./ChipViews/Wires/RBusIncomplete";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { observable, makeObservable, runInAction } from "mobx";
-import { SaveManager } from "../../Managers/SaveManager";
+import { SaveLoader } from "../../Managers/SaveLoader";
 import { Pos } from "../../common/Pos";
 import { MouseEvent } from "react";
 import { StatesManager } from "./RedactorManagers/StatesManager";
 import { HotKeysManager } from "./RedactorManagers/HotKeysManager";
 import { EditorObjectsManager } from "./RedactorManagers/EditorObjectsManager";
 import { lastEditSaves } from "../../common/lastEditSaves";
-import { ChipInfo } from "@shared/models/saves/ChipInfo";
 import { EscMenu } from "./Modal/DefaultModals/EscMenu";
 import { AppViewModel } from "../../App";
 
 export interface RequiredProps {
-    saveName: string;
-    chipInfo?: ChipInfo;
+    saveLoader: SaveLoader;
 }
 
 export class EditPageViewModel extends ViewModel<AppViewModel, RequiredProps> {
-    saveManager: SaveManager;
+    saveLoder: SaveLoader;
     statesManager: StatesManager;
     hotKeysManager: HotKeysManager;
     editorObjectsManager: EditorObjectsManager;
@@ -38,7 +36,7 @@ export class EditPageViewModel extends ViewModel<AppViewModel, RequiredProps> {
 
     constructor() {
         super();
-        this.saveManager = SaveManager.loadSaveByName(this.viewProps.saveName);
+        this.saveLoder = this.viewProps.saveLoader;
         this.statesManager = new StatesManager(this);
         this.editorObjectsManager = new EditorObjectsManager(this);
         this.hotKeysManager = new HotKeysManager(this);
@@ -47,9 +45,6 @@ export class EditPageViewModel extends ViewModel<AppViewModel, RequiredProps> {
             mousemove: this.handleMouseMove,
             keydown: this.hotKeysManager.handleKeyDown,
         };
-        if (this.viewProps.chipInfo) {
-            this.editorObjectsManager.loadChipByInfo(this.viewProps.chipInfo);
-        }
         makeObservable(this);
     }
 
@@ -77,7 +72,7 @@ export class EditPageViewModel extends ViewModel<AppViewModel, RequiredProps> {
     onClosingWindow = () => {
         if (!this.editorObjectsManager.notSavedChanges) return;
         const lastEditSave: lastEditSaves = {
-            saveName: this.saveManager.saveName,
+            saveName: this.saveLoder.saveInfo.saveName,
             chipInfo: this.editorObjectsManager.currentChip.toChipInfo(),
         };
         localStorage.setItem("Recovery:lastEdit", JSON.stringify(lastEditSave));
@@ -154,7 +149,6 @@ export const EditPage = view(EditPageViewModel)<RequiredProps>(
                                         viewModel.editorObjectsManager
                                             .setAddingChip
                                     }
-                                    saveManager={viewModel.saveManager}
                                 />
                             )
                         )}

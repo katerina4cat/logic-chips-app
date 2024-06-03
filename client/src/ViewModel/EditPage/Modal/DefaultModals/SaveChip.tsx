@@ -36,7 +36,7 @@ export class SaveChipViewModel extends ViewModel<
     saveChip = () => {
         if (this.chipTitle != "")
             if (
-                this.parent.saveManager.saveNewChip(
+                this.parent.saveLoder.saveNewChip(
                     this.parent.editorObjectsManager.currentChip,
                     this.chipTitle,
                     this.chipColor

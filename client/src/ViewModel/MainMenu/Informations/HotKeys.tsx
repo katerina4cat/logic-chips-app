@@ -40,7 +40,7 @@ export const HotKeys = view(HotKeysViewModel)<RequiredProps>(
                 <div className={cl.HotKeyEditor}>
                     {Object.keys(hotkeyInfo).map((hotkeyName) => {
                         const keyInfo = (
-                            userSettings.hotKeys as unknown as {
+                            userSettings.settingsData.hotKeys as unknown as {
                                 [key: string]: hotKeyItem;
                             }
                         )[hotkeyName];

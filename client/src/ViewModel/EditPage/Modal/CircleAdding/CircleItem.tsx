@@ -1,7 +1,7 @@
 import { createRef } from "react";
 import cl from "./CircleItem.module.scss";
 import { Pos } from "../../../../common/Pos";
-import { SaveManager } from "../../../../Managers/SaveManager";
+import { SaveLoader } from "../../../../Managers/SaveLoader";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { makeObservable, action } from "mobx";
 
@@ -12,7 +12,7 @@ interface RequiredProps {
     elementInd: number;
     circleID: number;
     addNewChip?: (chipName: string) => void;
-    saveManager: SaveManager;
+    saveLoader: SaveLoader;
     contextMenu: (chipName: string, positionCursor: Pos) => void;
     edit?: boolean;
 }
@@ -49,8 +49,8 @@ export class CircleItemViewModel extends ViewModel<undefined, RequiredProps> {
         const rawTexty = Math.sin(angle);
         this.elementBackgroundRef.current?.setAttribute(
             "d",
-            this.viewProps.saveManager.Wheels[this.viewProps.circleID].length ==
-                1
+            this.viewProps.saveLoader.saveInfo.Wheels[this.viewProps.circleID]
+                .length == 1
                 ? `M${x1},${y1}A26,26,0,0,${1},${rawTextx * 26 + 50},${
                       rawTexty * 26 + 50
                   }A26,26,0,0,${1},${x2},${y2}`
@@ -67,16 +67,17 @@ export class CircleItemViewModel extends ViewModel<undefined, RequiredProps> {
             angle / (this.viewProps.halfAngle * 2) - this.viewProps.elementInd;
         if (deltaInd > 1.5)
             deltaInd -=
-                this.viewProps.saveManager.Wheels[this.viewProps.circleID]
-                    .length;
+                this.viewProps.saveLoader.saveInfo.Wheels[
+                    this.viewProps.circleID
+                ].length;
         if (deltaInd > 0.875 && deltaInd < 1.5) {
-            this.viewProps.saveManager.swapCircleElement(
+            this.viewProps.saveLoader.swapCircleElement(
                 this.viewProps.circleID,
                 this.viewProps.element,
                 false
             );
         } else if (deltaInd < -0.875 && deltaInd > -1.5) {
-            this.viewProps.saveManager.swapCircleElement(
+            this.viewProps.saveLoader.swapCircleElement(
                 this.viewProps.circleID,
                 this.viewProps.element,
                 true
@@ -109,8 +110,8 @@ export class CircleItemViewModel extends ViewModel<undefined, RequiredProps> {
 
         this.elementBackgroundRef.current?.setAttribute(
             "d",
-            this.viewProps.saveManager.Wheels[this.viewProps.circleID].length ==
-                1
+            this.viewProps.saveLoader.saveInfo.Wheels[this.viewProps.circleID]
+                .length == 1
                 ? `M${x1},${y1}A26,26,0,0,${1},${rawTextx * 26 + 50},${
                       rawTexty * 26 + 50
                   }A26,26,0,0,${1},${x2},${y2}`
@@ -164,7 +165,7 @@ export const CircleItem = view(CircleItemViewModel)<RequiredProps>(
                         viewModel.viewProps.edit ? cl.CircleItemEdit : undefined
                     }`}
                     d={
-                        viewModel.viewProps.saveManager.Wheels[
+                        viewModel.viewProps.saveLoader.saveInfo.Wheels[
                             viewModel.viewProps.circleID
                         ].length == 1
                             ? `M${x1},${y1}A26,26,0,0,${1},${

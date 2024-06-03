@@ -2,6 +2,14 @@ import { action, makeObservable, observable } from "mobx";
 
 export const changedHotKey = { current: () => {} };
 
+export const hotKeyItemFromInfo = (hotkeyInfo: hotKeyItem) =>
+    new hotKeyItem(
+        hotkeyInfo.keys,
+        hotkeyInfo.altKey,
+        hotkeyInfo.ctrlKey,
+        hotkeyInfo.shiftKey
+    );
+
 export class hotKeyItem {
     @observable keys: String[];
     @observable altKey: boolean;

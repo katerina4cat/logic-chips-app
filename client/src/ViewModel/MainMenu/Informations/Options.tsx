@@ -1,5 +1,5 @@
 import { ViewModel, view } from "@yoskutik/react-vvm";
-import { makeObservable } from "mobx";
+import { action, makeObservable } from "mobx";
 import { MainMenuViewModel } from "../MainMenu";
 import { MainInfo } from "./Main";
 import cl from "./Options.module.scss";
@@ -37,13 +37,18 @@ export const Options = view(OptionsViewModel)<RequiredProps>(
                     className={`${cl.Option} ${
                         !UserManager.signedIn && cl.Disabled
                     }`}
-                    onClick={() => {
+                    onClick={action(() => {
                         if (UserManager.signedIn)
-                            userSettings.setSyncSaves(!userSettings.syncSaves);
-                    }}
+                            userSettings.setSyncSaves(
+                                !userSettings.settingsData.syncSaves
+                            );
+                    })}
                 >
                     Синхронизация сохранений{" "}
-                    <input type="checkbox" checked={userSettings.syncSaves} />
+                    <input
+                        type="checkbox"
+                        checked={userSettings.settingsData.syncSaves}
+                    />
                 </div>
 
                 <div
@@ -53,7 +58,7 @@ export const Options = view(OptionsViewModel)<RequiredProps>(
                     onClick={() => {
                         if (UserManager.signedIn)
                             userSettings.setSyncSettings(
-                                !userSettings.syncSettings
+                                !userSettings.settingsData.syncSettings
                             );
                     }}
                     style={{ textDecoration: "line-through" }}
@@ -61,22 +66,22 @@ export const Options = view(OptionsViewModel)<RequiredProps>(
                     Синхронизация настроек{" "}
                     <input
                         type="checkbox"
-                        checked={userSettings.syncSettings}
+                        checked={userSettings.settingsData.syncSettings}
                     />
                 </div>
                 <div
                     className={cl.Option}
-                    onClick={() =>
-                        userSettings.setSmartConnection(
-                            !userSettings.smartConnection
-                        )
-                    }
+                    onClick={action(
+                        () =>
+                            (userSettings.settingsData.smartConnection =
+                                !userSettings.settingsData.smartConnection)
+                    )}
                     style={{ textDecoration: "line-through" }}
                 >
                     Умное подключение провода к пину{" "}
                     <input
                         type="checkbox"
-                        checked={userSettings.smartConnection}
+                        checked={userSettings.settingsData.smartConnection}
                     />
                 </div>
                 <button onClick={viewModel.hotKeys}>Горячие клавиши</button>

@@ -4,6 +4,8 @@ import { MainMenuViewModel } from "../MainMenu";
 import { MainInfo } from "./Main";
 import { EditPage } from "../../EditPage/EditPage";
 import { NewGame } from "./NewGame";
+import { saveManager } from "../../../Managers/SaveManager";
+import { SaveLoader } from "../../../Managers/SaveLoader";
 
 interface RequiredProps {}
 
@@ -18,8 +20,8 @@ export class SavesInfoViewModel extends ViewModel<
     back = () => {
         this.parent.setCurrentInfo(<MainInfo />);
     };
-    loadGame = (saveName: string) => {
-        this.parent.parent.setCurrentPage(<EditPage saveName={saveName} />);
+    loadGame = (saveLoader: SaveLoader) => {
+        this.parent.parent.setCurrentPage(<EditPage saveLoader={saveLoader} />);
     };
     openCreating = () => {
         this.parent.setCurrentInfo(<NewGame />);
@@ -31,7 +33,7 @@ export const SavesInfo = view(SavesInfoViewModel)<RequiredProps>(
         return (
             <>
                 <h1 style={{ textAlign: "center" }}>Сохранения</h1>
-                {viewModel.parent.saves.length === 0 && (
+                {saveManager.saves.length === 0 && (
                     <>
                         <div>У вас нету ещё ни одного сохранения</div>
                         <button onClick={viewModel.openCreating}>
@@ -39,13 +41,15 @@ export const SavesInfo = view(SavesInfoViewModel)<RequiredProps>(
                         </button>
                     </>
                 )}
-                {viewModel.parent.saves.map((saveInfo) => (
+                {saveManager.saves.map((saveInfo) => (
                     <button
-                        key={saveInfo.title}
-                        onClick={() => viewModel.loadGame(saveInfo.title)}
+                        key={saveInfo.saveName}
+                        onClick={() =>
+                            viewModel.loadGame(new SaveLoader(saveInfo))
+                        }
                     >
-                        <h3>{saveInfo.title}</h3>
-                        <p>Чипов: {saveInfo.chips}</p>
+                        <h3>{saveInfo.saveName}</h3>
+                        <p>Чипов: {saveInfo.Chips.length}</p>
                     </button>
                 ))}
                 <button onClick={viewModel.back}>Назад</button>

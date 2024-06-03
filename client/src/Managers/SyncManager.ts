@@ -1,6 +1,6 @@
 import { removeElementByField } from "../common/RemoveElement";
 import { getSyncChanges } from "./Apis/Saves";
-import { SaveManager } from "./SaveManager";
+import { saveManager } from "./SaveManager";
 
 class SyncManager {
     checkSync = async () => {
@@ -12,24 +12,45 @@ class SyncManager {
         if (!allChanges) return;
         // Применение всех изменений, если они были получены и имеются
         allChanges.forEach((save) => {
-            const localSave = SaveManager.loadSaveByName(save.saveName);
-            if (save.created) localSave.created = save.created;
+            let currentSaveData = saveManager.saves.find(
+                (saveData) => saveData.saveName === save.saveName
+            );
+            if (currentSaveData === undefined) {
+                currentSaveData = {
+                    saveName: save.saveName,
+                    lastEdit: save.lastEdit,
+                    created: save.created || new Date(new Date().getTime()),
+                    Wheels: [],
+                    Chips: [],
+                };
+                saveManager.saves.push(currentSaveData);
+            }
+
             save.deleting.forEach((deletingInfo) => {
-                const index = localSave.Chips.findIndex(
+                const index = currentSaveData.Chips.findIndex(
                     (chip) => chip.name == deletingInfo.name
                 );
                 if (index === -1) return;
-                if (deletingInfo.deletedAt > localSave.Chips[index].lastEdit)
-                    removeElementByField(localSave.Chips, deletingInfo, "name");
+                if (
+                    deletingInfo.deletedAt >
+                    currentSaveData.Chips[index].lastEdit
+                )
+                    removeElementByField(
+                        currentSaveData.Chips,
+                        deletingInfo,
+                        "name"
+                    );
             });
             save.creatingChips.forEach((cloudChipInfo) => {
-                const index = localSave.Chips.findIndex(
+                const index = currentSaveData.Chips.findIndex(
                     (chip) => chip.name === cloudChipInfo.name
                 );
-                if (index === -1) localSave.Chips.push(cloudChipInfo);
+                if (index === -1) currentSaveData.Chips.push(cloudChipInfo);
                 else {
                     const deltaTime =
-                        new Date(localSave.Chips[index].lastEdit).valueOf() -
+                        new Date(
+                            currentSaveData.Chips[index].lastEdit
+                        ).valueOf() -
                         new Date(cloudChipInfo.lastEdit).valueOf();
                     // Если локальное время последнего сохранения больше, облачного больше чем на 1.75 сек, то спрашиваем кого сохранять
                     if (deltaTime > 1100) {
@@ -38,7 +59,7 @@ class SyncManager {
                             confirm(`Синхронизация сохранения "${save.saveName}"
 Обновить чип ${cloudChipInfo.name} из облака?
 Даты изменения:
-Локальная: ${new Date(localSave.Chips[index].lastEdit || 0)
+Локальная: ${new Date(currentSaveData.Chips[index].lastEdit || 0)
                                 .toISOString()
                                 .replace("T", " ")
                                 .replace("Z", "")}
@@ -47,16 +68,16 @@ class SyncManager {
                                 .replace("T", " ")
                                 .replace("Z", "")}
 `);
-                        if (userConfirm) localSave.Chips[index] = cloudChipInfo;
+                        if (userConfirm)
+                            currentSaveData.Chips[index] = cloudChipInfo;
                     } else {
                         if (deltaTime < -1100) {
-                            localSave.Chips[index] = cloudChipInfo;
+                            currentSaveData.Chips[index] = cloudChipInfo;
                         }
                     }
                 }
             });
-            if (save.created) localSave.created = save.created;
-            localSave.save();
+            if (save.created) currentSaveData.created = save.created;
         });
         // Сохранение времени последней синхронизации
         localStorage.setItem(

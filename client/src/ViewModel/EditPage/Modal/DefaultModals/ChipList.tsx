@@ -61,8 +61,8 @@ export const ChipList = view(ChipListViewModel)<RequiredProps>(
                         onClick={(e) => e.stopPropagation()}
                     >
                         {[
-                            ...viewModel.parent.saveManager.defaultChips,
-                            ...viewModel.parent.saveManager.Chips,
+                            ...viewModel.parent.saveLoder.defaultChips,
+                            ...viewModel.parent.saveLoder.saveInfo.Chips,
                         ].map((chip) => (
                             <div
                                 className={cl.LibraryItem}
@@ -110,7 +110,7 @@ export const ChipList = view(ChipListViewModel)<RequiredProps>(
                             className={cl.Button}
                             disabled={
                                 !viewModel.currentSelect ||
-                                !viewModel.parent.saveManager.currentChipNeddedForSelected(
+                                !viewModel.parent.saveLoder.currentChipNeddedForSelected(
                                     viewModel.parent.editorObjectsManager
                                         .currentChip.name,
                                     viewModel.currentSelect
@@ -136,7 +136,7 @@ export const ChipList = view(ChipListViewModel)<RequiredProps>(
                                 )
                             }
                             onClick={() => {
-                                viewModel.parent.saveManager.removeChip(
+                                viewModel.parent.saveLoder.removeChip(
                                     viewModel.currentSelect || ""
                                 );
                             }}
@@ -155,7 +155,7 @@ export const ChipList = view(ChipListViewModel)<RequiredProps>(
                 </div>
                 <EditCircleAdding
                     enabled={viewModel.parent.statesManager.libraryWindow}
-                    saveManager={viewModel.parent.saveManager}
+                    saveLoader={viewModel.parent.saveLoder}
                     circleID={viewModel.circleID}
                 />
             </div>

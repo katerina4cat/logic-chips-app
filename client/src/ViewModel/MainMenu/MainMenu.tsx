@@ -4,26 +4,7 @@ import cl from "./MainMenu.module.scss";
 import { MainInfo } from "./Informations/Main";
 import { AppViewModel } from "../../App";
 import userManager, { userSettings } from "../../Managers/UserManager";
-import { SaveManager } from "../../Managers/SaveManager";
 import { syncManager } from "../../Managers/SyncManager";
-
-class Save {
-    title: string;
-    chips: number;
-    created: Date;
-    lastEdit: Date;
-    constructor(
-        title: string,
-        chips: number,
-        created: Date = new Date(0),
-        lastEdit: Date = new Date(0)
-    ) {
-        this.title = title;
-        this.chips = chips;
-        this.created = created;
-        this.lastEdit = lastEdit;
-    }
-}
 
 interface RequiredProps {
     startInfo?: JSX.Element;
@@ -33,49 +14,28 @@ export class MainMenuViewModel extends ViewModel<AppViewModel, RequiredProps> {
     constructor() {
         super();
         makeObservable(this);
-        this.loadSavesInfo();
         reaction(
             () => userManager.loaded,
             async (newState) => {
                 if (newState) {
-                    if (userSettings.IsUserSync) {
+                    if (userSettings.IsUserSyncSaves) {
                         await syncManager.checkSync();
-                        // Обновление информации для меню сохранений
-                        this.loadSavesInfo();
                     }
                 }
             }
         );
         reaction(
-            () => userSettings.IsUserSync,
+            () => userSettings.IsUserSyncSaves,
             async (newState) => {
                 if (newState) {
-                    if (userSettings.IsUserSync) {
+                    if (userSettings.IsUserSyncSaves) {
                         await syncManager.checkSync();
-                        // Обновление информации для меню сохранений
-                        this.loadSavesInfo();
                     }
                 }
             }
         );
     }
 
-    loadSavesInfo = async () => {
-        const keys = Object.keys(localStorage)
-            .filter((key) => key.startsWith("Save:"))
-            .map((key) => key.slice(5));
-        this.saves = keys.map((key) => {
-            const saveInfo = SaveManager.loadSaveByName(key);
-            return new Save(
-                saveInfo.saveName,
-                saveInfo.Chips.length,
-                saveInfo.created,
-                saveInfo.lastEdit
-            );
-        });
-    };
-
-    @observable saves: Save[] = [];
     @observable currentInfo = this.viewProps.startInfo ? (
         this.viewProps.startInfo
     ) : (

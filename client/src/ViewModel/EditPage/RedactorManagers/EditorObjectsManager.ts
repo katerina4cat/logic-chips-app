@@ -63,11 +63,7 @@ export class EditorObjectsManager {
 
     @action loadChip = (chipName: string) => {
         [this.currentChip, this.lastSizeWindow] =
-            this.pageViewModel.saveManager.loadChipByName(
-                chipName,
-                undefined,
-                0
-            );
+            this.pageViewModel.saveLoder.loadChipByName(chipName, undefined, 0);
         this.pageViewModel.cancelAll();
         if (this.lastSizeWindow.x === 0 && this.lastSizeWindow.y === 0)
             this.lastSizeWindow = new Pos(
@@ -80,7 +76,7 @@ export class EditorObjectsManager {
 
     @action loadChipByInfo = (chipInfo: ChipInfo) => {
         [this.currentChip, this.lastSizeWindow] =
-            this.pageViewModel.saveManager.loadChipByChipInfo(
+            this.pageViewModel.saveLoder.loadChipByChipInfo(
                 chipInfo,
                 undefined,
                 0
@@ -130,7 +126,7 @@ export class EditorObjectsManager {
     @action setAddingChip = (chipName: string) => {
         if (chipName != "BUS") {
             this.addingChip =
-                this.pageViewModel.saveManager.loadChipByName(chipName)[0];
+                this.pageViewModel.saveLoder.loadChipByName(chipName)[0];
             this.addingBus = false;
             this.addingCount = 1;
             this.statesManager.closeAll();

@@ -1,7 +1,6 @@
 import cl from "./CircleAdding.module.scss";
 import { Pos } from "../../../../common/Pos";
 import { CircleItem } from "./CircleItem";
-import { SaveManager } from "../../../../Managers/SaveManager";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { EditPageViewModel } from "../../EditPage";
 import { makeObservable, observable } from "mobx";
@@ -9,7 +8,6 @@ import { makeObservable, observable } from "mobx";
 interface RequiredProps {
     enabled?: boolean;
     addNewChip: (chipName: string) => void;
-    saveManager: SaveManager;
     circleID: number;
 }
 
@@ -29,7 +27,7 @@ class CircleAddingViewModel extends ViewModel<
             2 *
             Math.PI *
             (1 /
-                this.viewProps.saveManager.Wheels[this.viewProps.circleID]
+                this.parent.saveLoder.saveInfo.Wheels[this.viewProps.circleID]
                     .length)
         );
     };
@@ -38,8 +36,9 @@ class CircleAddingViewModel extends ViewModel<
 export const CircleAdding = view(CircleAddingViewModel)<RequiredProps>(
     ({ viewModel }) => {
         const disabled =
-            viewModel.viewProps.saveManager.Wheels[viewModel.viewProps.circleID]
-                .length == 0;
+            viewModel.parent.saveLoder.saveInfo.Wheels[
+                viewModel.viewProps.circleID
+            ].length == 0;
         return (
             <div
                 onClick={(e) => {
@@ -67,7 +66,7 @@ export const CircleAdding = view(CircleAddingViewModel)<RequiredProps>(
                         : `#${viewModel.viewProps.circleID + 1}`}
                 </h1>
                 <svg className={cl.CircleAdding} viewBox="0 0 100 100">
-                    {viewModel.viewProps.saveManager.Wheels[
+                    {viewModel.parent.saveLoder.saveInfo.Wheels[
                         viewModel.viewProps.circleID
                     ].map((element, i) => (
                         <CircleItem
@@ -76,7 +75,7 @@ export const CircleAdding = view(CircleAddingViewModel)<RequiredProps>(
                             halfAngle={viewModel.getAngle(0.5)}
                             elementInd={i}
                             element={element}
-                            saveManager={viewModel.viewProps.saveManager}
+                            saveLoader={viewModel.parent.saveLoder}
                             addNewChip={viewModel.viewProps.addNewChip}
                             circleID={viewModel.viewProps.circleID}
                             contextMenu={() => {}}

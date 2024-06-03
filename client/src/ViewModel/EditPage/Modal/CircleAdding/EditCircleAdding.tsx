@@ -4,13 +4,13 @@ import { CircleItem } from "./CircleItem";
 import { ContextMenu } from "../ContextMenu";
 import { Pos } from "../../../../common/Pos";
 import { removeElement } from "../../../../common/RemoveElement";
-import { SaveManager } from "../../../../Managers/SaveManager";
+import { SaveLoader } from "../../../../Managers/SaveLoader";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
 
 interface RequiredProps {
     enabled?: boolean;
-    saveManager: SaveManager;
+    saveLoader: SaveLoader;
     circleID: number;
 }
 
@@ -39,8 +39,9 @@ export class EditCircleAddingViewModel extends ViewModel<
             2 *
             Math.PI *
             (1 /
-                this.viewProps.saveManager.Wheels[this.viewProps.circleID]
-                    .length)
+                this.viewProps.saveLoader.saveInfo.Wheels[
+                    this.viewProps.circleID
+                ].length)
         );
     };
 
@@ -51,10 +52,9 @@ export class EditCircleAddingViewModel extends ViewModel<
     };
     @action deletingCircleItem = () => {
         removeElement(
-            this.viewProps.saveManager.Wheels[this.viewProps.circleID],
+            this.viewProps.saveLoader.saveInfo.Wheels[this.viewProps.circleID],
             this.selectedChip || ""
         );
-        this.viewProps.saveManager.save();
         this.enabledContext = false;
         this.selectedChip = undefined;
     };
@@ -74,7 +74,7 @@ export const EditCircleAdding = view(EditCircleAddingViewModel)<RequiredProps>(
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={action((e) => {
                         if (
-                            viewModel.viewProps.saveManager.Wheels[
+                            viewModel.viewProps.saveLoader.saveInfo.Wheels[
                                 viewModel.viewProps.circleID
                             ].length >= 12
                         ) {
@@ -84,17 +84,16 @@ export const EditCircleAdding = view(EditCircleAddingViewModel)<RequiredProps>(
                             return;
                         }
                         if (
-                            !viewModel.viewProps.saveManager.Wheels[
+                            !viewModel.viewProps.saveLoader.saveInfo.Wheels[
                                 viewModel.viewProps.circleID
                             ].find(
                                 (chipNames) =>
                                     chipNames == e.dataTransfer.getData("chip")
                             )
                         ) {
-                            viewModel.viewProps.saveManager.Wheels[
+                            viewModel.viewProps.saveLoader.saveInfo.Wheels[
                                 viewModel.viewProps.circleID
                             ].push(e.dataTransfer.getData("chip"));
-                            viewModel.viewProps.saveManager.save();
                         }
                     })}
                     className={cl.EditCircleAdding}
@@ -103,14 +102,14 @@ export const EditCircleAdding = view(EditCircleAddingViewModel)<RequiredProps>(
                     onClick={(e) => e.stopPropagation()}
                     style={{
                         backgroundColor:
-                            viewModel.viewProps.saveManager.Wheels[
+                            viewModel.viewProps.saveLoader.saveInfo.Wheels[
                                 viewModel.viewProps.circleID
                             ].length == 0
                                 ? "rgba(255,255,255,0.1)"
                                 : "transparent",
                     }}
                 >
-                    {viewModel.viewProps.saveManager.Wheels[
+                    {viewModel.viewProps.saveLoader.saveInfo.Wheels[
                         viewModel.viewProps.circleID
                     ].map((element, i) => (
                         <CircleItem
@@ -119,7 +118,7 @@ export const EditCircleAdding = view(EditCircleAddingViewModel)<RequiredProps>(
                             halfAngle={viewModel.getAngle(0.5)}
                             element={element}
                             elementInd={i}
-                            saveManager={viewModel.viewProps.saveManager}
+                            saveLoader={viewModel.viewProps.saveLoader}
                             circleID={viewModel.viewProps.circleID}
                             contextMenu={viewModel.setPositionContext}
                             edit
@@ -132,10 +131,9 @@ export const EditCircleAdding = view(EditCircleAddingViewModel)<RequiredProps>(
                         fill="rgba(249,38,40,0.75)"
                         style={{ cursor: "help" }}
                         onClick={() => {
-                            viewModel.viewProps.saveManager.Wheels[
+                            viewModel.viewProps.saveLoader.saveInfo.Wheels[
                                 viewModel.viewProps.circleID
                             ] = [];
-                            viewModel.viewProps.saveManager.save();
                         }}
                     />
                 </svg>

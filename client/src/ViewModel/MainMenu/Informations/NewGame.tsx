@@ -6,6 +6,8 @@ import { MainInfo } from "./Main";
 import { EditPage } from "../../EditPage/EditPage";
 import { userSettings } from "../../../Managers/UserManager";
 import { createSave } from "../../../Managers/Apis/Saves";
+import { saveManager } from "../../../Managers/SaveManager";
+import { SaveLoader, defaultSave } from "../../../Managers/SaveLoader";
 
 interface RequiredProps {}
 
@@ -22,19 +24,22 @@ export class NewGameViewModel extends ViewModel<
     @action setGameName = (value: string) => {
         this.errorName = false;
         if (!value) this.errorName = true;
-        if (this.parent.saves.find((save) => save.title == value))
+        if (saveManager.saves.find((save) => save.saveName == value))
             this.errorName = true;
         this.gameName = value;
     };
     back = () => {
         this.parent.setCurrentInfo(<MainInfo />);
     };
+    @action
     create = () => {
         if (!this.errorName) {
+            const saveInfo = observable(defaultSave(this.gameName));
+            saveManager.saves.push(saveInfo);
             this.parent.parent.setCurrentPage(
-                <EditPage saveName={this.gameName} />
+                <EditPage saveLoader={new SaveLoader(saveInfo)} />
             );
-            if (userSettings.IsUserSync) createSave(this.gameName);
+            if (userSettings.IsUserSyncSaves) createSave(this.gameName);
         }
     };
 }

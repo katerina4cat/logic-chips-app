@@ -15,20 +15,21 @@ export class HotKeysManager {
         this.statesManager = editPageViewModel.statesManager;
         this.editorObjectsManager = editPageViewModel.editorObjectsManager;
         this.initHotKeys();
+        console.log(userSettings.settingsData.hotKeys);
         makeObservable(this);
     }
 
     @action handleKeyDown = (e: KeyboardEvent) => {
         if (this.statesManager.escWindow) {
-            if (userSettings.hotKeys.escAction.testKey(e))
-                userSettings.hotKeys.escAction.event();
+            if (userSettings.settingsData.hotKeys.escAction.testKey(e))
+                userSettings.settingsData.hotKeys.escAction.event();
             return;
         }
         // Проверка находимся ли в основном чипе
         if (this.editorObjectsManager.currentChip.id !== 0) {
-            if (userSettings.hotKeys.save.testKey(e)) {
+            if (userSettings.settingsData.hotKeys.save.testKey(e)) {
                 e.preventDefault();
-                userSettings.hotKeys.save.event();
+                userSettings.settingsData.hotKeys.save.event();
             }
             if (e.key === "Backspace") {
                 this.editorObjectsManager.currentChip =
@@ -45,38 +46,41 @@ export class HotKeysManager {
                 return;
             }
         // Проверка каждого хоткея
-        for (const hotKeyItem of Object.values(userSettings.hotKeys)) {
-            if (hotKeyItem.testKey(e)) {
-                e.preventDefault();
-                hotKeyItem.event();
-                return;
+        Object.values(userSettings.settingsData.hotKeys).forEach(
+            (hotKeyItem) => {
+                if (hotKeyItem.testKey(e)) {
+                    e.preventDefault();
+                    hotKeyItem.event();
+                    return;
+                }
             }
-        }
+        );
     };
 
     initHotKeys() {
         // All pins titles
-        userSettings.hotKeys.hideAllPin.event =
+        userSettings.settingsData.hotKeys.hideAllPin.event =
             this.pageViewModel.statesManager.changeShowAllPinTitles;
         // Chip pins titles
-        userSettings.hotKeys.hideChipPins.event =
+        userSettings.settingsData.hotKeys.hideChipPins.event =
             this.pageViewModel.statesManager.changeShowChipPinTitles;
         // Library
-        userSettings.hotKeys.library.event =
+        userSettings.settingsData.hotKeys.library.event =
             this.pageViewModel.statesManager.switchLibraryWindow;
         // Save
-        userSettings.hotKeys.save.event =
+        userSettings.settingsData.hotKeys.save.event =
             this.pageViewModel.statesManager.switchSavingWindow;
         // New chip
-        userSettings.hotKeys.newChip.event = this.editorObjectsManager.newChip;
+        userSettings.settingsData.hotKeys.newChip.event =
+            this.editorObjectsManager.newChip;
         // Increase adding
-        userSettings.hotKeys.increaseCount.event =
+        userSettings.settingsData.hotKeys.increaseCount.event =
             this.editorObjectsManager.increaseAdding;
         // Decrease adding
-        userSettings.hotKeys.decreaseCount.event =
+        userSettings.settingsData.hotKeys.decreaseCount.event =
             this.editorObjectsManager.decreaseAdding;
         // escAction
-        userSettings.hotKeys.escAction.event = () => {
+        userSettings.settingsData.hotKeys.escAction.event = () => {
             if (this.statesManager.escWindow)
                 return this.statesManager.switchEscWindow(false);
 
@@ -87,7 +91,7 @@ export class HotKeysManager {
             this.statesManager.escWindow = true;
         };
         // Удаление
-        userSettings.hotKeys.remove.event =
+        userSettings.settingsData.hotKeys.remove.event =
             this.editorObjectsManager.removingSelectedChip;
     }
 }
