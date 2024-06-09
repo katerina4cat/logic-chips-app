@@ -15,7 +15,6 @@ export class HotKeysManager {
         this.statesManager = editPageViewModel.statesManager;
         this.editorObjectsManager = editPageViewModel.editorObjectsManager;
         this.initHotKeys();
-        console.log(userSettings.settingsData.hotKeys);
         makeObservable(this);
     }
 

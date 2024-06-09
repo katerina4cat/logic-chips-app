@@ -125,6 +125,15 @@ export class EditorObjectsManager {
 
     @action setAddingChip = (chipName: string) => {
         if (chipName != "BUS") {
+            if (
+                this.pageViewModel.saveLoder.currentChipNeddedForSelected(
+                    this.currentChip.name,
+                    chipName
+                )
+            ) {
+                alert("Невозможно добавить этот чип, он зависит от текущего!");
+                return false;
+            }
             this.addingChip =
                 this.pageViewModel.saveLoder.loadChipByName(chipName)[0];
             this.addingBus = false;

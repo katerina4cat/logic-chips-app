@@ -19,9 +19,11 @@ import { EditorObjectsManager } from "./RedactorManagers/EditorObjectsManager";
 import { lastEditSaves } from "../../common/lastEditSaves";
 import { EscMenu } from "./Modal/DefaultModals/EscMenu";
 import { AppViewModel } from "../../App";
+import { ChipInfo } from "@shared/models/saves/ChipInfo";
 
 export interface RequiredProps {
     saveLoader: SaveLoader;
+    chipInfo?: ChipInfo;
 }
 
 export class EditPageViewModel extends ViewModel<AppViewModel, RequiredProps> {
@@ -45,6 +47,14 @@ export class EditPageViewModel extends ViewModel<AppViewModel, RequiredProps> {
             mousemove: this.handleMouseMove,
             keydown: this.hotKeysManager.handleKeyDown,
         };
+        if (this.viewProps.chipInfo) {
+            this.editorObjectsManager.currentChip =
+                this.saveLoder.loadChipByChipInfo(
+                    this.viewProps.chipInfo,
+                    undefined,
+                    0
+                )[0];
+        }
         makeObservable(this);
     }
 

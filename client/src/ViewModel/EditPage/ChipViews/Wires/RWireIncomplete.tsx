@@ -74,25 +74,27 @@ export class WireIncompleteViewModel extends ViewModel<EditPageViewModel> {
             (pin.isInput && pin.chip.id == 0) ||
             (!pin.isInput && pin.chip.id != 0);
 
+        const buffPoints = [...this.points];
+
         if (firstIsSource && !pinIsSource) {
             if (this.firstPin.chip.chipType != ChipTypes.BUS) {
-                this.points.shift();
+                buffPoints.shift();
             }
-            if (pin.chip.chipType != ChipTypes.BUS) this.points.pop();
+            if (pin.chip.chipType != ChipTypes.BUS) buffPoints.pop();
             this.parent.editorObjectsManager.addWire(
-                new Wire(this.firstPin, pin, [...this.points])
+                new Wire(this.firstPin, pin, buffPoints)
             );
             if (!ctrlKey) this.clear();
             return;
         }
         if (pinIsSource && !firstIsSource) {
-            this.points.reverse();
-            if (this.firstPin.chip.chipType != ChipTypes.BUS) this.points.pop();
-            if (pin.chip.chipType != ChipTypes.BUS) this.points.shift();
+            buffPoints.reverse();
+            if (this.firstPin.chip.chipType != ChipTypes.BUS) buffPoints.pop();
+            if (pin.chip.chipType != ChipTypes.BUS) buffPoints.shift();
             this.parent.editorObjectsManager.addWire(
-                new Wire(pin, this.firstPin, [...this.points])
+                new Wire(pin, this.firstPin, buffPoints)
             );
-            this.clear();
+            if (!ctrlKey) this.clear();
             return;
         }
         console.log("2 ПИНА ЛИБО ОБА СУРСЫ, ЛИБО ОБА ТАРГЕТЫ");

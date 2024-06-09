@@ -33,7 +33,6 @@ class UserManager {
 
     constructor() {
         makeObservable(this);
-        console.log(this.getCookie("refreshToken"));
         if ("accessToken" in localStorage) {
             userInfo();
         } else {

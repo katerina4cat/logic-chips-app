@@ -3,6 +3,7 @@ import { EditCircleAdding } from "../CircleAdding/EditCircleAdding";
 import { ViewModel, view } from "@yoskutik/react-vvm";
 import { action, makeObservable, observable } from "mobx";
 import { EditPageViewModel } from "../../EditPage";
+import { isDefaultChip } from "../../../../Managers/defaultChipsInfo";
 
 interface RequiredProps {}
 
@@ -90,9 +91,7 @@ export const ChipList = view(ChipListViewModel)<RequiredProps>(
                             className={cl.Button}
                             disabled={
                                 !viewModel.currentSelect ||
-                                /^(AND|NOT|TRI-STATE BUFFER|BUS)$/.test(
-                                    viewModel.currentSelect
-                                ) ||
+                                isDefaultChip(viewModel.currentSelect) ||
                                 viewModel.parent.editorObjectsManager
                                     .currentChip.name == viewModel.currentSelect
                             }
@@ -110,7 +109,7 @@ export const ChipList = view(ChipListViewModel)<RequiredProps>(
                             className={cl.Button}
                             disabled={
                                 !viewModel.currentSelect ||
-                                !viewModel.parent.saveLoder.currentChipNeddedForSelected(
+                                viewModel.parent.saveLoder.currentChipNeddedForSelected(
                                     viewModel.parent.editorObjectsManager
                                         .currentChip.name,
                                     viewModel.currentSelect
@@ -131,7 +130,8 @@ export const ChipList = view(ChipListViewModel)<RequiredProps>(
                             className={cl.Button}
                             disabled={
                                 !viewModel.currentSelect ||
-                                /^(AND|NOT|TRI-STATE BUFFER|BUS)$/.test(
+                                isDefaultChip(viewModel.currentSelect) ||
+                                viewModel.parent.saveLoder.selectedChipNeededForAnyChip(
                                     viewModel.currentSelect
                                 )
                             }

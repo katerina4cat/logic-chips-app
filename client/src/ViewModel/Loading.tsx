@@ -5,6 +5,8 @@ import { AppViewModel } from "../App";
 import { MainMenu } from "./MainMenu/MainMenu";
 import { lastEditSaves } from "../common/lastEditSaves";
 import { EditPage } from "./EditPage/EditPage";
+import { SaveLoader } from "../Managers/SaveLoader";
+import { saveManager } from "../Managers/SaveManager";
 
 interface RequiredProps {}
 
@@ -27,12 +29,20 @@ export class LoadingViewModel extends ViewModel<AppViewModel, RequiredProps> {
             // Редактируя чип: ${lastEditSave.chipInfo.name}
             // Возобновить редактирование?`);
             if (userAnswer) {
-                // this.parent.setCurrentPage(
-                //     <EditPage
-                //         saveLoader={lastEditSave.saveName}
-                //         chipInfo={lastEditSave.chipInfo}
-                //     />
-                // );
+                const savesInfo = saveManager.saves.find(
+                    (v) => v.saveName == lastEditSave.saveName
+                );
+                if (!savesInfo) {
+                    localStorage.removeItem("Recovery:lastEdit");
+                    return;
+                }
+                const saveLoader = new SaveLoader(savesInfo);
+                this.parent.setCurrentPage(
+                    <EditPage
+                        saveLoader={saveLoader}
+                        chipInfo={lastEditSave.chipInfo}
+                    />
+                );
             } else {
                 localStorage.removeItem("Recovery:lastEdit");
             }

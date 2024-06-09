@@ -23,3 +23,7 @@ export const defaultChipsInfo = [
         chipInfo: new ChipInfo("8 SEGMENT", ChipTypes.EightSegment, "#242529"),
     },
 ];
+
+export const isDefaultChip = (chipName: string) =>
+    defaultChipsInfo.findIndex((chip) => chip.chipInfo.name === chipName) !==
+    -1;

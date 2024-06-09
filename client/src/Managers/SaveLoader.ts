@@ -122,6 +122,8 @@ export class SaveLoader {
         chip.name = name;
         chip.color = color;
         chip.chipType = chipType;
+        chip.input.sort((a, b) => a.deltaPos.y - b.deltaPos.y);
+        chip.output.sort((a, b) => a.deltaPos.y - b.deltaPos.y);
         const savingChip = chip.toChipInfo();
         savingChip.lastEdit = new Date(new Date().getTime());
         this.saveInfo.lastEdit = savingChip.lastEdit;
@@ -144,17 +146,26 @@ export class SaveLoader {
         currentChip: string,
         chipName: string
     ): boolean => {
-        if (chipName == currentChip) return false;
+        if (chipName == currentChip) return true;
         const chipInfo = this.saveInfo.Chips.find(
             (chip) => chip.name == chipName
-        );
+        ); // Ищем чип по имени
         if (!chipInfo) return false;
-        for (let subTestChip of chipInfo.SubChips)
-            return this.currentChipNeddedForSelected(
-                currentChip,
-                subTestChip.name
-            );
-        return true;
+
+        for (const subTestChip of chipInfo.SubChips)
+            if (
+                this.currentChipNeddedForSelected(currentChip, subTestChip.name)
+            )
+                return true;
+        return false;
+    };
+
+    selectedChipNeededForAnyChip = (chipName: string) => {
+        for (const subChips of this.saveInfo.Chips)
+            if (subChips.name !== chipName)
+                if (this.currentChipNeddedForSelected(chipName, subChips.name))
+                    return true;
+        return false;
     };
 
     @action loadChipByName = (
